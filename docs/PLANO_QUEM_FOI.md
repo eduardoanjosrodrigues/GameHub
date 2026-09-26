@@ -85,10 +85,10 @@ Direção [proposta]: o mesmo estilo de guache e nanquim sobre papel creme do Av
 
 | Peça | Quem faz |
 |---|---|
-| 6 bichos (papagaio, peixe no aquário, tartaruga, coelho, gato, hamster), capa (16:9) e o cocô | **Nano Banana**, pelos prompts que eu escrevo em `docs/quem_foi_prompts.md` |
-| Cor do jogador (moldura e coleira desenhadas por cima), cartas, textos, ícones de cocô e ícone do jogo no hub | Eu, em SVG e no app |
+| 6 bichos (papagaio, peixe no aquário, tartaruga, coelho, gato, hamster), o cocô, capa e mesa (16:9) e, opcional, os 6 "culpados" | **Nano Banana**, pelos prompts em `docs/quem_foi_prompts.md` |
+| Cor do jogador (moldura e fundo da carta), cartas, textos, ícones de cocô e ícone do jogo no hub | Eu, em SVG e no app |
 
-A mesma imagem de cada bicho serve para as 6 cores: o app pinta a moldura e um lenço ou coleira na cor do dono. Assim são só 6 imagens em vez de 36 [proposta].
+A mesma imagem de cada bicho serve para as 6 cores: o app desenha a moldura grossa e o fundo da carta na cor do dono, e a imagem não tem coleira nem nada colorido que brigue com isso. Assim são só 6 imagens em vez de 36 [proposta]. Os prompts estão prontos em [quem_foi_prompts.md](quem_foi_prompts.md): os 6 bichos, o cocô, a capa, a mesa e, se quiser, a versão "culpada" de cada bicho.
 
 ## 7. Arquitetura
 

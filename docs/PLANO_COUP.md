@@ -1,6 +1,6 @@
 # gamehub — Plano do Coup
 
-> Status: v1 · 2026-09-26 · plano, nada implementado
+> Status: v2 · 2026-09-26 · plano, nada implementado (v2: qualquer um desafia o bloqueio; avança quando quem foi bloqueado aceita)
 > Escopo: oitavo jogo do hub, **Coup** (base + variante oficial do Inquisidor). Pelo **Wi-Fi**, cada um no seu celular (app ou navegador), com **tabuleiro opcional**, como o Avalon.
 
 Legenda (a mesma dos outros planos): **[decidido]** veio das suas respostas; **[proposta]** é sugestão minha (lista em §10); **[verificar]** precisa ser confirmado.
@@ -21,7 +21,7 @@ O app faz o trabalho chato: guarda as cartas escondidas no celular, conta as moe
 | Jogadores | **2 a 6**, com a **regra oficial de 2** |
 | Reação (o ponto crítico) | **Sem "Deixa passar" e sem cronômetro visível.** Toda ação que dá para desafiar ou bloquear espera **no mínimo 5 s** antes de valer, para dar tempo de reagir. Na tela ficam só **"Desafiar"** e **"Bloquear"**. Se ninguém reage em 5 s, a ação vale |
 | Quais ações esperam | **Todas as que dá para desafiar ou bloquear**: as de personagem (Imposto, Assassinar, Extorquir, Trocar, Examinar) e a Ajuda Externa. **Renda** e **Golpe de Estado** valem na hora |
-| Bloqueio | **Só quem foi bloqueado pode desafiar o bloqueio**, e sem tempo: escolhe na hora entre aceitar e desafiar. (No oficial, qualquer um pode desafiar um bloqueio; aqui fica só com quem foi bloqueado) |
+| Bloqueio | **Todos recebem os botões "Desafiar o bloqueio" e "Aceitar"**, e qualquer um pode desafiar (como no oficial). O jogo **só avança quando quem foi bloqueado aceita**, ou quando alguém desafia. Sem tempo |
 | Reações ao mesmo tempo | **Vale quem apertou primeiro**, pelo mesmo relógio justo do sino do Halli Galli |
 | Nome e arte | **Coup**, com nomes em português; retratos pelo **Nano Banana**, no mesmo estilo do Avalon |
 | Aparelhos | Igual ao Avalon: cada um no seu celular (app ou navegador), tabuleiro opcional, troca de aparelho |
@@ -71,7 +71,11 @@ O app faz o trabalho chato: guarda as cartas escondidas no celular, conta as moe
    - **"Desafiar"**: qualquer um menos quem fez a ação;
    - **"Bloquear com X"**: só quem pode bloquear essa ação. O bloqueio é uma afirmação, e dá para bloquear blefando.
 3. A primeira reação que chega ao host vale. As outras telas mostram "Bia desafiou primeiro".
-4. **Bloqueio**: quem teve a ação bloqueada escolhe na hora, sem tempo: **"Aceitar o bloqueio"** ou **"Desafiar o bloqueio"**.
+4. **Bloqueio**: aparece "Bia bloqueia com a Condessa" em todas as telas, com **"Desafiar o bloqueio"** e **"Aceitar"** para todo mundo menos quem bloqueou.
+   - O primeiro "Desafiar o bloqueio" que chegar ao host vale.
+   - O **"Aceitar" de quem foi bloqueado** encerra: o bloqueio vale e a vez passa.
+   - O "Aceitar" dos outros só avisa a mesa ("Caio aceitou") e some da tela dessa pessoa; o jogo continua esperando quem foi bloqueado [proposta].
+   - Não tem tempo: fica esperando a decisão de quem foi bloqueado.
 5. Ninguém reagiu em 5 s: a ação vale.
 
 Detalhes [proposta]:
@@ -152,7 +156,7 @@ As regras recebem a hora do host em cada ação e respondem se a janela ainda es
 
 | Marco | Entrega | Critério de pronto |
 |---|---|---|
-| C1 Regras | `CoupRules` + testes | Todas as ações; quem pode bloquear o quê; desafio ganho e perdido (com troca da carta); desafio do bloqueio; Assassinar com duas perdas; Golpe obrigatório; 2 jogadores; Inquisidor (Trocar e Examinar); janela de 5 s e a primeira reação; eliminação e vitória; filtro do que cada um vê |
+| C1 Regras | `CoupRules` + testes | Todas as ações; quem pode bloquear o quê; desafio ganho e perdido (com troca da carta); desafio do bloqueio por qualquer um e o aceitar de quem foi bloqueado; Assassinar com duas perdas; Golpe obrigatório; 2 jogadores; Inquisidor (Trocar e Examinar); janela de 5 s e a primeira reação; eliminação e vitória; filtro do que cada um vê |
 | C2 Rede e app | Sessões, telas | Partida inteira com robôs que blefam, desafiam e bloqueiam, conferindo que ninguém recebe carta alheia |
 | C3 Navegador | `web/coup.js` | Partida com o navegador no meio dos robôs |
 | C4 Arte | Prompts, SVGs, marcadores | Capturas de todas as telas |
@@ -172,5 +176,5 @@ As regras recebem a hora do host em cada ação e respondem se a janela ainda es
 
 | # | Pergunta |
 |---|---|
-| **P1** | Revisar as **[proposta]**: barrinha de 5 s e nova janela para bloqueio depois do desafio (§3.4), espectador (§3.5), cuidados (§4.3), queda (§5), direção de arte e cores (§6) |
+| **P1** | Revisar as **[proposta]**: o "Aceitar" dos outros no bloqueio só avisar (§3.4), barrinha de 5 s e nova janela para bloqueio depois do desafio (§3.4), espectador (§3.5), cuidados (§4.3), queda (§5), direção de arte e cores (§6) |
 | **P2** | [verificar] Moedas do Assassinar quando o assassino perde o desafio: pelo que conheço das regras, voltam para ele. Confirmar no manual quando der |
