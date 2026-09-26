@@ -9,6 +9,10 @@ cd "$(dirname "$0")/.."
 G="${GODOT:-$HOME/Downloads/Godot_v4.7.2-stable_linux.x86_64}"
 export JAVA_HOME="${JAVA_HOME:-$HOME/.local/jdk-17}"
 mkdir -p build
+# As bibliotecas do template Gradle não vão pro git (são grandes): recria a partir do template do Godot.
+if [ ! -d android/build/libs ]; then
+  unzip -q -o "$HOME/.local/share/godot/export_templates/4.7.2.stable/android_source.zip" "libs/*" -d android/build
+fi
 case "${1:-debug}" in
   debug|install)
     "$G" --headless --export-debug "Android" build/gamehub-debug.apk

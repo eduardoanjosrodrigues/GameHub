@@ -34,9 +34,9 @@ Essas informações são usadas só durante a partida e ficam visíveis apenas p
 
 - **Internet e estado da rede / Wi-Fi**: para encontrar e conectar aos outros aparelhos da mesma rede. O app não acessa a internet.
 - **Multicast de Wi-Fi**: para encontrar partidas automaticamente na rede local.
+- **Vibração**: para dar retorno durante o jogo.
 
 O app não usa a câmera. Para entrar numa sala pelo QR code, você usa o app de câmera do próprio celular, que abre o gamehub.
-- **Vibração**: para dar retorno durante o jogo.
 
 ## Crianças
 
