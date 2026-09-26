@@ -37,6 +37,14 @@ O que conferir no aparelho (não deu pra testar sem celular conectado):
 - [ ] Criar sala no celular e entrar pelo PC (`godot --path .` > Entrar numa sala), pelos três caminhos: lista de salas, código e IP.
 - [ ] Abrir a câmera do celular apontando pro QR de uma sala criada no PC. Nem todo app de câmera oferece abrir links `gamehub://`; se o seu não oferecer, o código da sala continua funcionando.
 
+## APK de release (instalar direto, sem ser debug)
+
+```bash
+tools/build_android.sh apk
+```
+
+Sai `build/gamehub.apk`, assinado com a chave de upload. Se o celular já tiver a versão de debug, desinstale antes: as duas têm assinaturas diferentes e o Android recusa instalar uma por cima da outra.
+
 ## Gerar o pacote da Play Store
 
 ```bash
