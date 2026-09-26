@@ -1,0 +1,10 @@
+# Godot
+.godot/
+/android/
+
+# Builds
+/build/
+
+# Chaves de assinatura (nunca versionar)
+*.keystore
+*.jks
