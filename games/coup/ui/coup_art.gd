@@ -112,7 +112,11 @@ static func card(role: String, w: float, up := false, variant := 0) -> TapPanel:
 	else:
 		var pic := portrait(role, variant)
 		if pic:
-			v.add_child(_rect(pic, w, h))
+			# Retrato 2:3 na carta 10:13: recorta um pouco em cima e embaixo.
+			var pr := _rect(pic, w, h)
+			pr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+			pr.clip_contents = true
+			v.add_child(pr)
 		else:
 			var box := CenterContainer.new()
 			box.custom_minimum_size = Vector2(w, h)
