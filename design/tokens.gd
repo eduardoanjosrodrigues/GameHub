@@ -36,7 +36,7 @@ const RADIUS_FIELD := 14
 const BORDER := 1.5
 const SPACE := 8
 const TOUCH_MIN := 56
-const CONTENT_MAX_WIDTH := 600.0
+const CONTENT_MAX_WIDTH := 720.0 # largura base do celular: no celular ocupa tudo, no tablet fica centralizado
 const SHADOW_COLOR := Color(0.12, 0.10, 0.06, 0.10)
 
 # Tipografia (px na resolução base 720×1280)

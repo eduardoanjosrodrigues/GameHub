@@ -3,7 +3,7 @@ extends Screen
 
 const HowTo := preload("res://games/chapeu/screens/how_to_screen.gd")
 const CreateRoom := preload("res://games/chapeu/screens/create_room_screen.gd")
-const JoinScreen := preload("res://games/chapeu/screens/join_screen.gd")
+const JoinScreen := preload("res://app/screens/join_screen.gd")
 const GameScreen := preload("res://games/chapeu/screens/chapeu_game.gd")
 
 

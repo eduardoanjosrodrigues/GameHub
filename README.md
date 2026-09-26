@@ -2,7 +2,11 @@
 
 Hub de joguinhos de festa pra Android, feito em Godot 4.7. O primeiro jogo é o **Chapéu**: cada um escreve palavras, tudo vai pro chapéu, e dois times tentam adivinhar em três rodadas (Descrever, Uma palavra, Mímica). Dá pra jogar num celular só (passa-e-joga) ou cada um no seu celular pelo Wi-Fi, com um tablet opcional de tabuleiro.
 
-O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/PLANO_FASE_1.md).
+O segundo é o **Halli Galli**: cada um vira uma carta na sua vez e, quando a mesa tem exatamente 5 de uma fruta, quem bater o sino primeiro leva as cartas. Pelo Wi-Fi, cada celular deitado na mesa é a carta do seu dono (arrastar vira, toque duplo bate o sino), e o sino é decidido pelo instante do toque num relógio sincronizado com o host, não pela ordem de chegada na rede. Também dá pra jogar com um aparelho só no meio da mesa.
+
+O terceiro é o **Avalon**, de papéis secretos (5 a 10 pessoas): cada celular mostra o papel e o que a pessoa sabe, os votos são secretos e revelados juntos, e as cartas de missão são embaralhadas. Um tablet, TV ou notebook pode ser o tabuleiro. Plano em [docs/PLANO_AVALON.md](docs/PLANO_AVALON.md); os prompts da arte estão em [docs/avalon_prompts.md](docs/avalon_prompts.md).
+
+O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/PLANO_FASE_1.md). O do Halli Galli está em [docs/PLANO_HALLI_GALLI.md](docs/PLANO_HALLI_GALLI.md).
 
 ## Estrutura
 
@@ -10,10 +14,13 @@ O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/
 |---|---|
 | `app/` | Casca do hub: navegação, telas (início, configurações, histórico), componentes de interface, autoloads (`Settings`, `Audio`, `Haptics`, `History`, `App`) |
 | `design/` | Tokens de cor e forma, fontes, tema, ícones SVG e imagens da loja |
-| `net/` | Rede local genérica: transporte ENet (`Net`), descoberta por broadcast, código de sala, QR code, link de entrada |
+| `net/` | Rede local genérica: transporte ENet (`Net`), descoberta por broadcast, código de sala, QR code, link de entrada, relógio sincronizado (`ClockSync`), pergunta de qual jogo é a sala (`RoomProbe`) |
 | `games/chapeu/rules/` | Regras do Chapéu como máquina de estados pura (sem tela, sem rede) |
 | `games/chapeu/session/` | Quem roda as regras: passa-e-joga, host no Wi-Fi e cliente no Wi-Fi |
 | `games/chapeu/screens/` | Telas do Chapéu |
+| `games/avalon/` | Avalon: regras, sessões (host/cliente, jogador ou tabuleiro), telas, carta de papel e trilha de missões, arte |
+| `games/halli_galli/` | Halli Galli: regras (`rules/`), sessões mesa/host/cliente (`session/`), telas, desenho das cartas e da mesa (`ui/`), arte e sons |
+| `web/` | Página pra jogar pelo navegador (iPhone ou quem não tem o app): HTML/JS servido pelo celular do host, na rede local |
 | `tests/` | Testes automáticos |
 | `tools/` | Tour de capturas de tela, robôs de teste de rede, gerador de sons, build do Android |
 | `android/build/` | Template Gradle do Godot com o filtro do link `gamehub://entrar` (QR) |
@@ -46,7 +53,37 @@ Partida inteira pela rede com 4 robôs (inclui queda de conexão e alguém tenta
 tools/net_test.sh godot
 ```
 
-Capturas de todas as telas num tamanho exato:
+Justiça do sino do Halli Galli pela rede (4 robôs com atrasos diferentes; quem toca primeiro tem a pior rede e tem que ganhar todas):
+
+```bash
+tools/halli_net_test.sh godot
+```
+
+Partida inteira de Avalon pela rede (5 robôs jogadores + 1 tabuleiro, um cai e volta):
+
+```bash
+tools/avalon_net_test.sh godot
+```
+
+Partida inteira de Secret Hitler pela rede (7 robôs jogadores + 1 tabuleiro, um cai e volta):
+
+```bash
+tools/sh_net_test.sh godot
+```
+
+Trocar aparelho no meio da partida (a Eva some de vez, o tabuleiro abre o QR da vaga dela, um aparelho novo termina a partida no lugar dela e o antigo é recusado quando volta):
+
+```bash
+tools/avalon_swap_test.sh godot
+```
+
+Quem não tem o app entra pelo navegador: na sala, escolha o QR "Navegador (iPhone)" (a página fica em `http://IP-do-host:7780/`). Depois de mudar artes ou sons usados na página, copie de novo pra `web/assets/`:
+
+```bash
+tools/sync_web_assets.sh
+```
+
+Capturas de todas as telas num tamanho exato (`--tour-set=halli` só as do Halli Galli):
 
 ```bash
 godot -- --tour=/tmp/telas --tour-size=1080x1920

@@ -7,6 +7,8 @@ const RECONNECT_FOR_S := 60.0
 
 var host_ip := ""
 var player_name := ""
+## Token do QR de troca de aparelho: entra na vaga de alguém que já está na partida.
+var seat_token := ""
 var _welcomed := false
 var _reconnecting := false
 var _reconnect_started := 0
@@ -40,6 +42,11 @@ func connect_to_host() -> void:
 		_on_join_failed("create")
 
 
+## Tabuleiro: pede ao host o QR pra passar a vaga de alguém pra outro aparelho.
+func request_seat(seat: String) -> void:
+	Net.send_to_host({"type": "pedir_vaga", "id": seat})
+
+
 func send(action: Dictionary) -> void:
 	if _reconnecting:
 		error.emit("Reconectando ao host...")
@@ -54,7 +61,7 @@ func leave() -> void:
 
 
 func _on_joined() -> void:
-	Net.send_to_host({"type": "hello", "device": Settings.device_id, "nome": player_name, "papel": local_role})
+	Net.send_to_host({"type": "hello", "device": Settings.device_id, "nome": player_name, "papel": local_role, "vaga": seat_token})
 
 
 func _on_join_failed(_reason: String) -> void:
@@ -91,6 +98,8 @@ func _retry() -> void:
 
 func _on_message(_peer: int, msg: Dictionary) -> void:
 	match msg.get("type", ""):
+		"vaga":
+			seat_link.emit(str(msg.get("id", "")), str(msg.get("token", "")))
 		"bem_vindo":
 			_welcomed = true
 			local_id = msg.get("id", "")
@@ -110,7 +119,7 @@ func _on_message(_peer: int, msg: Dictionary) -> void:
 		"erro":
 			var code: String = msg.get("codigo", "")
 			var text: String = msg.get("mensagem", "Erro.")
-			if code in ["versao", "partida_em_andamento", "cheia", "invalido"]:
+			if code in ["versao", "partida_em_andamento", "cheia", "invalido", "outro_jogo", "vaga_passada", "vaga_invalida"]:
 				_welcomed = false
 				ended.emit(text)
 			else:

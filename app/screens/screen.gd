@@ -17,12 +17,12 @@ func on_back() -> bool:
 
 
 ## Monta a estrutura padrão: coluna centralizada com largura máxima e rolagem.
-## Retorna a VBox onde o conteúdo vai.
-func make_column(with_scroll := true, pad := 32, sep := 20) -> VBoxContainer:
+## pad é a margem das laterais. Retorna a VBox onde o conteúdo vai.
+func make_column(with_scroll := true, pad := 20, sep := 20) -> VBoxContainer:
 	var mw := MaxWidth.new()
 	mw.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(mw)
-	var m := UI.margin(pad, pad - 8, pad)
+	var m := UI.margin(pad, 24, 32)
 	var col := UI.vbox(sep)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL

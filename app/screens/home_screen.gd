@@ -2,20 +2,25 @@ extends Screen
 ## Início do hub: logo, grade de jogos, Histórico e Configurações.
 
 const ChapeuMenu := preload("res://games/chapeu/screens/chapeu_menu.gd")
+const HalliMenu := preload("res://games/halli_galli/screens/halli_menu.gd")
+const AvalonMenu := preload("res://games/avalon/screens/avalon_menu.gd")
+const ShMenu := preload("res://games/secret_hitler/screens/sh_menu.gd")
 const SettingsScreen := preload("res://app/screens/settings_screen.gd")
 const HistoryScreen := preload("res://app/screens/history_screen.gd")
-const JoinScreen := preload("res://games/chapeu/screens/join_screen.gd")
+const JoinScreen := preload("res://app/screens/join_screen.gd")
 
 ## Catálogo de jogos. Os próximos entram aqui.
 const GAMES := [
-	{"id": "chapeu", "nome": "Chapéu", "desc": "Explique, resuma e faça mímica. Festa garantida!", "icone": "chapeu", "cor": Tokens.AZUL, "pronto": true},
-	{"id": "em_breve_1", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
+	{"id": "chapeu", "nome": "Chapéu", "desc": "Explique, resuma e faça mímica. Festa garantida!", "icone": "chapeu", "cor": Tokens.AZUL, "botao": AppButton.Variant.ACCENT, "pronto": true},
+	{"id": "halli", "nome": "Halli Galli", "desc": "Cinco frutas iguais? Bata o sino primeiro!", "icone": "halli_galli", "cor": Tokens.MOSTARDA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "avalon", "nome": "Avalon", "desc": "Servos de Arthur contra lacaios de Mordred. Em quem confiar?", "icone": "avalon", "cor": Tokens.SALVIA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "secret_hitler", "nome": "Secret Hitler", "desc": "Liberais contra fascistas. Quem é o Hitler?", "icone": "secret_hitler", "cor": Tokens.VERMELHO, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
 ]
 
 
 func _ready() -> void:
-	var col := make_column(true, 28, 22)
+	var col := make_column(true, 20, 22)
 	var top := UI.hbox(12)
 	top.add_child(UI.spacer(0, true))
 	top.add_child(UI.icon_button("history", func(): App.push(HistoryScreen.new())))
@@ -25,15 +30,17 @@ func _ready() -> void:
 	col.add_child(UI.caption("Joguinhos pra jogar junto"))
 	col.add_child(UI.spacer(4))
 
-	var featured: Dictionary = GAMES[0]
-	col.add_child(_featured_card(featured))
+	for g in GAMES:
+		if g.pronto:
+			col.add_child(_featured_card(g))
 
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 18)
 	grid.add_theme_constant_override("v_separation", 18)
-	for i in range(1, GAMES.size()):
-		grid.add_child(_small_card(GAMES[i]))
+	for g in GAMES:
+		if not g.pronto:
+			grid.add_child(_small_card(g))
 	col.add_child(grid)
 	App.deep_link.connect(_on_deep_link)
 	# Aberto por um QR antes da tela existir.
@@ -45,7 +52,7 @@ func _ready() -> void:
 func _on_deep_link(code: String) -> void:
 	if App.current() == self:
 		App.take_pending_link()
-		App.push(JoinScreen.new(code))
+		App.push(JoinScreen.new(code, App.take_pending_seat()))
 
 
 func _featured_card(g: Dictionary) -> Control:
@@ -62,12 +69,9 @@ func _featured_card(g: Dictionary) -> Control:
 	tv.add_child(UI.label(g.desc, 18, Tokens.TINTA, Fonts.body_bold()))
 	row.add_child(tv)
 	v.add_child(row)
-	var play := UI.button("Jogar", AppButton.Variant.ACCENT, func(): App.push(ChapeuMenu.new()), "play")
+	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu}.get(g.id, ChapeuMenu)
+	var play := UI.button("Jogar", g.botao, func(): App.push(menu.new()), "play")
 	v.add_child(play)
-	ic.pivot_offset = Vector2(75, 75)
-	var tw := ic.create_tween().set_loops()
-	tw.tween_property(ic, "rotation", deg_to_rad(-4), 0.9).set_trans(Tween.TRANS_SINE)
-	tw.tween_property(ic, "rotation", deg_to_rad(4), 0.9).set_trans(Tween.TRANS_SINE)
 	return c
 
 

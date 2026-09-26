@@ -1,5 +1,7 @@
 extends Node
 ## Transporte de rede local (ENet) genérico, reutilizável por qualquer jogo do hub.
+## O host também pode abrir a porta pro navegador (WebGateway): quem entra pela página vira um
+## peer como qualquer outro, com as mesmas mensagens.
 ##
 ## Todas as mensagens são dicionários {v, type, ...} que passam por um único par de RPCs.
 ## O host é autoritativo: clientes mandam intenções, o host responde com estado.
@@ -12,11 +14,15 @@ signal join_failed(reason: String)
 signal host_lost
 
 const PORT := 7777
-const PROTOCOL_V := 1
+const PROTOCOL_V := 2
 const MAX_CLIENTS := 20
 const JOIN_TIMEOUT_S := 6.0
 
 var role := "" # "host", "client" ou ""
+## Só pra testes (robôs de rede): atraso artificial em cada sentido, no cliente.
+var debug_lag_ms := 0
+## Servidor pra quem joga pelo navegador (só no host, se aberto com start_web).
+var web: WebGateway
 var _join_timer: SceneTreeTimer
 
 
@@ -61,7 +67,35 @@ func join(ip: String, port := PORT) -> Error:
 	return OK
 
 
+## Abre a página do jogo pra navegadores (host). info vai no /config.json da página.
+func start_web(info: Dictionary) -> Error:
+	stop_web()
+	web = WebGateway.new()
+	web.info = info
+	web.peer_joined.connect(func(id): peer_joined.emit(id))
+	web.peer_left.connect(func(id): peer_left.emit(id))
+	web.message.connect(func(id, msg): if role == "host": message.emit(id, msg))
+	add_child(web)
+	var err := web.start()
+	if err != OK:
+		stop_web()
+	return err
+
+
+func stop_web() -> void:
+	if web:
+		web.stop()
+		web.queue_free()
+		web = null
+
+
+## Endereço da página pra quem entra pelo navegador ("" se não estiver aberta).
+func web_url() -> String:
+	return "http://%s:%d/" % [local_ip(), WebGateway.HTTP_PORT] if web else ""
+
+
 func close() -> void:
+	stop_web()
 	_join_timer = null
 	if multiplayer.multiplayer_peer and not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		multiplayer.multiplayer_peer.close()
@@ -71,17 +105,31 @@ func close() -> void:
 
 # --- Envio -----------------------------------------------------------------
 
-func send_to_host(msg: Dictionary) -> void:
+## fast: sem garantia de entrega nem de ordem (pings do relógio, onde um atraso vale menos que uma perda).
+func send_to_host(msg: Dictionary, fast := false) -> void:
 	if role != "client":
 		return
 	msg.v = PROTOCOL_V
-	_c2h.rpc_id(1, msg)
+	if debug_lag_ms > 0:
+		get_tree().create_timer(debug_lag_ms / 1000.0).timeout.connect(func():
+			if role == "client":
+				(_c2h_fast if fast else _c2h).rpc_id(1, msg))
+		return
+	if fast:
+		_c2h_fast.rpc_id(1, msg)
+	else:
+		_c2h.rpc_id(1, msg)
 
 
 func send_to(peer_id: int, msg: Dictionary, fast := false) -> void:
-	if role != "host" or peer_id not in multiplayer.get_peers():
+	if role != "host":
 		return
 	msg.v = PROTOCOL_V
+	if web and web.has_peer(peer_id):
+		web.send(peer_id, msg)
+		return
+	if peer_id not in multiplayer.get_peers():
+		return
 	if fast:
 		_h2c_fast.rpc_id(peer_id, msg)
 	else:
@@ -89,6 +137,9 @@ func send_to(peer_id: int, msg: Dictionary, fast := false) -> void:
 
 
 func disconnect_peer(peer_id: int) -> void:
+	if web and web.has_peer(peer_id):
+		web.kick(peer_id)
+		return
 	if role == "host" and multiplayer.multiplayer_peer is ENetMultiplayerPeer and peer_id in multiplayer.get_peers():
 		(multiplayer.multiplayer_peer as ENetMultiplayerPeer).disconnect_peer(peer_id)
 
@@ -102,14 +153,28 @@ func _c2h(msg: Dictionary) -> void:
 	message.emit(multiplayer.get_remote_sender_id(), msg)
 
 
+@rpc("any_peer", "call_remote", "unreliable")
+func _c2h_fast(msg: Dictionary) -> void:
+	if role != "host":
+		return
+	message.emit(multiplayer.get_remote_sender_id(), msg)
+
+
 @rpc("authority", "call_remote", "reliable")
 func _h2c(msg: Dictionary) -> void:
-	message.emit(1, msg)
+	_from_host(msg)
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _h2c_fast(msg: Dictionary) -> void:
-	message.emit(1, msg)
+	_from_host(msg)
+
+
+func _from_host(msg: Dictionary) -> void:
+	if debug_lag_ms > 0:
+		get_tree().create_timer(debug_lag_ms / 1000.0).timeout.connect(func(): message.emit(1, msg))
+	else:
+		message.emit(1, msg)
 
 
 # --- Eventos ---------------------------------------------------------------

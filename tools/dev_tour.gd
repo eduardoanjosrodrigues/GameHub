@@ -69,6 +69,22 @@ func _run() -> void:
 		await _local_game()
 	if set_name in ["all", "board"]:
 		await _board()
+	if set_name in ["all", "halli"]:
+		await _halli()
+	if set_name in ["all", "avalon"]:
+		await _avalon()
+	if set_name in ["all", "sh"]:
+		await _sh()
+	if set_name == "avalon_cards":
+		await _avalon_cards()
+	if set_name == "sh_cards":
+		await _sh_cards()
+	if set_name == "avalon_scroll":
+		await _avalon_scroll()
+	if set_name == "swap":
+		await _swap()
+	if set_name == "halli_table6":
+		await _halli_table(["Ana", "Bruno", "Carla", "Davi", "Elisa", "Fábio"], "table6")
 	get_tree().quit()
 
 
@@ -92,7 +108,7 @@ func _hub() -> void:
 	App.push(load("res://games/chapeu/screens/create_room_screen.gd").new())
 	await _shot("create_room")
 	App.back()
-	App.push(load("res://games/chapeu/screens/join_screen.gd").new())
+	App.push(load("res://app/screens/join_screen.gd").new())
 	await _shot("join")
 	App.back()
 
@@ -187,3 +203,415 @@ func _board() -> void:
 	await _shot("board_turn")
 	s.leave()
 	App.home()
+
+
+# --- Halli Galli -----------------------------------------------------------
+
+func _halli() -> void:
+	App.push(load("res://app/screens/home_screen.gd").new())
+	await _shot("hg_home")
+	App.push(load("res://games/halli_galli/screens/halli_menu.gd").new())
+	await _shot("hg_menu")
+	App.push(load("res://games/halli_galli/screens/halli_how_to.gd").new())
+	await _shot("hg_how_to")
+	App.back()
+	await _halli_table(["Ana", "Bruno"], "table2")
+	await _halli_table(["Ana", "Bruno", "Carla", "Davi"], "table4")
+	await _halli_wifi()
+
+
+func _halli_table(names: Array, label: String) -> void:
+	var game: Screen = load("res://games/halli_galli/screens/halli_table_game.gd").new()
+	App.push(game)
+	var s: HalliLocal = game.session
+	for n in names:
+		s.send({"type": "add_player", "name": n})
+	await _shot("hg_%s_setup" % label)
+	s.send({"type": "start"})
+	var r := s.rules
+	var cards := [HalliRules.make_card(0, 2), HalliRules.make_card(1, 4), HalliRules.make_card(0, 3), HalliRules.make_card(3, 1), HalliRules.make_card(2, 5), HalliRules.make_card(1, 1)]
+	for i in r.players.size():
+		r.players[i].up.append({"c": cards[i], "t": 0})
+		r.players[i].down.pop_front()
+	r.turn = r.players[0].id
+	r.last_flip_t = -100000
+	r.lock_until = 0
+	s._emit_view(r.view_for({"role": "table"}), [])
+	await _shot("hg_%s_play" % label)
+	game._tv.banner(r.players[1].id, "+%d · 23 ms" % r.players.size(), Tokens.SALVIA)
+	await get_tree().create_timer(0.1).timeout
+	await _shot("hg_%s_bell" % label)
+	App.home()
+	await get_tree().create_timer(0.3).timeout
+
+
+func _halli_wifi() -> void:
+	var h := HalliHost.new("Ana")
+	if h.open_room() != "":
+		return
+	var game: Screen = load("res://games/halli_galli/screens/halli_wifi_game.gd").new(h)
+	App.push(game)
+	var names := ["Bruno", "Carla", "Davi", "Elisa"]
+	for i in names.size():
+		h.rules.apply({"id": "", "host": true}, {"type": "add_player", "id": "d%d" % i, "name": names[i]})
+	h._broadcast([])
+	await _shot("hg_wifi_lobby")
+	game._qr_web = true
+	game._build_lobby()
+	await _shot("hg_wifi_lobby_web")
+	h.send({"type": "start"})
+	var r := h.rules
+	r.turn = h.local_id
+	r.lock_until = 0
+	r.last_flip_t = h.now_ms() - 450
+	h._refresh_local([])
+	await _shot("hg_wifi_cooldown")
+	r.last_flip_t = -100000
+	h._refresh_local([])
+	await _shot("hg_wifi_turn")
+	h.send({"type": "flip"})
+	await get_tree().create_timer(0.4).timeout
+	await _shot("hg_wifi_card")
+	game._pv.show_banner("+7 cartas!", "5 morangos · por 23 ms", Tokens.SALVIA, 3.0)
+	await get_tree().create_timer(0.25).timeout
+	await _shot("hg_wifi_won")
+	r.set_connected("d2", false, h.now_ms())
+	h._broadcast([])
+	await _shot("hg_wifi_paused")
+	r.set_connected("d2", true, h.now_ms())
+	r.phase = HalliRules.PHASE_GAME_OVER
+	r.winner = h.local_id
+	r.out_order = ["d0", "d3", "d1", "d2"]
+	r.players[0].ok = 5
+	r.players[1].wrong = 2
+	h._broadcast([])
+	await _shot("hg_wifi_game_over")
+	h.leave()
+	App.home()
+
+
+# --- Avalon ----------------------------------------------------------------
+
+func _avalon() -> void:
+	App.push(load("res://app/screens/home_screen.gd").new())
+	App.push(load("res://games/avalon/screens/avalon_menu.gd").new())
+	await _shot("av_menu")
+	for role in ["player", "board"]:
+		var h := AvalonHost.new(role, "Ana")
+		if h.open_room() != "":
+			return
+		var game: Screen = load("res://games/avalon/screens/avalon_game.gd").new(h)
+		App.push(game)
+		var r := h.rules
+		var names := ["Bruno", "Carla", "Davi", "Elisa", "Fábio", "Gabi"]
+		for i in (names.size() if role == "player" else 7):
+			r.apply({"id": "", "host": true}, {"type": "add_player", "id": "d%d" % i, "name": names[i % names.size()] if i < names.size() else "Hugo"})
+		r.apply({"id": "", "host": true}, {"type": "set_config", "toggle": "morgana"})
+		r.config.lady = true
+		h._broadcast([])
+		await _shot("av_%s_lobby" % role)
+		h.send({"type": "start"})
+		var ids: Array = r.players.map(func(p): return p.id)
+		var me: String = ids[0]
+		if role == "player":
+			r.roles[me] = "merlin"
+			r.roles["d3"] = "morgana"
+			r.roles["d4"] = "assassino"
+			r.roles["d5"] = "lacaio"
+			r.roles["d0"] = "percival"
+			r.roles["d1"] = "servo"
+			r.roles["d2"] = "servo"
+		h._broadcast([])
+		await _shot("av_%s_reveal" % role)
+		for id in ids:
+			r.apply({"id": id, "host": false, "now": 0}, {"type": "ready"})
+		r.leader = 0
+		r.team = [ids[0], ids[2]]
+		h._broadcast([])
+		await _shot("av_%s_team" % role)
+		r.apply({"id": ids[0], "host": false}, {"type": "select_team", "ids": [ids[0], ids[2]]})
+		r.apply({"id": ids[0], "host": false}, {"type": "propose"})
+		for i in range(1, 4):
+			r.apply({"id": ids[i], "host": false}, {"type": "vote", "approve": true})
+		h._broadcast([])
+		await _shot("av_%s_vote" % role)
+		for i in ids.size():
+			if not r.votes.has(ids[i]):
+				r.apply({"id": ids[i], "host": false}, {"type": "vote", "approve": i % 3 != 0})
+		h._broadcast([])
+		await _shot("av_%s_vote_result" % role)
+		h.send({"type": "continue"})
+		h._broadcast([])
+		await _shot("av_%s_quest" % role)
+		r.apply({"id": ids[0], "host": false}, {"type": "quest_card", "success": true})
+		r.cards[ids[2]] = false
+		r.apply({"id": ids[2], "host": false}, {"type": "quest_card", "success": true}) # já jogou: ignora
+		r.team = [ids[0], ids[2]]
+		r.cards = {ids[0]: true}
+		r.roles[ids[2]] = "lacaio"
+		r.apply({"id": ids[2], "host": false}, {"type": "quest_card", "success": false})
+		h._broadcast([])
+		await get_tree().create_timer(1.2).timeout
+		await _shot("av_%s_quest_result" % role)
+		r.phase = AvalonRules.PHASE_LADY
+		r.lady = me
+		h._broadcast([])
+		await _shot("av_%s_lady" % role)
+		r.phase = AvalonRules.PHASE_GAME_OVER
+		r.winner = "mal"
+		r.win_reason = "assassin_hit"
+		r.assassin_target = me
+		h._broadcast([])
+		await _shot("av_%s_game_over" % role)
+		h.leave()
+		App.home()
+		await get_tree().create_timer(0.4).timeout
+
+
+## Todas as cartas de papel lado a lado (pra conferir a arte).
+func _avalon_cards() -> void:
+	var sc := Screen.new()
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.set_anchors_preset(Control.PRESET_FULL_RECT)
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	sc.add_child(grid)
+	var list := [["merlin", 0], ["percival", 0], ["servo", 0], ["servo", 1], ["servo", 2], ["assassino", 0], ["morgana", 0], ["mordred", 0], ["oberon", 0], ["lacaio", 0], ["lacaio", 1], ["lacaio", 2]]
+	for e in list:
+		var c := AvalonArt.RoleCard.new(e[0], e[1])
+		c.custom_minimum_size = Vector2(170, 255)
+		grid.add_child(c)
+	App.push(sc)
+	await _shot("av_cards")
+
+
+## "Trocar aparelho" no meio de uma partida de Avalon (net/seat_transfer.gd).
+func _swap() -> void:
+	var h := AvalonHost.new("player", "Ana")
+	if h.open_room() != "":
+		return
+	var game: Screen = load("res://games/avalon/screens/avalon_game.gd").new(h)
+	App.push(game)
+	var r := h.rules
+	for n in ["Bruno", "Carla", "Davi", "Elisa"]:
+		r.apply({"id": "", "host": true}, {"type": "add_player", "id": "id_" + n, "name": n})
+	h.send({"type": "start"})
+	r.set_connected("id_Carla", false)
+	h._broadcast([])
+	await _shot("swap_banner")
+	game.call("_open_swap")
+	await _shot("swap_list")
+	game._swap._ask("id_Carla", false)
+	h.request_seat("id_Carla")
+	await _shot("swap_qr")
+
+
+## Arrasta (toque emulado) as salas e as telas do app e diz se o scroll anda. Um cartão ou controle
+## com mouse_filter STOP no meio do conteúdo quebra o arrasto: aparece "QUEBRADO".
+func _avalon_scroll() -> void:
+	Input.emulate_touch_from_mouse = true
+	var simple := Screen.new()
+	App.push(simple)
+	var col := simple.make_column()
+	for i in 60:
+		col.add_child(UI.label("linha %d" % i))
+	await get_tree().create_timer(0.4).timeout
+	await _drag(0.5)
+	var ss: ScrollContainer = simple.find_children("*", "ScrollContainer", true, false)[0]
+	print("SIMPLES arrasto: scroll=%d" % ss.scroll_vertical)
+	var h := AvalonHost.new("player", "Ana")
+	if h.open_room() != "":
+		return
+	var game: Screen = load("res://games/avalon/screens/avalon_game.gd").new(h)
+	App.push(game)
+	for n in ["Bruno", "Carla", "Davi", "Elisa", "Fábio", "Gabi"]:
+		h.rules.apply({"id": "", "host": true}, {"type": "add_player", "id": "id_" + n, "name": n})
+	h._broadcast([])
+	await get_tree().create_timer(0.6).timeout
+	for xf in [0.5, 0.2, 0.95]:
+		await _drag(xf)
+		print("AVALON arrasto em x=%.2f: scroll=%d de %d" % [xf, game._scroll.scroll_vertical, game._scroll.get_v_scroll_bar().max_value - game._scroll.size.y])
+	await _shot("av_scroll_end")
+	h.leave()
+	App.home()
+	await get_tree().create_timer(0.3).timeout
+	var hh := HalliHost.new("Ana")
+	if hh.open_room() != "":
+		return
+	var hg: Screen = load("res://games/halli_galli/screens/halli_wifi_game.gd").new(hh)
+	App.push(hg)
+	for n in ["Bruno", "Carla", "Davi", "Elisa", "Fábio", "Gabi", "Hugo", "Iara"]:
+		hh.rules.apply({"id": "", "host": true, "now": 0}, {"type": "add_player", "id": "id_" + n, "name": n})
+	hh._broadcast([])
+	await get_tree().create_timer(0.6).timeout
+	for xf in [0.5, 0.2]:
+		await _drag(xf)
+		print("HALLI arrasto em x=%.2f: scroll=%d" % [xf, hg._scroll.scroll_vertical])
+	hh.leave()
+	App.home()
+	await get_tree().create_timer(0.3).timeout
+	var ch := HostSession.new("player", "Ana")
+	if ch.open_room() != "":
+		return
+	var cg: Screen = load("res://games/chapeu/screens/chapeu_game.gd").new(ch)
+	App.push(cg)
+	for n in ["Bruno", "Carla", "Davi", "Elisa", "Fábio", "Gabi", "Hugo", "Iara"]:
+		ch.rules.apply({"id": "", "host": true}, {"type": "add_player", "id": "id_" + n, "name": n})
+	ch._broadcast([])
+	await get_tree().create_timer(0.6).timeout
+	await _drag(0.5)
+	print("CHAPEU arrasto: scroll=%d de %d" % [cg._scroll.scroll_vertical, cg._scroll.get_v_scroll_bar().max_value - cg._scroll.size.y])
+	ch.leave()
+	App.home()
+	await get_tree().create_timer(0.3).timeout
+	for path in ["res://app/screens/home_screen.gd", "res://app/screens/settings_screen.gd", "res://app/screens/history_screen.gd", "res://app/screens/join_screen.gd",
+			"res://games/chapeu/screens/chapeu_menu.gd", "res://games/chapeu/screens/how_to_screen.gd", "res://games/chapeu/screens/create_room_screen.gd",
+			"res://games/halli_galli/screens/halli_menu.gd", "res://games/halli_galli/screens/halli_how_to.gd", "res://games/halli_galli/screens/halli_create_room.gd",
+			"res://games/avalon/screens/avalon_menu.gd", "res://games/avalon/screens/avalon_how_to.gd", "res://games/avalon/screens/avalon_create_room.gd",
+			"res://games/secret_hitler/screens/sh_menu.gd", "res://games/secret_hitler/screens/sh_how_to.gd", "res://games/secret_hitler/screens/sh_create_room.gd"]:
+		App.home()
+		await get_tree().create_timer(0.2).timeout
+		if not path.ends_with("home_screen.gd"):
+			App.push(load(path).new())
+		await get_tree().create_timer(0.5).timeout
+		var scs: Array = App.current().find_children("*", "ScrollContainer", true, false)
+		if scs.is_empty():
+			print("TELA %s: sem scroll" % path.get_file())
+			continue
+		var sc2: ScrollContainer = scs[0]
+		var room := int(sc2.get_v_scroll_bar().max_value - sc2.size.y)
+		await _drag(0.5)
+		print("TELA %s: scroll=%d de %d %s" % [path.get_file(), sc2.scroll_vertical, room, "OK" if room <= 0 or sc2.scroll_vertical > 0 else "QUEBRADO"])
+
+
+func _drag(xf: float) -> void:
+	var sz := get_viewport().get_visible_rect().size
+	var x := sz.x * xf
+	var y0 := sz.y * 0.85
+	var b := InputEventMouseButton.new()
+	b.button_index = MOUSE_BUTTON_LEFT
+	b.pressed = true
+	b.position = Vector2(x, y0)
+	b.global_position = b.position
+	get_viewport().push_input(b, true)
+	await get_tree().process_frame
+	for i in 15:
+		var m := InputEventMouseMotion.new()
+		m.button_mask = MOUSE_BUTTON_MASK_LEFT
+		m.position = Vector2(x, y0 - (i + 1) * 30)
+		m.global_position = m.position
+		m.relative = Vector2(0, -30)
+		get_viewport().push_input(m, true)
+		await get_tree().process_frame
+	var u := InputEventMouseButton.new()
+	u.button_index = MOUSE_BUTTON_LEFT
+	u.pressed = false
+	u.position = Vector2(x, y0 - 450)
+	u.global_position = u.position
+	get_viewport().push_input(u, true)
+	await get_tree().create_timer(0.4).timeout
+
+
+## Secret Hitler: cada fase no celular de quem joga (o host, "Ana", presidente) e no tabuleiro.
+func _sh() -> void:
+	App.push(load("res://app/screens/home_screen.gd").new())
+	await _shot("sh_home")
+	App.push(load("res://games/secret_hitler/screens/sh_menu.gd").new())
+	await _shot("sh_menu")
+	App.push(load("res://games/secret_hitler/screens/sh_how_to.gd").new())
+	await _shot("sh_how_to")
+	App.home()
+	for role in ["player", "board"]:
+		var h := ShHost.new(role, "Ana")
+		if h.open_room() != "":
+			return
+		var game: Screen = load("res://games/secret_hitler/screens/sh_game.gd").new(h)
+		App.push(game)
+		var r := h.rules
+		var names := ["Bruno", "Carla", "Davi", "Elisa", "Fábio", "Gabi"]
+		for i in (names.size() if role == "player" else 7):
+			r.apply({"id": "", "host": true}, {"type": "add_player", "id": "d%d" % i, "name": names[i % names.size()] if i < names.size() else "Hugo"})
+		h._broadcast([])
+		await _shot("sh_%s_lobby" % role)
+		h.send({"type": "start"})
+		var ids: Array = r.players.map(func(p): return p.id)
+		var me: String = ids[0]
+		if role == "player":
+			r.roles[me] = "fascista"
+			r.roles["d0"] = "hitler"
+			r.roles["d1"] = "fascista"
+			for k in range(2, 6):
+				r.roles["d%d" % k] = "liberal"
+		r._rot = 0
+		h._broadcast([])
+		await _shot("sh_%s_reveal" % role)
+		for id in ids:
+			r.apply({"id": id, "host": false, "now": 0}, {"type": "ready"})
+		r.fascist = 2
+		r.liberal = 1
+		r.tracker = 1
+		r.deck = ["L", "F", "F", "L", "F", "F", "F"]
+		h._broadcast([])
+		await _shot("sh_%s_nominate" % role)
+		var pres: String = r.president
+		r.apply({"id": pres, "host": false}, {"type": "nominate", "id": ids[2]})
+		for i in range(1, 4):
+			r.apply({"id": ids[i], "host": false}, {"type": "vote", "ja": true})
+		h._broadcast([])
+		await _shot("sh_%s_vote" % role)
+		for i in ids.size():
+			if not r.votes.has(ids[i]):
+				r.apply({"id": ids[i], "host": false}, {"type": "vote", "ja": i % 3 != 0})
+		h._broadcast([])
+		await _shot("sh_%s_vote_result" % role)
+		h.send({"type": "continue"})
+		h._broadcast([])
+		await _shot("sh_%s_leg_president" % role)
+		r.apply({"id": pres, "host": false}, {"type": "discard", "index": 0})
+		r.fascist = 4
+		h._broadcast([])
+		await _shot("sh_%s_leg_waiting" % role)
+		r.apply({"id": ids[2], "host": false}, {"type": "enact", "index": 0})
+		h._broadcast([])
+		await _shot("sh_%s_policy" % role)
+		if r.power != "":
+			h.send({"type": "continue"})
+			h._broadcast([])
+			await _shot("sh_%s_power" % role)
+			r.apply({"id": pres, "host": false}, {"type": "power", "id": ids[3]})
+			h._broadcast([])
+			await _shot("sh_%s_power_result" % role)
+		r.phase = ShRules.PHASE_POWER
+		r.power = "investigate"
+		r.president = me if role == "player" else pres
+		h._broadcast([])
+		await _shot("sh_%s_investigate" % role)
+		r.apply({"id": r.president, "host": false}, {"type": "power", "id": ids[4]})
+		h._broadcast([])
+		await _shot("sh_%s_investigate_result" % role)
+		r.phase = ShRules.PHASE_GAME_OVER
+		r.winner = "fascista"
+		r.win_reason = "hitler_chancellor"
+		h._broadcast([])
+		await _shot("sh_%s_game_over" % role)
+		h.leave()
+		App.home()
+		await get_tree().create_timer(0.4).timeout
+
+
+## Todas as cartas de papel do Secret Hitler lado a lado (pra conferir a arte).
+func _sh_cards() -> void:
+	var sc := Screen.new()
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.set_anchors_preset(Control.PRESET_FULL_RECT)
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	sc.add_child(grid)
+	for e in [["liberal", 0], ["liberal", 1], ["liberal", 2], ["liberal", 3], ["fascista", 0], ["fascista", 1], ["fascista", 2], ["hitler", 0]]:
+		var c := ShArt.RoleCard.new(e[0], e[1])
+		c.custom_minimum_size = Vector2(170, 255)
+		grid.add_child(c)
+	App.push(sc)
+	await _shot("sh_cards")

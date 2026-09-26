@@ -8,6 +8,7 @@ var rules: ChapeuRules
 var host_name := ""
 var _peers := {} # peer_id -> {"device": String, "role": "player" | "board"}
 var _beacon: LanDiscovery
+var _seats := SeatTransfer.new()
 var _last_tick := 0
 var _last_sync := 0
 
@@ -31,6 +32,9 @@ func open_room() -> String:
 		return "Não consegui abrir a sala (erro %d). Veja se o Wi-Fi está ligado." % err
 	var ip := Net.local_ip()
 	room_code = RoomCode.encode(ip)
+	# Quem não tem o app (ex: iPhone) entra pelo navegador. Se a porta estiver ocupada, segue sem.
+	if Net.start_web({"jogo": "chapeu", "codigo": room_code, "sala": _beacon_info().nome, "v": Net.PROTOCOL_V}) != OK:
+		push_warning("Não consegui abrir a página do navegador.")
 	Net.message.connect(_on_message)
 	Net.peer_left.connect(_on_peer_left)
 	_beacon = LanDiscovery.beacon(_beacon_info())
@@ -64,8 +68,19 @@ func leave() -> void:
 
 func _on_message(peer_id: int, msg: Dictionary) -> void:
 	match msg.get("type", ""):
+		"qual_jogo":
+			Net.send_to(peer_id, {"type": "jogo", "jogo": "chapeu"})
 		"hello":
 			_on_hello(peer_id, msg)
+		"pedir_vaga":
+			# Só o tabuleiro (além do host) pode abrir o QR pra passar a vaga de alguém.
+			if _peers.has(peer_id) and _peers[peer_id].get("role", "") == "board":
+				var seat := str(msg.get("id", ""))
+				var token := _issue_seat(seat)
+				if token != "":
+					Net.send_to(peer_id, {"type": "vaga", "id": seat, "token": token})
+				else:
+					Net.send_to(peer_id, {"type": "erro", "codigo": "vaga", "mensagem": _seat_refusal(seat)})
 		"acao":
 			if not _peers.has(peer_id):
 				return
@@ -82,15 +97,29 @@ func _on_hello(peer_id: int, msg: Dictionary) -> void:
 	if int(msg.get("v", 0)) != Net.PROTOCOL_V:
 		_reject(peer_id, "versao", "Versões diferentes do gamehub. Atualizem o app.")
 		return
+	if str(msg.get("jogo", "chapeu")) != "chapeu":
+		_reject(peer_id, "outro_jogo", "Essa sala é de Chapéu.")
+		return
 	var device: String = str(msg.get("device", ""))
 	var role: String = "board" if msg.get("papel", "") == "board" else "player"
 	var name: String = str(msg.get("nome", "")).strip_edges()
 	if device == "":
 		_reject(peer_id, "invalido", "Não deu pra identificar o aparelho.")
 		return
-	# O mesmo aparelho reconectando: esquece a conexão antiga.
+	var taken := false
+	if role == "player":
+		var sr := _seats.on_hello(device, str(msg.get("vaga", "")), func(id: String) -> bool: return not rules.player(id).is_empty(), Time.get_ticks_msec())
+		if sr.has("erro"):
+			_reject(peer_id, sr.erro, sr.mensagem)
+			return
+		device = sr.seat
+		taken = sr.taken
+	# O mesmo aparelho reconectando: esquece a conexão antiga. Se outro aparelho assumiu a vaga
+	# (QR de troca), o antigo é avisado e desconectado.
 	for pid in _peers.keys():
 		if _peers[pid].device == device and pid != peer_id:
+			if taken:
+				_reject(pid, "vaga_passada", "Seu lugar na partida foi passado para outro aparelho.")
 			_peers.erase(pid)
 	var events: Array = []
 	if role == "player":
@@ -109,6 +138,28 @@ func _on_hello(peer_id: int, msg: Dictionary) -> void:
 	_peers[peer_id] = {"device": device, "role": role}
 	Net.send_to(peer_id, {"type": "bem_vindo", "id": device if role == "player" else "", "papel": role, "codigo": room_code})
 	_broadcast(events)
+
+
+## Abre o QR pra passar a vaga de alguém pra outro aparelho (host). A resposta vem por seat_link.
+func request_seat(seat: String) -> void:
+	var token := _issue_seat(seat)
+	if token != "":
+		seat_link.emit(seat, token)
+	else:
+		error.emit(_seat_refusal(seat))
+
+
+func _issue_seat(seat: String) -> String:
+	# A vaga do próprio host não troca: é ele que roda a partida.
+	if seat == "" or seat == local_id or rules.player(seat).is_empty() or rules.phase == ChapeuRules.PHASE_LOBBY:
+		return ""
+	return _seats.issue(seat, Time.get_ticks_msec())
+
+
+func _seat_refusal(seat: String) -> String:
+	if seat == local_id:
+		return "A vaga do host não pode ser trocada: é o aparelho dele que roda a partida."
+	return "Não dá pra trocar essa vaga agora."
 
 
 func _reject(peer_id: int, code: String, message: String) -> void:

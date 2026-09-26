@@ -29,6 +29,9 @@ var _name_edit: LineEdit
 var _history_saved := false
 var _conn_overlay: Control
 var _leaving := false
+## QR da sala: do app (gamehub://) ou do navegador (página servida por este aparelho).
+var _qr_web := false
+var _swap: SeatSwap
 
 
 func _init(p_session: ChapeuSession) -> void:
@@ -50,7 +53,7 @@ func _ready() -> void:
 	add_child(mw)
 	_scroll = UI.scroll()
 	mw.add_child(_scroll)
-	var m := UI.margin(28, 20, 32)
+	var m := UI.margin(20, 20, 32)
 	m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	m.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(m)
@@ -66,6 +69,9 @@ func _ready() -> void:
 
 
 func on_back() -> bool:
+	if is_instance_valid(_swap):
+		_swap.close()
+		return true
 	if _show_config:
 		_show_config = false
 		_rebuild()
@@ -85,6 +91,8 @@ func _on_view(new_view: Dictionary, events: Array) -> void:
 	if phase != _last_phase:
 		_on_phase_changed(phase)
 	_time_ms = float(v.get("time_ms", ChapeuRules.TURN_MS))
+	if is_instance_valid(_swap):
+		_swap.set_players(_swap_players())
 	if not _built or _needs_rebuild(old, v):
 		_rebuild()
 	else:
@@ -266,7 +274,8 @@ func _rebuild() -> void:
 	if keep_scroll > 0:
 		(func(): _scroll.scroll_vertical = keep_scroll).call_deferred()
 	if name_focused and _name_edit:
-		_name_edit.grab_focus.call_deferred()
+		var ne := _name_edit
+		(func(): if is_instance_valid(ne) and ne.is_inside_tree(): ne.grab_focus()).call_deferred()
 
 
 func _update() -> void:
@@ -297,7 +306,29 @@ func _header(title_text: String) -> void:
 		chip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		chip.autowrap_mode = TextServer.AUTOWRAP_OFF
 		row.add_child(chip)
+	if _can_swap():
+		row.add_child(UI.icon_button("phone", _open_swap))
 	_root.add_child(row)
+
+
+# --- Trocar aparelho (net/seat_transfer.gd) --------------------------------
+
+func _can_swap() -> bool:
+	return session.mode == "wifi" and (session.is_host or session.local_role == "board") and v.get("phase", "lobby") != "lobby"
+
+
+func _swap_players() -> Array:
+	var out: Array = []
+	for p in v.get("players", []):
+		if p.id != session.local_id:
+			out.append({"id": p.id, "name": p.name, "connected": p.connected, "color": Tokens.team_color(str(p.get("team", "azul")))})
+	return out
+
+
+func _open_swap() -> void:
+	if is_instance_valid(_swap):
+		return
+	_swap = SeatSwap.open(self, session, _swap_players(), str(v.get("host_ip", "")), str(v.get("room_code", "")), session.local_role == "board")
 
 
 func _build_connecting() -> void:
@@ -352,13 +383,28 @@ func _build_wifi_lobby() -> void:
 		var rv := UI.vbox(12)
 		rc.add_child(rv)
 		rv.add_child(UI.label("Chame a galera!", 26, Tokens.TINTA, Fonts.title(), HORIZONTAL_ALIGNMENT_CENTER))
-		if code != "":
+		var web_url := Net.web_url()
+		if web_url != "":
+			rv.add_child(UI.segmented([["app", "Tem o app"], ["web", "Navegador (iPhone)"]], "web" if _qr_web else "app", func(k):
+				_qr_web = k == "web"
+				_rebuild_lobby()))
+		if _qr_web and web_url != "":
+			var wqr := QrView.new(web_url, 300 if session.local_role == "board" else 240)
+			wqr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			rv.add_child(wqr)
+			rv.add_child(UI.label("Aponte a câmera pro QR: o jogo abre no navegador, sem instalar nada. Ou digite no navegador:", 16, Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
+			rv.add_child(UI.label(web_url.trim_prefix("http://").trim_suffix("/"), 40, Tokens.TINTA, Fonts.title_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+			rv.add_child(UI.small_button("Copiar endereço", AppButton.Variant.SECONDARY, func():
+				DisplayServer.clipboard_set(web_url)
+				App.toast("Endereço copiado. Mande pra quem vai jogar.", Tokens.SALVIA)))
+		elif code != "":
 			var qr := QrView.new(DeepLink.make(code), 300 if session.local_role == "board" else 240)
 			qr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			rv.add_child(qr)
 			rv.add_child(UI.label("Aponte a câmera pro QR ou, no app, toque em Entrar numa sala:", 16, Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
 			rv.add_child(UI.label(RoomCode.pretty(code), 56, Tokens.TINTA, Fonts.title_bold(), HORIZONTAL_ALIGNMENT_CENTER))
-		rv.add_child(UI.label("IP: %s" % v.get("host_ip", ""), 15, Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+		if not (_qr_web and web_url != ""):
+			rv.add_child(UI.label("IP: %s" % v.get("host_ip", ""), 15, Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
 		_root.add_child(rc)
 	elif code != "":
 		_root.add_child(UI.caption("Sala %s · esperando todo mundo entrar" % RoomCode.pretty(code)))
@@ -368,6 +414,10 @@ func _build_wifi_lobby() -> void:
 		_start_button()
 	else:
 		_root.add_child(UI.caption("Esperando o host começar a partida..."))
+
+
+func _rebuild_lobby() -> void:
+	_rebuild()
 
 
 ## Os dois times com seus jogadores.
@@ -593,7 +643,9 @@ func _word_form(n: int, on_done: Callable, done_text: String) -> void:
 	_root.add_child(UI.button(done_text, AppButton.Variant.SUCCESS, func(): _submit_words(on_done), "check"))
 	_root.add_child(UI.spacer(260)) # espaço pro teclado
 	if not _word_edits.is_empty():
-		_word_edits[0].grab_focus.call_deferred()
+		var first: LineEdit = _word_edits[0]
+		# Adiado: a tela pode ser remontada antes (o campo sai da árvore).
+		(func(): if is_instance_valid(first) and first.is_inside_tree(): first.grab_focus()).call_deferred()
 
 
 func _submit_words(on_done: Callable) -> void:
@@ -731,6 +783,8 @@ func _build_turn() -> void:
 	top.add_child(chip)
 	if i_explain and not v.paused:
 		top.add_child(UI.icon_button("pause", func(): session.send({"type": "pause"})))
+	if _can_swap():
+		top.add_child(UI.icon_button("phone", _open_swap))
 	_root.add_child(top)
 
 	if v.paused:

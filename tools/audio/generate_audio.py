@@ -2,7 +2,8 @@
 """Gera os efeitos sonoros e as músicas do gamehub por síntese (só biblioteca padrão).
 
 Uso: python3 tools/audio/generate_audio.py
-Saída: app/audio/sfx/*.wav, app/audio/music/menu.wav, games/chapeu/audio/*.wav
+Saída: app/audio/sfx/*.wav, app/audio/music/menu.wav, games/chapeu/audio/*.wav,
+games/halli_galli/audio/*.wav
 
 Tudo é sintetizado aqui (ondas simples + envelopes), então não há licença de terceiros.
 Pra trocar um som, ajuste a função correspondente e rode de novo.
@@ -205,6 +206,70 @@ def sfx_pop():
     return b
 
 
+# --- Halli Galli -----------------------------------------------------------
+
+def struck(buf, start_s, dur_s, f, partials, vol=0.5, decay=4.0):
+    """Sino batido: parciais inarmônicas com decaimento exponencial (as agudas morrem antes)."""
+    n = int(dur_s * RATE)
+    s0 = int(start_s * RATE)
+    for i in range(n):
+        t = i / RATE
+        x = 0.0
+        for mult, amp in partials:
+            x += amp * math.sin(2 * math.pi * f * mult * t) * math.exp(-decay * mult ** 0.7 * t)
+        idx = s0 + i
+        if idx >= len(buf):
+            break
+        buf[idx] += x * vol * min(1.0, t / 0.0015)
+
+
+def sfx_hg_bell():
+    b = buf_of(1.6)
+    struck(b, 0, 1.6, 1480, [(1.0, 1.0), (2.01, 0.5), (2.76, 0.45), (4.07, 0.25), (5.4, 0.2), (8.93, 0.08)], 0.5, 2.6)
+    noise(b, 0, 0.012, 0.35, 400, 0.8, seed=3)
+    return b
+
+
+def sfx_hg_flip():
+    b = buf_of(0.16)
+    noise(b, 0, 0.14, 0.6, 26, 0.35, seed=5)
+    tone(b, 0.0, 0.1, 520, 300, "sine", 0.15, 0.002, 0.08)
+    return b
+
+
+def sfx_hg_collect():
+    b = buf_of(0.7)
+    for i in range(6):
+        noise(b, i * 0.045, 0.07, 0.35, 45, 0.4, seed=10 + i)
+    for i, n in enumerate([72, 76, 79, 84]):
+        tone(b, 0.25 + i * 0.07, 0.22, note_hz(n), kind="square", vol=0.16, release=0.16)
+        tone(b, 0.25 + i * 0.07, 0.22, note_hz(n), kind="sine", vol=0.25, release=0.16)
+    return b
+
+
+def sfx_hg_wrong():
+    b = buf_of(0.6)
+    tone(b, 0, 0.22, 196, 185, "saw", 0.35, 0.004, 0.06)
+    tone(b, 0, 0.22, 199, 188, "square", 0.2, 0.004, 0.06)
+    tone(b, 0.28, 0.3, 175, 150, "saw", 0.35, 0.004, 0.12)
+    tone(b, 0.28, 0.3, 178, 153, "square", 0.2, 0.004, 0.12)
+    return b
+
+
+def sfx_hg_turn():
+    b = buf_of(0.3)
+    tone(b, 0, 0.1, note_hz(84), kind="sine", vol=0.45, release=0.07)
+    tone(b, 0.11, 0.16, note_hz(88), kind="sine", vol=0.45, release=0.12)
+    return b
+
+
+def sfx_hg_out():
+    b = buf_of(0.8)
+    for i, n in enumerate([72, 69, 65, 60]):
+        tone(b, i * 0.14, 0.2, note_hz(n), kind="tri", vol=0.4, release=0.14)
+    return b
+
+
 # --- Músicas ---------------------------------------------------------------
 
 def music_menu():
@@ -280,6 +345,12 @@ def main():
     for name, fn in sfx.items():
         folder = "app/audio/sfx" if name in ("tap", "join", "leave", "pop") else "games/chapeu/audio"
         save(f"{folder}/{name}.wav", fn(), 0.8)
+    halli = {
+        "hg_bell": sfx_hg_bell, "hg_flip": sfx_hg_flip, "hg_collect": sfx_hg_collect,
+        "hg_wrong": sfx_hg_wrong, "hg_turn": sfx_hg_turn, "hg_out": sfx_hg_out,
+    }
+    for name, fn in halli.items():
+        save(f"games/halli_galli/audio/{name}.wav", fn(), 0.8)
     save("app/audio/music/menu.wav", music_menu(), 0.7)
     save("games/chapeu/audio/turn.wav", music_turn(), 0.7)
 

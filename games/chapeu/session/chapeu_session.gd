@@ -14,6 +14,8 @@ signal error(message: String)
 signal connection_changed(state: String)
 ## A sessão acabou (ex: host sumiu de vez, partida em andamento).
 signal ended(reason: String)
+## QR pronto pra passar a vaga de alguém pra outro aparelho (o token vai no link).
+signal seat_link(seat: String, token: String)
 
 var view := {}
 var is_host := false
@@ -24,6 +26,11 @@ var mode := "local"
 
 
 func send(_action: Dictionary) -> void:
+	pass
+
+
+## Pede o QR pra passar a vaga de alguém pra outro aparelho (host ou tabuleiro).
+func request_seat(_seat: String) -> void:
 	pass
 
 

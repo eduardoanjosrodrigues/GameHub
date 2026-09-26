@@ -61,6 +61,8 @@ static func spacer(h := 0.0, expand := false) -> Control:
 
 static func card(bg := Tokens.SUPERFICIE, pad := 24) -> PanelContainer:
 	var p := PanelContainer.new()
+	# Deixa o toque passar: senão o arrasto que começa num cartão não rola a tela.
+	p.mouse_filter = Control.MOUSE_FILTER_PASS
 	var s := ThemeBuilder.card_style(bg)
 	s.content_margin_left = pad
 	s.content_margin_right = pad

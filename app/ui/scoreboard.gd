@@ -9,6 +9,7 @@ func _init(scores := {"azul": 0, "vermelho": 0}, big := false, highlight := "") 
 	add_theme_constant_override("separation", 14)
 	for team in ["azul", "vermelho"]:
 		var c := PanelContainer.new()
+		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var st := ThemeBuilder.solid_style(Tokens.team_color(team), 20)
 		st.content_margin_top = 14
 		st.content_margin_bottom = 12

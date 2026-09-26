@@ -14,6 +14,9 @@ func _init(p_entry: Dictionary) -> void:
 func _ready() -> void:
 	var col := make_column()
 	make_header(col, "Partida")
+	if entry.get("game", "") == "halli":
+		_halli(col)
+		return
 	col.add_child(UI.caption("%s · %s" % [entry.get("date", "").replace("T", " ").left(16), "Passa-e-joga" if entry.get("mode", "") == "local" else "Wi-Fi"]))
 	var winner: String = entry.get("winner", "")
 	var headline := "Empate!" if winner == "" else "Venceu o %s!" % Tokens.team_name(winner)
@@ -46,3 +49,20 @@ func _ready() -> void:
 			if p.get("team", "") == team:
 				v.add_child(UI.player_row(p.get("name", ""), Tokens.team_color(team)))
 		col.add_child(c)
+
+
+func _halli(col: VBoxContainer) -> void:
+	var mode := "Na mesa" if entry.get("mode", "") == "table" else "Wi-Fi"
+	col.add_child(UI.caption("Halli Galli · %s · %s" % [mode, entry.get("date", "").replace("T", " ").left(16)]))
+	var win: String = entry.get("winner_name", "")
+	col.add_child(UI.title("%s venceu!" % win if win != "" else "Fim de jogo", 36))
+	var c := UI.card()
+	var v := UI.vbox(10)
+	c.add_child(v)
+	v.add_child(UI.label("Classificação", 22, Tokens.TINTA, Fonts.title()))
+	var players: Array = entry.get("players", [])
+	for i in players.size():
+		var p: Dictionary = players[i]
+		var extra := "%d certos · %d errados" % [int(p.get("ok", 0)), int(p.get("wrong", 0))]
+		v.add_child(UI.player_row("%dº %s" % [i + 1, p.get("name", "")], HalliArt.player_color(int(p.get("color", 0))), true, extra))
+	col.add_child(c)

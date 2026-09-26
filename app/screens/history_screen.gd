@@ -34,13 +34,28 @@ func _build() -> void:
 			_build()), "trash"))
 
 
+func _mode_name(e: Dictionary) -> String:
+	match e.get("mode", ""):
+		"local":
+			return "Passa-e-joga"
+		"table":
+			return "Na mesa"
+	return "Wi-Fi"
+
+
 func _entry_card(e: Dictionary) -> Control:
+	if e.get("game", "") == "halli":
+		return _halli_card(e)
+	if e.get("game", "") == "avalon":
+		return _avalon_card(e)
+	if e.get("game", "") == "secret_hitler":
+		return _sh_card(e)
 	var winner: String = e.get("winner", "")
 	var c := UI.card(Tokens.SUPERFICIE, 20)
 	var v := UI.vbox(8)
 	c.add_child(v)
 	var head := UI.hbox(10)
-	var t := UI.label("%s · %s" % [e.get("game_name", "Chapéu"), "Passa-e-joga" if e.get("mode", "") == "local" else "Wi-Fi"], 20, Tokens.TINTA, Fonts.title())
+	var t := UI.label("%s · %s" % [e.get("game_name", "Chapéu"), _mode_name(e)], 20, Tokens.TINTA, Fonts.title())
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	var date := UI.label(_format_date(e.get("date", "")), 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
@@ -61,6 +76,66 @@ func _entry_card(e: Dictionary) -> Control:
 	v.add_child(UI.label(result_text, 17, Tokens.TINTA_SUAVE, Fonts.body_bold()))
 	var open := UI.small_button("Ver detalhes", AppButton.Variant.SECONDARY, func(): App.push(HistoryDetail.new(e)))
 	v.add_child(open)
+	return c
+
+
+## Halli Galli: vencedor e quantos jogaram.
+func _halli_card(e: Dictionary) -> Control:
+	var c := UI.card(Tokens.SUPERFICIE, 20)
+	var v := UI.vbox(8)
+	c.add_child(v)
+	var head := UI.hbox(10)
+	var t := UI.label("Halli Galli · %s" % _mode_name(e), 20, Tokens.TINTA, Fonts.title())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	var date := UI.label(_format_date(e.get("date", "")), 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
+	date.autowrap_mode = TextServer.AUTOWRAP_OFF
+	head.add_child(date)
+	v.add_child(head)
+	var players: Array = e.get("players", [])
+	var win: String = e.get("winner_name", "")
+	v.add_child(UI.label("Venceu %s" % win if win != "" else "Sem vencedor", 18, Tokens.TINTA, Fonts.body_bold()))
+	v.add_child(UI.label("%d jogadores" % players.size(), 16, Tokens.TINTA_SUAVE))
+	v.add_child(UI.small_button("Ver detalhes", AppButton.Variant.SECONDARY, func(): App.push(HistoryDetail.new(e))))
+	return c
+
+
+## Avalon: qual lado venceu e como.
+func _avalon_card(e: Dictionary) -> Control:
+	var good: bool = e.get("winner_side", "") == "bem"
+	var c := UI.card(AvalonArt.side_color(good), 20)
+	var v := UI.vbox(8)
+	c.add_child(v)
+	var head := UI.hbox(10)
+	var t := UI.label("Avalon · Wi-Fi", 20, Tokens.TINTA, Fonts.title())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	var date := UI.label(_format_date(e.get("date", "")), 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
+	date.autowrap_mode = TextServer.AUTOWRAP_OFF
+	head.add_child(date)
+	v.add_child(head)
+	v.add_child(UI.label("O %s venceu" % ("bem" if good else "mal"), 18, Tokens.TINTA, Fonts.body_bold()))
+	v.add_child(UI.label(AvalonArt.REASONS.get(e.get("reason", ""), ""), 16, Tokens.TINTA_SUAVE))
+	v.add_child(UI.label(", ".join(e.get("players", []).map(func(p): return "%s (%s)" % [p.get("name", ""), AvalonArt.role_name(p.get("role", ""))])), 15, Tokens.TINTA_SUAVE))
+	return c
+
+
+func _sh_card(e: Dictionary) -> Control:
+	var lib: bool = e.get("winner_side", "") == "liberal"
+	var c := UI.card(Tokens.tint(ShArt.party_color(lib), 0.45), 20)
+	var v := UI.vbox(8)
+	c.add_child(v)
+	var head := UI.hbox(10)
+	var t := UI.label("Secret Hitler · Wi-Fi", 20, Tokens.TINTA, Fonts.title())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	var date := UI.label(_format_date(e.get("date", "")), 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
+	date.autowrap_mode = TextServer.AUTOWRAP_OFF
+	head.add_child(date)
+	v.add_child(head)
+	v.add_child(UI.label("Os %s venceram" % ("liberais" if lib else "fascistas"), 18, Tokens.TINTA, Fonts.body_bold()))
+	v.add_child(UI.label(ShArt.REASONS.get(e.get("reason", ""), ""), 16, Tokens.TINTA_SUAVE))
+	v.add_child(UI.label(", ".join(e.get("players", []).map(func(p): return "%s (%s)" % [p.get("name", ""), ShArt.role_name(p.get("role", ""))])), 15, Tokens.TINTA_SUAVE))
 	return c
 
 

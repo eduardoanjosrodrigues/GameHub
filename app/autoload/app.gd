@@ -10,6 +10,7 @@ var _overlay: Control
 var _toast_box: VBoxContainer
 var _last_link := ""
 var _pending_link := ""
+var _pending_seat := ""
 var _modal: Control
 
 
@@ -191,6 +192,7 @@ func check_deep_link() -> void:
 	var code := DeepLink.parse(data)
 	if code != "":
 		_pending_link = code
+		_pending_seat = DeepLink.parse_seat(data)
 		deep_link.emit(code)
 
 
@@ -199,6 +201,13 @@ func take_pending_link() -> String:
 	var c := _pending_link
 	_pending_link = ""
 	return c
+
+
+## Consome o token de troca de aparelho que veio junto com o último QR (ou "").
+func take_pending_seat() -> String:
+	var t := _pending_seat
+	_pending_seat = ""
+	return t
 
 
 func _read_intent_data() -> String:

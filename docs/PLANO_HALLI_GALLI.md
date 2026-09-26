@@ -1,6 +1,6 @@
 # gamehub — Plano do Halli Galli
 
-> Status: v1 · 2026-09-26 · especificação, nada implementado ainda
+> Status: v2 · 2026-09-26 · implementado (ver §13); falta testar em aparelhos reais
 > Escopo: segundo jogo do hub, o **Halli Galli**, em dois modos: **Wi-Fi** (principal) e **aparelho na mesa**.
 
 Legenda (a mesma do [PLANO_FASE_1.md](PLANO_FASE_1.md)):
@@ -40,6 +40,7 @@ A graça está na velocidade de reação. Por isso, no modo Wi-Fi, a coisa mais 
 | Fim da partida | Último que sobrar com cartas (clássico) |
 | Baralhos | O host escolhe quantos |
 | Vez lenta | Espera sem limite (clássico) |
+| Intervalo entre viradas | **Mínimo de 0,5 s entre duas viradas quaisquer** (era 1 s; reduzido depois de jogar), pra ninguém atropelar a mesa virando logo depois do outro |
 | Sino errado | Paga 1 carta para cada outro jogador (clássico) |
 | Monte vazio | Continua no jogo enquanto tiver carta aberta na mesa; sai quando chega a vez e não há o que virar |
 | Quase empate | Vence o horário exato do toque, mesmo por 1 ms |
@@ -70,13 +71,15 @@ A graça está na velocidade de reação. Por isso, no modo Wi-Fi, a coisa mais 
 
 - O jogador da vez vira a carta de cima do monte fechado para a pilha aberta. Depois a vez passa para o próximo da ordem.
 - Não há limite de tempo.
+- **Intervalo mínimo de 0,5 s entre viradas** [decidido]: o próximo só consegue virar 0,5 s depois da última carta virada na mesa. No Wi-Fi, o celular dele mostra a borda de "sua vez" enchendo durante esse meio segundo, e o arrastar só funciona quando ela completa. A conta usa o relógio sincronizado (§5.1), então vale igual pra todos.
 
 ### 3.4 O sino
 
 - Qualquer jogador pode bater a qualquer momento, até na vez de outro.
 - **Acertou** (exatamente 5 de alguma fruta somando as cartas de cima de todas as pilhas abertas): leva todas as pilhas abertas para o fundo do próprio monte, embaralhadas [proposta]. Quem acertou começa a próxima vez [proposta].
-- **Errou**: dá 1 carta do monte fechado para cada outro jogador ainda no jogo. Se não tiver cartas para todos, dá o que tiver, seguindo a ordem da vez a partir do próximo [proposta].
+- **Errou** [corrigido por você em 2026-09-26]: primeiro, **todas as cartas abertas voltam pro fundo do monte de cada dono** (a mesa zera). Depois, quem bateu dá 1 carta do monte para cada outro jogador ainda no jogo. Se não tiver cartas para todos, dá o que tiver, seguindo a ordem da vez a partir do próximo [proposta]. Quem já tinha saído mas tinha carta na mesa recebe ela de volta e volta pro jogo [proposta].
 - Depois de um sino (certo ou errado), ninguém vira carta por 1 s. Todo mundo vê o resultado e ninguém vira no susto [proposta].
+- **Sino atrasado não pune** [proposta, veio na implementação]: durante esse 1 s, um sino errado não conta nem pune. É a mão que chega no sino que outro acabou de bater; sem isso, quem batesse 200 ms depois do vencedor pagaria carta. Um sino certo nesse 1 s (a mesa ainda tem 5 depois de um erro) vale normalmente.
 
 ### 3.5 Saída e vitória
 
@@ -136,7 +139,7 @@ A rede entrega mensagens com atrasos diferentes (de 5 a 50 ms, e às vezes 200 m
 
 ### 5.1 Relógio sincronizado [proposta]
 
-- Cada cliente troca pings com o host (a cada 1 s no lobby, e a cada 2 s durante a partida). Cada ping calcula a diferença entre os relógios assumindo que ida e volta levam o mesmo tempo, como no NTP.
+- Cada cliente troca pings com o host: 12 rápidos (a cada 100 ms) logo ao entrar, pro relógio ficar bom em ~1 s, e depois 1 por segundo, no lobby e na partida. Os pings vão sem garantia de entrega (um ping atrasado atrapalha mais do que um perdido). Cada ping calcula a diferença entre os relógios assumindo que ida e volta levam o mesmo tempo, como no NTP.
 - O app guarda as últimas ~20 medições e usa as de **menor tempo de ida e volta**, que são as mais precisas. Numa rede local isso dá precisão de poucos milissegundos.
 - Todo evento importante (virar, bater) é marcado no celular com `Time.get_ticks_usec()` e convertido para o **horário do host**.
 
@@ -154,7 +157,7 @@ A rede entrega mensagens com atrasos diferentes (de 5 a 50 ms, e às vezes 200 m
 4. A validade é julgada **pela mesa no instante `t`**, não na chegada:
    - Bateu antes da carta que fez 5 aparecer: **errou** (bateu cedo demais).
    - Bateu depois de uma nova carta desfazer o 5: **errou**.
-5. Os outros sinos da janela são descartados, sem punição [proposta]. No jogo físico, a mão que chega depois bate na mão de quem chegou primeiro.
+5. **Só o primeiro sino da janela conta** (menor horário). Se ele estiver certo, leva a mesa; se estiver errado, a mesa volta pros donos e ele paga (§3.4). Em qualquer caso a mesa zera, então os sinos seguintes do mesmo momento são descartados, sem punição. No jogo físico, a mão que chega depois bate na mão de quem chegou primeiro.
 6. Se alguém virou uma carta com `t` **depois** do sino vencedor, essa virada é desfeita e a carta volta ao monte com animação. Isso deve ser raro por causa da trava de 1 s de §3.4.
 
 ### 5.4 O que continua injusto (e aceitamos)
@@ -204,36 +207,56 @@ Segue o mesmo princípio do Chapéu (regras separadas de tela e de rede):
 ```
 games/halli_galli/
 ├── rules/halli_rules.gd      # estado + apply(ação) → eventos; puro, com semente, testável
-├── session/                  # local_session, host_session, client_session
-├── screens/                  # menu, lobby, jogo Wi-Fi, jogo na mesa, como jogar
+├── session/                  # halli_local (mesa), halli_host e halli_client (Wi-Fi)
+├── screens/                  # menu, criar sala, jogo Wi-Fi, jogo na mesa, como jogar
+├── ui/                       # desenho das cartas e do sino, tela do jogador, mesa, resultados
 └── art/, audio/
 net/clock_sync.gd             # novo e reutilizável: ping, diferença de relógio, horário do host
+net/room_probe.gd             # pergunta de qual jogo é uma sala antes de entrar
 ```
 
-- `HalliRules` recebe ações **com horário** (`virar(jogador, t)`, `sino(jogador, t)`) e mantém a linha do tempo da mesa, de modo que a validade de um sino em qualquer instante `t` possa ser consultada.
-- A janela de decisão (§5.3) fica na `host_session`, não nas regras. As regras só recebem o sino vencedor já escolhido e os outros descartados, e isso continua testável.
+- `HalliRules` recebe ações **com horário** (`flip` com `t`, e `ring(sinos, agora)`) e mantém a linha do tempo da mesa (cada carta aberta guarda o instante em que foi virada), de modo que a mesa em qualquer instante `t` possa ser consultada.
+- A janela de decisão (§5.3) fica na `HalliHost`, não nas regras: o host junta os sinos da janela e passa todos pra `ring()`, que ordena e julga. Isso continua testável sem rede.
+- No modo mesa (`HalliLocal`) não há janela: cada toque vai direto pra `ring()`, e a regra do sino atrasado (§3.4) cuida dos toques quase juntos.
 - O estado enviado a cada cliente é **filtrado**: ele recebe a própria carta aberta, a próxima carta do próprio monte, as contagens e de quem é a vez. Não recebe as cartas dos outros.
 
-### 8.1 Mensagens (primeira versão) [proposta]
+### 8.1 Mensagens (como ficou)
+
+Protocolo do `Net` subiu pra versão 2 (entrou um canal sem garantia de entrega no sentido cliente → host). Aparelhos com versões diferentes do app não se falam.
 
 | Direção | Tipo | Conteúdo |
 |---|---|---|
-| C→H | `hello` | device_id, nome |
-| C→H | `ping` / H→C `pong` | t_envio_cliente, t_host |
-| C→H | `virar` | t (horário do host) |
-| C→H | `sino` | t |
-| H (host local) | `ordem`, `baralhos`, `iniciar`, `remover` | parâmetros |
-| H→C | `estado` | estado filtrado + eventos |
-| H→C | `resultado_sino` | vencedor, certo/errado, fruta, diferença em ms para o segundo |
-| H→C | `desfazer_virada` | jogador |
-| H→C | `pausa` / `retomar` | quem caiu |
+| C→H | `qual_jogo` / H→C `jogo` | pergunta de qual jogo é a sala (entrar por código ou QR, §8.2) |
+| C→H | `hello` | jogo, device_id, nome |
+| C→H | `ping` / H→C `pong` | `c` (envio no relógio do cliente), `rtt` (maior ida e volta recente), `h` (relógio do host) |
+| C→H | `acao` | `{type: "flip", t}`, `{type: "bell", t}` ou ações do host |
+| H→C | `bem_vindo` | id, código da sala |
+| H→C | `estado` | estado filtrado + eventos (`flip`, `turn`, `bell`, `undo_flip`, `out`, `paused`, `resumed`, `game_over`...) |
+| H→C | `erro` | `acao` (ação recusada: o estado certo vem logo depois), `outro_jogo`, `partida_em_andamento`, `versao`... |
+
+### 8.2 Entrar numa sala de qualquer jogo
+
+A tela "Entrar numa sala" saiu do Chapéu e virou do hub (`app/screens/join_screen.gd`). Salas achadas na rede já dizem o jogo. Por código, IP ou QR, o app primeiro conecta e pergunta `qual_jogo` (`net/room_probe.gd`), desconecta e entra de novo já com a sessão certa.
+
+### 8.3 Jogar pelo navegador (iPhone e quem não tem o app)
+
+Vale pro Halli Galli e pro Chapéu (docs/PLANO_FASE_1.md não previa; entrou em 2026-09-26).
+
+- Quem cria a sala no app (Android) abre também uma página na rede local: **http://IP:7780/**. O canal do jogo é um WebSocket na porta **7781**. As portas 8080/8081 ficaram de fora porque são comuns demais (no PC de desenvolvimento a 8080 já estava ocupada).
+- Na sala, o QR tem duas opções: **Tem o app** (link `gamehub://`, como antes) e **Navegador (iPhone)** (o endereço da página). Abaixo do QR do navegador aparece o endereço pra digitar.
+- A página é um cliente leve em HTML/JS (`web/`), não o Godot no navegador: abre na hora e não precisa instalar nada. Quem entra por ela é, pro host, um jogador como outro qualquer (`net/web_gateway.gd` dá a cada navegador um id de peer e troca as mesmas mensagens do `Net`, em JSON).
+- No Android, a página mostra "Abrir no app" pra quem tem o gamehub instalado.
+- **Halli Galli pelo navegador**: mesmos gestos (arrastar vira, toque duplo bate), relógio sincronizado por ping e o instante do toque vem do próprio evento de toque (`event.timeStamp`). O iPhone **não vibra** (o Safari não deixa); o resto funciona igual.
+- **Chapéu pelo navegador**: todas as fases do jogador (escolher time, escrever palavras, escolher quem explica, explicar com Acertou/Pular/Pausar, adivinhar, resumo, fim). O tabuleiro continua só no app.
+- Recarregar a página no meio da partida volta pro mesmo lugar (o aparelho guarda um id no navegador). O botão × da página sai de vez.
+- Artes, fontes e sons da página ficam em `web/assets/`, copiados por `tools/sync_web_assets.sh` (cada cópia vai pro app sem conversão).
 
 ---
 
 ## 9. Queda de rede [decidido + proposta]
 
 - Se alguém cai, a partida **pausa para todos**, e todos veem "Esperando **Ana** voltar...". O cliente tenta reconectar sozinho, como no Chapéu.
-- O host pode **remover** quem não voltar. As cartas do monte fechado dessa pessoa são divididas entre os outros, e a pilha aberta dela sai da mesa [proposta].
+- O host pode **remover** quem não voltar ("Continuar sem Fulano"). Todas as cartas dessa pessoa, do monte e da mesa, são divididas uma a uma entre os outros, pro fundo do monte [proposta].
 - Se o host cair, todos veem "Esperando o host", sem migração de host (como no Chapéu).
 - Sinos e viradas feitos durante a pausa são ignorados.
 
@@ -259,7 +282,7 @@ net/clock_sync.gd             # novo e reutilizável: ping, diferença de relóg
 |---|---|---|
 | **H1 — Regras** | `HalliRules` + testes | Testes cobrindo: contagem de 5 com várias pilhas, sino no instante antes e depois da carta, erro com poucas cartas, sair na vez, voltar ao jogo ganhando a mesa, vários baralhos, vencedor |
 | **H2 — Aparelho na mesa** | Telas e layouts de 2 a 6, multitoque por área | Partida completa no celular (2 e 4) e no emulador de tablet (6) |
-| **H3 — Relógio sincronizado** | `net/clock_sync.gd` + teste | Com atraso artificial de 0 a 200 ms e variação, a diferença estimada fica a menos de 5 ms do real |
+| **H3 — Relógio sincronizado** | `net/clock_sync.gd` + teste | Wi-Fi de casa (atraso extra médio de até 15 ms): erro abaixo de 5 ms. Rede ruim (média de 60 ms): erro abaixo de 20 ms |
 | **H4 — Wi-Fi** | Lobby com ordem da mesa, tela do jogador, gestos, janela do sino, desfazer virada | Bot de rede com atrasos diferentes por jogador: quem toca antes sempre vence, independente do atraso |
 | **H5 — Queda e polimento** | Pausa e reconexão, vibração, sons, arte, tela "como jogar" | Derrubar o Wi-Fi de um celular no meio da partida e ele voltar com as mesmas cartas |
 | **H6 — Playtest** | Partida real com 4 ou mais celulares | Lista de ajustes resolvida, principalmente gestos e janela `J` |
@@ -271,4 +294,22 @@ net/clock_sync.gd             # novo e reutilizável: ping, diferença de relóg
 | # | Pergunta |
 |---|---|
 | **P1** | O gamehub vai para a Play Store com o Chapéu. O Halli Galli entra nessa mesma build? Opções: (a) sim, com outro nome e outra arte só na versão da loja; (b) só numa build interna (instalada por APK), com o jogo escondido na versão da loja; (c) você não vai publicar o hub, e tudo fica interno. |
-| **P2** | Revisar todas as **[proposta]**: distribuição com carta a mais, ordem arrastada no lobby, primeiro jogador sorteado, quem ganha a mesa começa, trava de 1 s, punição quando faltam cartas, pilha de quem saiu continua valendo, sinos da janela descartados sem punição, valores dos gestos (40 px, 300 ms, 80 px), janela `J`, padrões de vibração, sino tocando só em quem bateu, visual, o que acontece com quem é removido. |
+| **P2** | Revisar todas as **[proposta]**: distribuição com carta a mais, ordem no lobby (ficou com botões ↑ ↓ em vez de arrastar), primeiro jogador sorteado, quem ganha a mesa começa, trava de 1 s, punição quando faltam cartas, pilha de quem saiu continua valendo, só o primeiro sino da janela conta, quem saiu volta se a carta dele voltar da mesa, sino atrasado sem punição (§3.4), valores dos gestos (40 px, 300 ms, 80 px), janela `J`, padrões de vibração, sino tocando só em quem bateu, visual, o que acontece com quem é removido. |
+
+---
+
+## 13. Status da implementação (2026-09-26)
+
+| Marco | Status |
+|---|---|
+| H1 Regras | ✓ `HalliRules` + 22 testes (`tests/test_halli_rules.gd`) |
+| H2 Aparelho na mesa | ✓ layouts de 2 a 6, multitoque por área (conferido com toques simulados). Até 4 no celular, até 6 no tablet (tela com lado menor ≥ 3,4 pol.) |
+| H3 Relógio sincronizado | ✓ `net/clock_sync.gd` + 4 testes (`tests/test_clock_sync.gd`) |
+| H4 Wi-Fi | ✓ `tools/halli_net_test.sh`: 4 robôs, quem toca primeiro tem 200 ms de atraso de rede e ganhou 6 de 6 sinos; a diferença medida foi de 41–42 ms para 40 ms reais |
+| H5 Queda e polimento | ✓ pausa e volta testadas pelos robôs; vibração, sons (sintetizados em `tools/audio/generate_audio.py`), arte em SVG, "como jogar", histórico |
+| H6 Playtest | **Falta**: partida real com celulares |
+
+Também mudou fora do jogo: a tela "Entrar numa sala" agora é do hub (§8.2), o início mostra os dois jogos, o histórico mostra partidas de Halli Galli, e dá pra jogar Halli Galli e Chapéu pelo navegador (§8.3), testado no navegador contra robôs.
+
+Ainda não testado em aparelho real. Pontos pra olhar no playtest: se o toque duplo dispara sem querer, se o arrastar é confortável com o celular deitado, o tamanho da janela `J` no Wi-Fi de verdade, e se a vibração dá pra sentir com o celular na mesa.
+
