@@ -1,0 +1,30 @@
+/* Coup no navegador: cartas de personagem, a mesa, as ações e a barrinha dos 5 s. */
+.cp-card { width: 120px; border: 4px solid var(--c); border-radius: 14px; background: var(--superficie); overflow: hidden; display: flex; flex-direction: column; flex: none; }
+.cp-card img.portrait { width: 100%; aspect-ratio: 10 / 13; object-fit: cover; display: block; }
+.cp-card img.emblem { width: 60%; aspect-ratio: 1; margin: 22% auto; display: block; }
+.cp-card b { background: var(--c); color: var(--superficie); text-align: center; font-family: "Fraunces", serif; font-size: 15px; padding: 3px 0; }
+.cp-card.back { border-color: #2B2A33; background: #2B2A33; }
+.cp-card.back img { width: 100%; aspect-ratio: 10 / 14; display: block; }
+.cp-card.up { opacity: .45; }
+.cp-card.mini { width: 42px; border-width: 2px; border-radius: 8px; }
+.cp-card.mini b { font-size: 0; padding: 0; height: 4px; }
+.cp-card.pick { cursor: pointer; }
+.cp-card.pick.on { outline: 4px solid var(--mostarda); outline-offset: 2px; }
+.cp-mine { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cp-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 12px; }
+.cp-row.turn { background: color-mix(in srgb, var(--superficie) 50%, var(--mostarda)); }
+.cp-row b { font-size: 17px; }
+.cp-row small { display: block; color: var(--suave); font-weight: 700; }
+.cp-row .avatar { width: 36px; height: 36px; font-size: 17px; }
+.cp-coin { width: 24px; height: 24px; }
+.cp-n { min-width: 22px; font-family: "Fraunces", serif; font-size: 20px; }
+.cp-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cp-act { background: var(--superficie); border: 1.5px solid var(--linha); border-radius: 16px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+.cp-act small { color: var(--suave); font-weight: 700; font-size: 12px; }
+.cp-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.cp-btns .btn { flex: 1 1 140px; min-height: 72px; }
+.cp-bar { height: 14px; border-radius: 7px; background: var(--linha); overflow: hidden; }
+.cp-bar i { display: block; height: 100%; background: var(--mostarda); border-radius: 7px; }
+.cp-board .cp-card.mini { width: 60px; }
+.cp-board .cp-row b { font-size: 24px; }
+.card > .row > .sub.grow { white-space: nowrap; }

@@ -282,6 +282,11 @@ func ring(taps: Array, _now: int) -> Dictionary:
 	return _ok(events)
 
 
+## Toques que chegaram na janela do host (PartyClockHost): [{player, t, animal}].
+func resolve_timed(list: Array, now: int) -> Dictionary:
+	return ring(list, now)
+
+
 ## O host chama sempre: acaba o suspense quando o tempo passa.
 func tick(now: int) -> Dictionary:
 	if phase == PHASE_RACE and doomed and now >= suspense_until:

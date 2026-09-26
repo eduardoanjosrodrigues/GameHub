@@ -21,7 +21,8 @@ cp design/icons/avalon.svg "$OUT/"
 cp games/avalon/art/*.svg "$OUT/"
 for f in games/avalon/art/emblems/*.svg; do cp "$f" "$OUT/emblema_$(basename "$f")"; done
 cp design/icons/secret_hitler.svg "$OUT/"
-cp design/icons/{sintonia,ito,quem_foi}.svg "$OUT/"
+cp design/icons/{sintonia,ito,quem_foi,coup}.svg "$OUT/"
+for f in games/coup/art/emblems/*.svg; do cp "$f" "$OUT/coup_$(basename "$f")"; done
 cp games/quem_foi/audio/qf_{pum,plim,descarga}.wav "$OUT/"
 for f in games/secret_hitler/art/*.svg; do cp "$f" "$OUT/sh_$(basename "$f")"; done
 for f in games/secret_hitler/art/emblems/*.svg; do cp "$f" "$OUT/sh_emblema_$(basename "$f")"; done
@@ -31,7 +32,7 @@ for f in games/secret_hitler/art/emblems/*.svg; do cp "$f" "$OUT/sh_emblema_$(ba
 # ir duas vezes no APK.
 python3 tools/fix_avalon_art.py
 python3 tools/compress_art.py
-for f in games/avalon/art/roles/*.{png,jpg,webp} games/avalon/art/*.{png,jpg,webp} games/secret_hitler/art/roles/*.{png,jpg,webp} games/secret_hitler/art/*.{png,jpg,webp} games/quem_foi/art/*.{png,jpg,webp}; do
+for f in games/avalon/art/roles/*.{png,jpg,webp} games/avalon/art/*.{png,jpg,webp} games/secret_hitler/art/roles/*.{png,jpg,webp} games/secret_hitler/art/*.{png,jpg,webp} games/quem_foi/art/*.{png,jpg,webp} games/coup/art/*.{png,jpg,webp}; do
   [ -f "$f" ] && printf '[remap]\n\nimporter="keep"\n' > "$f.import"
 done
 for f in $(find "$OUT" -type f ! -name '*.import'); do

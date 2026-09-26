@@ -20,6 +20,7 @@ const IMAGE_DIRS := {
 	"res://games/avalon/art/roles/": "/assets/avalon/", "res://games/avalon/art/": "/assets/avalon/",
 	"res://games/secret_hitler/art/roles/": "/assets/sh/", "res://games/secret_hitler/art/": "/assets/sh/",
 	"res://games/quem_foi/art/": "/assets/qf/",
+	"res://games/coup/art/": "/assets/coup/",
 }
 const FIRST_ID := 1_000_000
 const HTTP_TIMEOUT_MS := 5000

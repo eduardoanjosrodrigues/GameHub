@@ -1,6 +1,6 @@
 # gamehub — Plano do Coup
 
-> Status: v2 · 2026-09-26 · plano, nada implementado (v2: qualquer um desafia o bloqueio; avança quando quem foi bloqueado aceita)
+> Status: v3 · 2026-09-26 · implementado (ver §11); faltam os retratos do Nano Banana e testar com pessoas
 > Escopo: oitavo jogo do hub, **Coup** (base + variante oficial do Inquisidor). Pelo **Wi-Fi**, cada um no seu celular (app ou navegador), com **tabuleiro opcional**, como o Avalon.
 
 Legenda (a mesma dos outros planos): **[decidido]** veio das suas respostas; **[proposta]** é sugestão minha (lista em §10); **[verificar]** precisa ser confirmado.
@@ -54,7 +54,7 @@ O app faz o trabalho chato: guarda as cartas escondidas no celular, conta as moe
 | **Examinar** (Inquisidor) | o alvo mostra uma carta (ele escolhe qual) só pra você; você devolve ou obriga o alvo a trocar essa carta por outra do baralho | ninguém (dá pra desafiar) | sim |
 
 - Com **10 moedas ou mais**, o Golpe de Estado é obrigatório (oficial). O app só mostra essa ação.
-- As moedas do Assassinar são pagas na hora e **não voltam** se a ação for bloqueada. Voltam só se o assassino perder o desafio (oficial) [verificar].
+- As moedas do Assassinar são pagas na hora e **não voltam** se a ação for bloqueada. Voltam se o assassino perder o desafio (oficial, confirmado no manual).
 
 ### 3.3 Desafio
 
@@ -177,4 +177,18 @@ As regras recebem a hora do host em cada ação e respondem se a janela ainda es
 | # | Pergunta |
 |---|---|
 | **P1** | Revisar as **[proposta]**: o "Aceitar" dos outros no bloqueio só avisar (§3.4), barrinha de 5 s e nova janela para bloqueio depois do desafio (§3.4), espectador (§3.5), cuidados (§4.3), queda (§5), direção de arte e cores (§6) |
-| **P2** | [verificar] Moedas do Assassinar quando o assassino perde o desafio: pelo que conheço das regras, voltam para ele. Confirmar no manual quando der |
+| **P2** | ~~Moedas do Assassinar quando o assassino perde o desafio~~: confirmado no manual, voltam para ele |
+
+## 11. Status da implementação (2026-09-26)
+
+Feito: C1 a C3, e a arte provisória do C4. Faltam os retratos do Nano Banana e o C5, o playtest.
+
+- **Regras** (`CoupRules`): 13 testes em `tests/test_coup_rules.gd`. Cobrem todas as ações, os bloqueios de cada uma, desafio ganho e perdido (com troca da carta mostrada), desafio do bloqueio por qualquer um, o "Aceitar" dos outros que só avisa, Assassinar com duas perdas, moedas devolvidas no desafio, Golpe obrigatório com 10, 2 jogadores, Inquisidor (Trocar, Examinar e bloquear o Capitão), a janela de 5 s e reação atrasada recusada.
+- **Rede**:
+  - `CoupHost` e `CoupClient` usam o `PartyClockHost` e o `PartyClockClient` (`games/tema_base/`): o relógio justo do sino, tirado do Quem Foi? para servir aos dois.
+  - Desafio e bloqueio vão com a hora do toque, e vale o primeiro.
+  - A janela fecha pelo relógio do host. O tempo dela é `config.window_ms`: 5 s na partida, e o teste de rede usa 1,2 s.
+- **Teste de rede**: `tools/coup_net_test.sh`, com 3 robôs em redes diferentes, 1 tabuleiro e uma queda, uma partida com o Embaixador e outra com o Inquisidor. Os robôs blefam, desafiam, bloqueiam e aceitam ao acaso e conferem que ninguém recebe carta escondida alheia. O duelo de 2 também foi testado.
+- **Telas**: celular do jogador e tabuleiro. Tem ações com aviso de blefe, alvo, a janela com a barrinha, bloqueio, perder carta, troca, examinar, escolha da primeira carta com 2 jogadores, fim e o histórico curto.
+- **Navegador**: `web/coup.js` e `web/coup.css`, com o mesmo acerto de relógio. Testado no meio dos robôs: desafio (e desafio atrasado recusado), mostrar carta no exame, perder carta e Extorquir blefando.
+- **Arte**: emblemas, moeda, verso e ícone em SVG. Os prompts dos retratos estão em [coup_prompts.md](coup_prompts.md): os 6 personagens com 2 variações cada, a capa e a mesa. As imagens entram sozinhas quando forem salvas em `games/coup/art/`.
