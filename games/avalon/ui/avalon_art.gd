@@ -60,7 +60,7 @@ static func tex(path: String) -> Texture2D:
 ## Os arquivos vão pro APK como estão (importer "keep", ver tools/sync_web_assets.sh), porque o
 ## WebGateway serve os mesmos pro navegador; aqui eles viram textura na hora.
 static func art_file(base: String) -> Texture2D:
-	for ext in [".png", ".jpg", ".webp"]:
+	for ext in [".webp", ".jpg", ".png"]:
 		var path: String = ART + base + ext
 		if _tex.has(path):
 			if _tex[path]:

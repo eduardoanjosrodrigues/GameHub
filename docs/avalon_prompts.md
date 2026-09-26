@@ -7,7 +7,7 @@ Arte dos personagens e da capa do Avalon (docs/PLANO_AVALON.md §6). Tudo que é
 1. Gere **uma imagem por vez**, colando o **bloco de estilo** e depois o prompt da peça (os dois juntos, na mesma mensagem).
 2. Gere o **Merlin primeiro**. Quando ficar bom, anexe ele como **imagem de referência** em todas as outras ("match the style of the attached image exactly"). É isso que deixa o baralho com cara de baralho.
 3. Salve com o nome da tabela em `games/avalon/art/roles/` (retratos) ou `games/avalon/art/` (capa e mesa). PNG, JPG ou WEBP servem; se o gerador salvar JPEG com nome `.png`, o `tools/sync_web_assets.sh` arruma a extensão sozinho.
-4. Rode `tools/sync_web_assets.sh` (arruma a extensão e marca as imagens pra irem cruas no APK, servidas também pro navegador). O app usa a imagem se ela existir; se não, mostra o marcador simples. Se faltar uma variação (ex: `lacaio_3`), usa outra que exista.
+4. Rode `tools/sync_web_assets.sh`: ele arruma a extensão, converte pra WebP qualidade 80 (o que vai no APK e na página do navegador) e guarda o original em `art_originais/`. O app usa a imagem se ela existir; se não, mostra o marcador simples. Se faltar uma variação (ex: `lacaio_3`), usa outra que exista.
 
 Tamanhos: retratos em **2:3 vertical (1024 × 1536)**; capa e mesa em **16:9 (1920 × 1080)**.
 

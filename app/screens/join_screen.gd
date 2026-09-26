@@ -6,7 +6,9 @@ const ChapeuGame := preload("res://games/chapeu/screens/chapeu_game.gd")
 const HalliGame := preload("res://games/halli_galli/screens/halli_wifi_game.gd")
 const AvalonGame := preload("res://games/avalon/screens/avalon_game.gd")
 const ShGame := preload("res://games/secret_hitler/screens/sh_game.gd")
-const GAME_NAMES := {"chapeu": "Chapéu", "halli": "Halli Galli", "avalon": "Avalon", "secret_hitler": "Secret Hitler"}
+const GAME_NAMES := {"chapeu": "Chapéu", "halli": "Halli Galli", "avalon": "Avalon", "secret_hitler": "Secret Hitler", "sintonia": "Sintonia", "ito": "Ito"}
+## Jogos de tema (docs/PLANO_SINTONIA_ITO.md): mesma sessão, tela de cada um.
+const PARTY_GAMES := {"sintonia": "res://games/sintonia/screens/sintonia_game.gd", "ito": "res://games/ito/screens/ito_game.gd"}
 
 var _prefill_code := ""
 var _seat_token := ""
@@ -167,6 +169,10 @@ func _open(ip: String, game: String, n: String) -> void:
 			var sc := ShClient.new(ip, n, "player" if _seat_token != "" or not _as_board else "board")
 			sc.seat_token = _seat_token
 			App.replace(ShGame.new(sc))
+		"sintonia", "ito":
+			var pc := PartyClient.new(game, ip, n, "player" if _seat_token != "" or not _as_board else "board")
+			pc.seat_token = _seat_token
+			App.replace(load(PARTY_GAMES[game]).new(pc))
 		_:
 			var cc := ClientSession.new(ip, n, "player" if _seat_token != "" or not _as_board else "board")
 			cc.seat_token = _seat_token

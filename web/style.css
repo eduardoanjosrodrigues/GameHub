@@ -162,7 +162,7 @@ input.field:focus { border-color: var(--tinta); }
 .col.av-board { max-width: 1100px; font-size: 22px; position: relative; z-index: 0; }
 /* Fundo do tabuleiro: a mesa redonda bem clarinha, atrás de tudo. */
 .col.av-board::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .12;
-  background: url(assets/avalon/mesa.jpg) center / cover no-repeat; }
+  background: url(assets/avalon/mesa.webp) center / cover no-repeat; }
 .av-banner { width: 100%; aspect-ratio: 1376 / 614; object-fit: cover; object-position: 50% 100%; border-radius: 16px; }
 .av-pic { width: 160px; aspect-ratio: 2 / 3; object-fit: cover; margin: 0 auto; border: 4px solid #1E7F86; border-radius: 14px; }
 .av-board .av-pic { width: 240px; }
@@ -199,6 +199,41 @@ img.qr { width: min(100%, 320px); aspect-ratio: 1; margin: 0 auto; display: bloc
 .sh-board .sh-lbl { font-size: 26px; }
 .sh-board .sh-cell small { font-size: clamp(11px, 1.4vw, 18px); }
 .sh-board .sh-foot small { font-size: 19px; }
-.col.sh-board::before { background-image: url(assets/sh/mesa.jpg); opacity: .07; }
+.col.sh-board::before { background-image: url(assets/sh/mesa.webp); opacity: .07; }
 .sh-hand .av-choice { flex: 1; max-width: 170px; }
 .sh-hand .av-choice img { width: 100%; }
+
+/* Ito: cartas numeradas e a fila com o fio vermelho. */
+.ito-status { justify-content: center; gap: 14px; }
+.ito-status b { font-family: "Fraunces", serif; font-size: 26px; }
+.ito-status small { color: var(--suave); font-weight: 700; }
+.ito-heart { display: inline-block; width: 26px; height: 24px; margin: 0 3px; vertical-align: middle; background: var(--texto-desab);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21 C4 14 1 10 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 10 20 14 12 21Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21 C4 14 1 10 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 10 20 14 12 21Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.ito-heart.on { background: var(--vermelho); }
+.ito-card { width: 110px; height: 142px; border: 4px solid var(--vermelho); border-radius: 18px; background: var(--superficie); display: flex;
+  align-items: center; justify-content: center; font-family: "Fraunces", serif; font-weight: 800; font-size: 50px; box-shadow: var(--sombra); margin: 0 auto; }
+.ito-card.back { background: #2B2A33; color: var(--superficie); }
+.ito-card.mini { width: 54px; height: 68px; font-size: 26px; border-radius: 12px; border-width: 3px; margin: 0; flex: none; }
+.ito-hands { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.ito-hand { display: flex; flex-direction: column; gap: 8px; width: 150px; }
+.ito-thread { position: relative; display: flex; flex-direction: column; gap: 8px; padding-left: 40px; }
+.ito-thread::before { content: ""; position: absolute; left: 16px; top: 10px; bottom: 10px; width: 4px; border-radius: 2px; background: var(--vermelho); }
+.ito-end { color: var(--suave); font-weight: 700; font-size: 15px; position: relative; }
+.ito-item { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; min-height: 58px; cursor: pointer; }
+.ito-item b { display: block; font-size: 18px; }
+.ito-item small { display: block; font-size: 16px; }
+.ito-end::before, .ito-item::before { content: ""; position: absolute; left: -31px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--vermelho); }
+.ito-item.sel { outline: 3px solid var(--tinta); }
+.ito-slot { width: 54px; height: 68px; flex: none; border-radius: 12px; background: #2B2A33; }
+.ito-slot:has(.ito-card) { background: none; }
+.av-board .ito-card.mini { width: 70px; height: 90px; font-size: 34px; }
+.av-board .ito-item b { font-size: 24px; }
+
+/* Sintonia: o disco e os temas. */
+.sint-dial { width: 100%; height: auto; display: block; }
+.sint-dial.live { touch-action: none; cursor: grab; }
+.sint-ends b { font-family: "Fraunces", serif; font-size: 19px; }
+.sint-opt { flex-direction: row; justify-content: space-between; cursor: pointer; border: 2.5px solid var(--tinta); }
+.sint-opt b { font-family: "Fraunces", serif; font-size: 19px; }
+.av-board .sint-ends b { font-size: 30px; }

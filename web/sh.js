@@ -107,8 +107,8 @@
       el.append(h("img", { src: "assets/secret_hitler.svg", alt: "" }), h("span", "Toque pra ver seu papel"));
       return el;
     }
-    const tries = [`${file}.jpg`, `${file}.png`, `${file}.webp`];
-    if (file !== r) tries.push(`${r}_1.jpg`, `${r}_1.png`);
+    const tries = [`${file}.webp`, `${file}.jpg`, `${file}.png`];
+    if (file !== r) tries.push(`${r}_1.webp`, `${r}_1.jpg`);
     const pic = h("img.portrait", { src: `assets/sh/${tries.shift()}`, alt: "" });
     const emb = h("span.emblem", { style: { "--m": `url(assets/sh_emblema_${r}.svg)`, background: lib ? LIB : FAS } });
     emb.style.display = "none";
@@ -193,7 +193,7 @@
   function lobby() {
     const n = v.players.length;
     const f = v.fascist_count;
-    const capa = h("img.av-banner", { src: "assets/sh/capa.jpg", alt: "" });
+    const capa = h("img.av-banner", { src: "assets/sh/capa.webp", alt: "" });
     capa.onerror = () => capa.remove();
     return [header("Sala do Secret Hitler"), capa,
       card(null, h("p.sub", `Ordem da mesa (${n})`),

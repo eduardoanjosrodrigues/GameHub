@@ -361,7 +361,7 @@ const GH = (() => {
     st, games, h, icon, button, card, player, mount, toast, overlay, closeOverlay,
     sound, preload, vibrate, keepAwake, send, act, boot, logo, leave, confirmLeave,
     meta: { chapeu: { nome: "Chapéu", icone: "chapeu" }, halli: { nome: "Halli Galli", icone: "halli_galli" }, avalon: { nome: "Avalon", icone: "avalon" },
-      secret_hitler: { nome: "Secret Hitler", icone: "secret_hitler" } },
-    boardGames: ["avalon", "secret_hitler"],
+      secret_hitler: { nome: "Secret Hitler", icone: "secret_hitler" }, sintonia: { nome: "Sintonia", icone: "sintonia" }, ito: { nome: "Ito", icone: "ito" } },
+    boardGames: ["avalon", "secret_hitler", "sintonia", "ito"],
   };
 })();

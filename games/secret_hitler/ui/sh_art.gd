@@ -60,7 +60,7 @@ static func tex(path: String) -> Texture2D:
 
 ## Arte gerada fora (Nano Banana), em qualquer formato comum, lida crua (importer "keep").
 static func art_file(base: String) -> Texture2D:
-	for ext in [".png", ".jpg", ".webp"]:
+	for ext in [".webp", ".jpg", ".png"]:
 		var path: String = ART + base + ext
 		if _tex.has(path):
 			if _tex[path]:

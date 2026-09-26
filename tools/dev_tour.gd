@@ -75,6 +75,10 @@ func _run() -> void:
 		await _avalon()
 	if set_name in ["all", "sh"]:
 		await _sh()
+	if set_name in ["all", "ito"]:
+		await _ito()
+	if set_name in ["all", "sintonia"]:
+		await _sintonia()
 	if set_name == "avalon_cards":
 		await _avalon_cards()
 	if set_name == "sh_cards":
@@ -615,3 +619,184 @@ func _sh_cards() -> void:
 		grid.add_child(c)
 	App.push(sc)
 	await _shot("sh_cards")
+
+
+const ITO_THEMES := "res://games/ito/data/temas.txt"
+const SINT_THEMES := "res://games/sintonia/data/temas.txt"
+
+
+## Ito: cada fase no celular do host, no tabuleiro e no celular só.
+func _ito() -> void:
+	App.push(load("res://app/screens/home_screen.gd").new())
+	await _shot("ito_home")
+	App.push(load("res://games/ito/screens/ito_menu.gd").new())
+	await _shot("ito_menu")
+	App.push(load("res://games/ito/screens/ito_how_to.gd").new())
+	await _shot("ito_how_to")
+	App.home()
+	for role in ["player", "board"]:
+		var h := PartyHost.new("ito", "Ito", ItoRules.new(ThemeBank.load_file(ITO_THEMES), 7), role, "Ana")
+		if h.open_room() != "":
+			return
+		var game: Screen = load("res://games/ito/screens/ito_game.gd").new(h)
+		App.push(game)
+		var r: ItoRules = h.rules
+		for n in ["Bruno", "Carla", "Davi"]:
+			r.apply({"id": "", "host": true}, {"type": "add_player", "id": "d_" + n, "name": n})
+		h._broadcast([])
+		await _shot("ito_%s_lobby" % role)
+		h.send({"type": "start"})
+		await _shot("ito_%s_theme" % role)
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "pick_theme", "index": 0})
+		var ids: Array = r.cards.keys()
+		ids.sort_custom(func(a, b): return r.cards[a].n < r.cards[b].n)
+		# Metade na fila, com uma troca, e palavras-chave.
+		for i in 2:
+			var c: Dictionary = r.cards[ids[i]]
+			r.apply({"id": c.owner, "host": false}, {"type": "word", "card": c.id, "text": ["um gatinho", "uma vaca", "um leão", "um tubarão"][i]})
+			r.apply({"id": c.owner, "host": false}, {"type": "place", "card": c.id, "to": 0})
+		h._broadcast([])
+		if role == "player":
+			var mine: Array = r.cards.keys().filter(func(id): return r.cards[id].owner == h.local_id and id not in r.row)
+			if not mine.is_empty():
+				game._sel = mine[0]
+				game._sel_new = true
+				game._rebuild()
+		await _shot("ito_%s_play" % role)
+		for i in ids.size():
+			var c: Dictionary = r.cards[ids[i]]
+			if c.id not in r.row:
+				r.apply({"id": c.owner, "host": false}, {"type": "place", "card": c.id, "to": r.row.size()})
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "move", "card": r.row[0], "to": 2})
+		game._sel = ""
+		h._broadcast([])
+		await _shot("ito_%s_all_placed" % role)
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "reveal"})
+		h._broadcast([{"type": "phase", "phase": "reveal"}])
+		await get_tree().create_timer(3.4).timeout
+		await _shot("ito_%s_reveal" % role)
+		r.lives = 1
+		r.best = 3
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "continue"})
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "pick_theme", "index": 1})
+		for id in r.cards:
+			r.apply({"id": r.cards[id].owner, "host": false}, {"type": "place", "card": id, "to": 0})
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "reveal"})
+		r.apply({"id": "d_Bruno", "host": false}, {"type": "continue"})
+		h._broadcast([])
+		await _shot("ito_%s_game_over" % role)
+		h.leave()
+		App.home()
+		await get_tree().create_timer(0.4).timeout
+	# Celular só.
+	var s := PartyLocal.new("ito", ItoRules.new(ThemeBank.load_file(ITO_THEMES), 3))
+	var lg: Screen = load("res://games/ito/screens/ito_game.gd").new(s)
+	App.push(lg)
+	for n in ["Ana", "Bruno", "Carla"]:
+		s.send({"type": "add_player", "name": n})
+	await _shot("ito_local_lobby")
+	s.send({"type": "start"})
+	await _shot("ito_local_gate")
+	lg._pass_open = true
+	lg._rebuild()
+	await _shot("ito_local_hand")
+	lg._pass_open = false
+	lg._pass_round = 1
+	lg._rebuild()
+	await _shot("ito_local_theme")
+	s.send({"type": "pick_theme", "index": 0})
+	var lr: ItoRules = s.rules
+	var first: String = lr.cards.keys()[0]
+	s.send({"type": "place", "card": first, "to": 0})
+	await _shot("ito_local_play")
+	lg.on_back()
+	await get_tree().create_timer(0.3).timeout
+	App.home()
+	await get_tree().create_timer(0.4).timeout
+
+
+## Sintonia: cada fase no celular do host, no tabuleiro e no celular só.
+func _sintonia() -> void:
+	App.push(load("res://games/sintonia/screens/sintonia_menu.gd").new())
+	await _shot("sint_menu")
+	App.push(load("res://games/sintonia/screens/sintonia_how_to.gd").new())
+	await _shot("sint_how_to")
+	App.home()
+	for role in ["player", "board"]:
+		var h := PartyHost.new("sintonia", "Sintonia", SintoniaRules.new(ThemeBank.load_file(SINT_THEMES), 5), role, "Ana")
+		if h.open_room() != "":
+			return
+		var game: Screen = load("res://games/sintonia/screens/sintonia_game.gd").new(h)
+		App.push(game)
+		var r: SintoniaRules = h.rules
+		for n in ["Bruno", "Carla", "Davi", "Elisa"]:
+			r.apply({"id": "", "host": true}, {"type": "add_player", "id": "d_" + n, "name": n})
+		h._broadcast([])
+		await _shot("sint_%s_lobby" % role)
+		h.send({"type": "start"})
+		var me: String = h.local_id if role == "player" else "d_Bruno"
+		var my_team: String = r.player(me).team
+		var mate: String = r.team_members(my_team).filter(func(p): return p.id != me)[0].id
+		r.turn_team = my_team
+		r.psychic = me
+		r.target = 68.0
+		h._broadcast([])
+		await _shot("sint_%s_pick" % role)
+		r.apply({"id": me, "host": false}, {"type": "pick_theme", "index": 0})
+		r.apply({"id": mate, "host": false}, {"type": "dial", "pos": 41})
+		h._broadcast([])
+		await _shot("sint_%s_dial_psychic" % role)
+		r.psychic = mate
+		r.apply({"id": me, "host": false}, {"type": "dial", "pos": 61.5})
+		h._broadcast([])
+		await _shot("sint_%s_dial_team" % role)
+		r.apply({"id": me, "host": false}, {"type": "lock"})
+		var rival: String = SintoniaRules.other(my_team)
+		r.apply({"id": r.team_members(rival)[0].id, "host": false}, {"type": "side", "side": "right"})
+		r.turn_team = rival
+		h._broadcast([])
+		await _shot("sint_%s_guess_bettor" % role)
+		r.turn_team = my_team
+		r.apply({"id": r.team_members(rival)[0].id, "host": false}, {"type": "lock_side"})
+		h._broadcast([])
+		await _shot("sint_%s_reveal" % role)
+		r.scores = {"azul": 10, "vermelho": 7}
+		r.winner = "azul"
+		r.apply({"id": me, "host": false}, {"type": "continue"})
+		h._broadcast([])
+		await _shot("sint_%s_game_over" % role)
+		h.leave()
+		App.home()
+		await get_tree().create_timer(0.4).timeout
+	var s := PartyLocal.new("sintonia", SintoniaRules.new(ThemeBank.load_file(SINT_THEMES), 9))
+	var lg: Screen = load("res://games/sintonia/screens/sintonia_game.gd").new(s)
+	App.push(lg)
+	s.send({"type": "set_config", "mode": "coop"})
+	for n in ["Ana", "Bruno", "Carla"]:
+		s.send({"type": "add_player", "name": n})
+	await _shot("sint_local_lobby")
+	s.send({"type": "start"})
+	await _shot("sint_local_gate")
+	lg._psy_open = true
+	lg._rebuild()
+	await _shot("sint_local_pick")
+	s.send({"type": "pick_theme", "index": 0, "as": s.rules.psychic})
+	await _shot("sint_local_hide")
+	lg._psy_done = 0
+	lg._rebuild()
+	await _shot("sint_local_table")
+	s.send({"type": "dial", "pos": 30})
+	s.send({"type": "lock"})
+	await _shot("sint_local_reveal")
+	var lr: SintoniaRules = s.rules
+	lr.coop_score = 17
+	lr.cards_left = 1
+	s.send({"type": "continue"})
+	s.send({"type": "pick_theme", "index": 0, "as": lr.psychic})
+	s.send({"type": "lock"})
+	s.send({"type": "continue"})
+	await _shot("sint_local_game_over")
+	lg.on_back()
+	await get_tree().create_timer(0.3).timeout
+	App.home()
+	await get_tree().create_timer(0.4).timeout

@@ -126,8 +126,8 @@
       return el;
     }
     // Tenta a arte em cada formato; se nenhuma existir, mostra o emblema.
-    const tries = [`${file}.png`, `${file}.jpg`, `${file}.webp`];
-    if (file !== r) tries.push(`${r}_1.jpg`, `${r}_1.png`);
+    const tries = [`${file}.webp`, `${file}.jpg`, `${file}.png`];
+    if (file !== r) tries.push(`${r}_1.webp`, `${r}_1.jpg`);
     const img = h("img.portrait", { src: `assets/avalon/${tries.shift()}`, alt: "" });
     const emb = h("span.emblem", { style: { "--m": `url(assets/emblema_${r}.svg)` } });
     emb.style.display = "none";
@@ -164,7 +164,7 @@
   function lobby() {
     const cfg = v.config;
     const n = v.players.length;
-    return [header("Sala do Avalon"), art("capa.jpg", "av-banner"),
+    return [header("Sala do Avalon"), art("capa.webp", "av-banner"),
       card(null, h("p.sub", `Ordem da mesa (${n})`),
         h("p.caption", { style: { textAlign: "left" } }, "A liderança passa de cima pra baixo. Quem criou a sala arruma a ordem."),
         v.players.map((p, i) => player(`${i + 1}. ${p.name}`, color(p.color), p.connected, !p.connected ? "desconectado" : (p.id === v.you ? "você" : "")))),
@@ -291,7 +291,7 @@
     const target = v.lady_target || "";
     const mine = !board() && holder === v.you;
     const teal = "#1E7F86";
-    const out = [header("Dama do Lago"), track(), art("dama_do_lago.jpg", "av-pic")];
+    const out = [header("Dama do Lago"), track(), art("dama_do_lago.webp", "av-pic")];
     if (!target) {
       if (mine) {
         out.push(big("A Dama do Lago está com você", teal, "Escolha alguém pra ver, só no seu celular, se é do bem ou do mal."));

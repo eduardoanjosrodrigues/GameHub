@@ -50,6 +50,8 @@ func _entry_card(e: Dictionary) -> Control:
 		return _avalon_card(e)
 	if e.get("game", "") == "secret_hitler":
 		return _sh_card(e)
+	if e.has("summary"):
+		return _summary_card(e)
 	var winner: String = e.get("winner", "")
 	var c := UI.card(Tokens.SUPERFICIE, 20)
 	var v := UI.vbox(8)
@@ -76,6 +78,25 @@ func _entry_card(e: Dictionary) -> Control:
 	v.add_child(UI.label(result_text, 17, Tokens.TINTA_SUAVE, Fonts.body_bold()))
 	var open := UI.small_button("Ver detalhes", AppButton.Variant.SECONDARY, func(): App.push(HistoryDetail.new(e)))
 	v.add_child(open)
+	return c
+
+
+## Sintonia e Ito: o resumo da partida e quem jogou.
+func _summary_card(e: Dictionary) -> Control:
+	var c := UI.card(Tokens.SUPERFICIE, 20)
+	var v := UI.vbox(8)
+	c.add_child(v)
+	var head := UI.hbox(10)
+	var t := UI.label("%s · %s" % [e.get("game_name", ""), _mode_name(e)], 20, Tokens.TINTA, Fonts.title())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	var date := UI.label(_format_date(e.get("date", "")), 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
+	date.autowrap_mode = TextServer.AUTOWRAP_OFF
+	head.add_child(date)
+	v.add_child(head)
+	v.add_child(UI.label(e.get("summary", ""), 18, Tokens.TINTA, Fonts.body_bold()))
+	var names: Array = e.get("players", []).map(func(p): return p.get("name", ""))
+	v.add_child(UI.label(", ".join(names), 15, Tokens.TINTA_SUAVE))
 	return c
 
 

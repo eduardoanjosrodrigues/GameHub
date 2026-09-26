@@ -1,0 +1,325 @@
+# Temas da Sintonia: dois extremos separados por |, um por linha (docs/PLANO_SINTONIA_ITO.md §7).
+# Pode editar à vontade. Linhas com # são ignoradas.
+Frio|Quente
+Barato|Caro
+Fácil|Difícil
+Feio|Bonito
+Pequeno|Grande
+Lento|Rápido
+Leve|Pesado
+Mole|Duro
+Silencioso|Barulhento
+Chato|Divertido
+Inútil|Útil
+Saudável|Porcaria
+Seguro|Perigoso
+Triste|Alegre
+Antigo|Moderno
+Comum|Raro
+Fedido|Cheiroso
+Amador|Profissional
+Nojento|Delicioso
+Calmo|Estressante
+Brega|Chique
+Infantil|Adulto
+Real|Imaginário
+Vilão|Herói
+Superestimado|Subestimado
+Sem graça|Hilário
+Esquecível|Inesquecível
+Fraco|Forte
+Mal pago|Bem pago
+Suave|Ardido
+Normal|Esquisito
+Comida de vó|Comida de restaurante
+Jogador perna de pau|Craque
+Programa de domingo ruim|Programa de domingo bom
+Música de elevador|Música de estádio
+Filme pra dormir|Filme pra ficar acordado
+Presente ruim|Presente incrível
+Coisa de pobre|Coisa de rico
+Coisa de criança|Coisa de idoso
+Emprego chato|Emprego dos sonhos
+Lugar feio pra casar|Lugar lindo pra casar
+Invenção inútil|Invenção que mudou o mundo
+Coisa que se faz sozinho|Coisa que se faz em grupo
+Bom pra primeiro encontro|Péssimo pra primeiro encontro
+Frase de tio no churrasco|Frase de poeta
+Nome de cachorro|Nome de gente
+Coisa de cidade grande|Coisa de interior
+Feito à mão|Feito em fábrica
+Sobremesa leve|Sobremesa pesada
+Ruim de dançar|Bom de dançar
+Fácil de desenhar|Difícil de desenhar
+Fácil de pronunciar|Difícil de pronunciar
+Fácil de soletrar|Difícil de soletrar
+Natural|Artificial
+Pra ver no cinema|Pra ver no celular
+Bom de levar pra praia|Ruim de levar pra praia
+Série pra maratonar|Série pra largar
+Esporte tranquilo|Esporte radical
+Clima de verão|Clima de inverno
+Hora de acordar|Hora de dormir
+Café da manhã|Janta
+Comida de festa junina|Comida de Natal
+Coisa de novela|Coisa de documentário
+Cantor de chuveiro|Cantor profissional
+Não vale nada|Vale uma fortuna
+Faz bem pra saúde|Faz mal pra saúde
+Deixa a casa bagunçada|Deixa a casa arrumada
+Nerd|Descolado
+Tímido|Extrovertido
+Sério|Palhaço
+Mentiroso|Sincero
+Egoísta|Generoso
+Preguiçoso|Esforçado
+Desorganizado|Organizado
+Pessimista|Otimista
+Medroso|Corajoso
+Discreto|Exibido
+Humilde|Metido
+Esquecido|Memória de elefante
+Ruim de cozinha|Chef de cozinha
+Pé-frio|Pé-quente
+Azarado|Sortudo
+Matemática|Artes
+Ciência|Magia
+Crime leve|Crime grave
+Pecado pequeno|Pecado mortal
+Mania inofensiva|Mania irritante
+Hábito ruim|Hábito bom
+Palavrão leve|Palavrão pesado
+Elogio fraco|Elogio forte
+Xingamento fofo|Xingamento pesado
+Desculpa esfarrapada|Desculpa convincente
+Mentira branca|Mentira cabeluda
+Tédio|Adrenalina
+Relaxante|Cansativo
+Superstição boba|Superstição séria
+Assunto pra festa|Assunto pra velório
+Coisa que dá pra consertar|Coisa que não tem conserto
+Personagem bom|Personagem mau
+Animal fofo|Animal assustador
+Animal de estimação|Animal selvagem
+Animal que eu comeria|Animal que eu jamais comeria
+Bicho inteligente|Bicho burro
+Planta que qualquer um cuida|Planta difícil de cuidar
+Fruta de feira|Fruta exótica
+Ingrediente de pizza bom|Ingrediente de pizza estranho
+Sabor de sorvete comum|Sabor de sorvete estranho
+Bebida de criança|Bebida de adulto
+Comida de boteco|Comida de restaurante fino
+Tempero fraco|Tempero forte
+Salgado|Doce
+Cru|Bem passado
+Cozinhar fácil|Cozinhar difícil
+Comida de dieta|Comida de domingo
+Sujeira pequena|Sujeira enorme
+Dor leve|Dor insuportável
+Doença boba|Doença grave
+Remédio de vó|Remédio de farmácia
+Susto pequeno|Susto de morrer
+Filme de comédia|Filme de terror
+Final feliz|Final triste
+Clichê|Original
+Nicho|Popular
+Conhecido só na família|Conhecido no mundo todo
+Famoso por pouco tempo|Famoso pra sempre
+Moda passageira|Clássico eterno
+Tecnologia velha|Tecnologia de ponta
+Aparelho que ninguém usa mais|Aparelho que todo mundo usa
+Aplicativo inútil|Aplicativo essencial
+Rede social chata|Rede social viciante
+Lugar tranquilo|Lugar agitado
+Lugar sujo|Lugar limpo
+Lugar vazio|Lugar lotado
+Perto de casa|Longe de casa
+Viagem barata|Viagem cara
+Destino de férias ruim|Destino de férias perfeito
+Transporte lento|Transporte rápido
+Jeito ruim de chegar numa festa|Jeito incrível de chegar numa festa
+Profissão tranquila|Profissão estressante
+Profissão que todo mundo quer|Profissão que ninguém quer
+Trabalho braçal|Trabalho intelectual
+Tarefa doméstica boa|Tarefa doméstica horrível
+Hobby de gente calma|Hobby de gente agitada
+Jogo de sorte|Jogo de habilidade
+Brincadeira de criança|Brincadeira de adulto
+Presente de amigo secreto barato|Presente de amigo secreto caro
+Roupa de ficar em casa|Roupa de casamento
+Roupa de frio|Roupa de calor
+Sapato confortável|Sapato torturante
+Cabelo discreto|Cabelo chamativo
+Tatuagem discreta|Tatuagem que se arrepende
+Cor calma|Cor gritante
+Cheiro bom|Cheiro ruim
+Som agradável|Som irritante
+Barulho de noite normal|Barulho de noite assustador
+Mais ou menos|Perfeito
+Horrível|Maravilhoso
+Nunca|Sempre
+Ninguém|Todo mundo
+Pouco|Muito
+Devagar|Com pressa
+Improvisado|Planejado
+Opcional|Obrigatório
+Vale a pena|Não vale a pena
+Precisa|Dispensável
+Proibido|Permitido
+Pouco provável|Muito provável
+Impossível|Possível
+Fácil de esconder|Impossível de esconder
+Fácil de perder|Difícil de perder
+Dura pouco|Dura muito
+Novo em folha|Caindo aos pedaços
+Seco|Molhado
+Escuro|Claro
+Sombrio|Colorido
+Liso|Áspero
+Macio|Espinhoso
+Frágil|Indestrutível
+Curto|Comprido
+Baixo|Alto
+Magro|Gordo
+Jovem|Velho
+Bebê|Idoso
+Pouca gente sabe|Todo mundo sabe
+Segredo pequeno|Segredo de Estado
+Fofoca leve|Fofoca pesada
+Notícia boa|Notícia ruim
+Dia normal|Dia histórico
+Acontece todo dia|Acontece uma vez na vida
+Mais barato que um pão|Mais caro que um carro
+Coisa que cabe no bolso|Coisa que não cabe numa casa
+Leve pra carregar|Precisa de caminhão
+Vale a pena esperar na fila|Não espero nem 1 minuto
+Coisa que acalma|Coisa que irrita
+Coisa que dá sono|Coisa que dá energia
+Coisa que dá fome|Coisa que tira a fome
+Coisa que dá medo|Coisa que dá coragem
+Coisa que dá vergonha|Coisa que dá orgulho
+Coisa que dá saudade|Coisa que dá alívio
+Coisa de segunda-feira|Coisa de sexta-feira
+Coisa de manhã|Coisa de madrugada
+Coisa de verão|Coisa de inverno
+Coisa de brasileiro|Coisa de gringo
+Coisa de carioca|Coisa de paulista
+Coisa de nordestino|Coisa de gaúcho
+Coisa de mãe|Coisa de pai
+Coisa de avó|Coisa de adolescente
+Coisa de homem|Coisa de mulher
+Coisa de rico que parece de pobre|Coisa de pobre que parece de rico
+Programa de índio|Programa imperdível
+Rolê furado|Rolê épico
+Festa morta|Festa lendária
+Música pra chorar|Música pra pular
+Música de velório|Música de casamento
+Música brega|Música cult
+Música que todo mundo sabe|Música que ninguém conhece
+Cantor desafinado|Voz de anjo
+Ator canastrão|Ator de Oscar
+Filme de sessão da tarde|Filme de festival
+Série infantil|Série só pra adultos
+Novela bobinha|Novela intensa
+Desenho animado bobo|Desenho animado genial
+Vilão de mentirinha|Vilão assustador
+Super-herói fraco|Super-herói invencível
+Poder inútil|Superpoder incrível
+Monstro fofo|Monstro aterrorizante
+Fantasia ruim de carnaval|Fantasia incrível de carnaval
+Time pequeno|Time gigante
+Esporte chato de assistir|Esporte emocionante de assistir
+Esporte sem contato|Esporte de pancada
+Jogo de tabuleiro rápido|Jogo de tabuleiro que dura horas
+Videogame fácil|Videogame impossível
+Clima de paz|Clima de guerra
+Discussão boba|Briga séria
+Motivo bobo pra terminar|Motivo sério pra terminar
+Casal que não combina|Casal perfeito
+Amizade de ocasião|Amigo pra vida toda
+Parente distante|Parente grudado
+Vizinho ótimo|Vizinho infernal
+Chefe legal|Chefe tirano
+Professor bonzinho|Professor carrasco
+Aluno bagunceiro|Aluno exemplar
+Ideia ruim|Ideia genial
+Plano infalível|Plano que vai dar errado
+Conselho ruim|Conselho sábio
+Pergunta boba|Pergunta difícil
+Resposta errada|Resposta certa
+Chute|Certeza
+Teoria da conspiração boba|Teoria da conspiração convincente
+Mistério fácil|Mistério sem solução
+Charada fácil|Charada impossível
+Palavra fácil|Palavra difícil
+Idioma fácil|Idioma difícil
+País pequeno|País enorme
+País frio|País quente
+Cidade pacata|Cidade caótica
+Casa simples|Mansão
+Móvel barato|Móvel de luxo
+Carro popular|Carro de luxo
+Carro econômico|Carro beberrão
+Celular velho|Celular top de linha
+Senha fraca|Senha forte
+Hacker amador|Hacker profissional
+Robô burro|Robô inteligente
+Futuro bom|Futuro distópico
+Passado recente|Passado distante
+Pré-história|Futuro distante
+Arte simples|Obra-prima
+Rabisco|Pintura famosa
+Livro fino|Livro grosso
+Leitura leve|Leitura pesada
+Poema curto|Poema épico
+Piada de tiozão|Piada inteligente
+Humor leve|Humor pesado
+Situação constrangedora leve|Situação de sumir do mapa
+Gafe pequena|Gafe histórica
+Erro pequeno|Erro gravíssimo
+Castigo leve|Castigo pesado
+Multa barata|Multa cara
+Prêmio de consolação|Prêmio máximo
+Sorte pequena|Sorte grande
+Viagem de bate-volta|Viagem de volta ao mundo
+Aventura pequena|Aventura épica
+Missão fácil|Missão impossível
+Herói de verdade|Herói de mentira
+Líder fraco|Líder forte
+Político honesto|Político corrupto
+Lei que faz sentido|Lei absurda
+Regra de casa boba|Regra de casa séria
+Condomínio tranquilo|Condomínio barraqueiro
+Praia vazia|Praia lotada
+Parque de diversões calmo|Parque de diversões radical
+Brinquedo de parque pra criança|Brinquedo de parque pra corajoso
+Evento chato|Evento imperdível
+Trânsito livre|Trânsito parado
+Fila curta|Fila quilométrica
+Espera rápida|Espera eterna
+Médico que acalma|Médico que assusta
+Dentista gentil|Dentista traumatizante
+Hospital|Spa
+Academia|Sofá
+Preguiça|Disposição
+Saudade|Alívio
+Paciência|Pressa
+Ciúme bobo|Ciúme doentio
+Amor platônico|Amor de novela
+Beijo técnico|Beijo de cinema
+Declaração brega|Declaração romântica
+Encontro desastroso|Encontro perfeito
+Homem das cavernas|Cientista
+Robô|Pessoa
+Máquina|Bicho
+Planeta|Grão de areia
+Formiga|Elefante
+Rato|Leão
+Tartaruga|Guepardo
+Peixe dourado|Tubarão
+Sussurro|Grito
+Gota|Oceano
+Faísca|Incêndio
+Garoa|Tempestade
+Brisa|Furacão
+Gelo|Vulcão

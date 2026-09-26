@@ -1,6 +1,6 @@
 # gamehub — Plano da Sintonia e do Ito
 
-> Status: v1 · 2026-09-26 · plano, nada implementado
+> Status: v2 · 2026-09-26 · implementado (ver §13); falta testar com pessoas
 > Escopo: quinto e sexto jogos do hub, **Sintonia** (tipo Wavelength) e **Ito**. São dois jogos separados que usam a mesma base. Funcionam pelo **Wi-Fi** (app ou navegador, com **tabuleiro opcional**) e também com **um celular só**.
 
 Legenda (a mesma dos outros planos): **[decidido]** veio das suas respostas; **[proposta]** é sugestão minha (lista em §10); **[verificar]** precisa ser confirmado.
@@ -261,3 +261,21 @@ Ordem [proposta]: **Ito primeiro**, que tem menos movimento ao vivo, e a Sintoni
 |---|---|
 | **P1** | Revisar as **[proposta]**: tamanho do alvo e passo da agulha (§3.1), número de jogadores (§3.2, §3.3), textos da nota (§3.3), qualquer um arrasta qualquer carta (§4.1), recorde do Desafio e cartas da Rodada solta (§4.2, §4.3), detalhes do celular só e sem extremo nele (§5), cuidados (§6.4), temas sem repetir (§7), 15 por segundo e queda (§8), arte só em SVG (§9), Ito primeiro (§10) |
 | **P2** | Nome do Ito no hub: **"Ito"** (o app é interno) [proposta]. Se um dia for para a Play Store, troca para "Fio" |
+
+## 13. Status da implementação (2026-09-26)
+
+Feito: T1 a T6. Falta o T7, o playtest.
+
+- **Base comum** (`games/tema_base/`):
+  - sessões genéricas `PartyHost`, `PartyClient` e `PartyLocal` (celular só);
+  - tela base `PartyGameScreen`, com sala, QR, troca de aparelho, janelas por cima e "passe o celular";
+  - `PartyMenu`, `PartyCreateRoom`, `PartyHowTo`, `ThemeBank` e `TapPanel`.
+- **Regras** (`ItoRules`, `SintoniaRules`): 18 testes em `tests/`. Todas as regras de §3 e §4 estão lá, inclusive recuperação, morte súbita, cooperativo com rodada extra, modo extremo e celular só sem extremo.
+- **Telas**:
+  - celular do jogador, tabuleiro e celular só nos dois jogos;
+  - na fila do Ito, toca-se na carta e depois em "Colocar aqui" (mais seguro que arrastar numa tela que rola);
+  - a agulha da Sintonia é ao vivo e não remonta a tela.
+- **Navegador**: `web/ito.js` e `web/sintonia.js`. A agulha é arrastável (pointer events) e as outras telas só movem a agulha.
+- **Rede**: `tools/party_bot.gd` e `tools/party_net_test.sh ito|sintonia`, com 5 jogadores, 1 tabuleiro e uma queda. Os robôs conferem que ninguém recebe número alheio nem o alvo antes da hora.
+- **Temas**: 323 pares da Sintonia e 216 frases do Ito, em `games/*/data/temas.txt`.
+- **Arte**: tudo em SVG, com o ícone de cada jogo, o disco, as cartas com o fio vermelho e os corações.

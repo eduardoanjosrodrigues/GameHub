@@ -1,0 +1,218 @@
+# Temas do Ito: uma frase por linha. Cada um fala um exemplo do tema que represente o seu número
+# (1 = o mínimo, 100 = o máximo). Pode editar à vontade. Linhas com # são ignoradas.
+O quão assustador é um animal
+O quão fofo é um animal
+O quão grande é um animal
+O quão perigoso é um animal
+O quão inteligente é um animal
+O quão bom é um animal de estimação
+O quão gostosa é uma comida
+O quão chique é uma comida
+O quão calórica é uma comida
+O quão estranha é uma comida
+O quão cara é uma comida
+O quão ardida é uma comida
+O quão difícil é de cozinhar uma receita
+O quão boa é uma sobremesa
+O quão bom é um sabor de sorvete
+O quão bom é um recheio de pizza
+O quão boa é uma bebida
+O quão forte é uma bebida
+O quão bom é um lanche de madrugada
+O quão boa é uma comida de festa
+O quão boa é uma fruta
+O quão útil é numa ilha deserta
+O quão útil é no dia a dia
+O quão útil é numa viagem
+O quão útil é num apocalipse zumbi
+O quão útil é pra se defender
+O quão útil é numa cozinha
+O quão importante é levar na mala
+O quão útil é numa festa
+O quão bom é um presente de aniversário
+O quão bom é um presente de amigo secreto
+O quão caro é um objeto
+O quão pesado é um objeto
+O quão grande é um objeto
+O quão frágil é um objeto
+O quão velho é um objeto
+O quão inútil é uma invenção
+O quão importante é uma invenção
+O quão famosa é uma pessoa
+O quão famoso é um brasileiro
+O quão famoso é um personagem
+O quão forte é um personagem
+O quão malvado é um vilão
+O quão legal é um super-herói
+O quão útil é um superpoder
+O quão assustador é um filme
+O quão bom é um filme
+O quão triste é um filme
+O quão engraçado é um filme
+O quão boa é uma série
+O quão boa é uma novela
+O quão bom é um desenho animado
+O quão boa é uma música
+O quão animada é uma música
+O quão brega é uma música
+O quão famosa é uma música
+O quão bom é um cantor
+O quão difícil é um instrumento
+O quão bom é um jogo
+O quão difícil é um esporte
+O quão perigoso é um esporte
+O quão emocionante é um esporte de assistir
+O quão bom é um time de futebol
+O quão bom é um jogador de futebol
+O quão divertido é um passatempo
+O quão caro é um passatempo
+O quão relaxante é uma atividade
+O quão cansativa é uma atividade
+O quão chata é uma tarefa doméstica
+O quão difícil é uma tarefa
+O quão boa é uma profissão
+O quão bem pago é um emprego
+O quão estressante é um emprego
+O quão perigoso é um emprego
+O quão legal é um lugar pra morar
+O quão bom é um destino de férias
+O quão caro é um lugar pra viajar
+O quão longe é um lugar
+O quão quente é um lugar
+O quão frio é um lugar
+O quão bonita é uma cidade
+O quão perigoso é um lugar
+O quão lotado é um lugar
+O quão romântico é um programa
+O quão bom é um programa de sábado à noite
+O quão bom é um programa de domingo
+O quão bom é um primeiro encontro
+O quão constrangedora é uma situação
+O quão vergonhoso é um mico
+O quão grave é um erro
+O quão grave é um crime
+O quão feio é um pecado
+O quão irritante é uma mania
+O quão irritante é um barulho
+O quão agradável é um som
+O quão bom é um cheiro
+O quão ruim é um cheiro
+O quão nojento é algo
+O quão doloroso é algo
+O quão assustador é algo
+O quão estressante é algo
+O quão emocionante é algo
+O quão rápido é algo
+O quão barulhento é algo
+O quão brilhante é algo
+O quão pegajoso é algo
+O quão macio é algo
+O quão quente é algo
+O quão raro é algo
+O quão difícil é de achar
+O quão fácil é de perder
+O quão difícil é de aprender
+O quão difícil é de desenhar
+O quão difícil é de explicar
+O quão difícil é de pronunciar
+O quão viciante é algo
+O quão saudável é um hábito
+O quão ruim é um hábito
+O quão importante é na vida
+O quão feliz algo te deixa
+O quão triste algo te deixa
+O quão bravo algo te deixa
+O quão nervoso algo te deixa
+O quão bem algo cheira de manhã
+O quão bom é um jeito de acordar
+O quão bom é um jeito de passar o tempo na fila
+O quão boa é uma desculpa pra faltar
+O quão convincente é uma mentira
+O quão boa é uma cantada
+O quão engraçada é uma piada
+O quão boa é uma frase de tio
+O quão chato é um assunto
+O quão polêmico é um assunto
+O quão sério é um problema
+O quão difícil é uma decisão
+O quão arriscada é uma aposta
+O quão sortudo é algo
+O quão azarado é algo
+O quão estranho é um nome
+O quão bonito é um nome
+O quão bom é um nome pra cachorro
+O quão chique é uma marca
+O quão caro é um carro
+O quão rápido é um meio de transporte
+O quão confortável é um meio de transporte
+O quão bom é um aplicativo
+O quão antigo é um aparelho
+O quão moderna é uma tecnologia
+O quão bom é um superpoder pra ir ao trabalho
+O quão assustador é um lugar à noite
+O quão assustadora é uma criatura
+O quão forte é um bicho numa briga
+O quão grande é uma coisa da natureza
+O quão perigoso é um fenômeno da natureza
+O quão bonito é um fenômeno da natureza
+O quão bom é um clima
+O quão bom é um dia da semana
+O quão boa é uma época do ano
+O quão bom é um feriado
+O quão boa é uma festa
+O quão boa é uma fantasia de carnaval
+O quão bom é um brinquedo de parque
+O quão radical é um brinquedo de parque
+O quão bom é um brinquedo de criança
+O quão bom é um doce de festa infantil
+O quão boa é uma comida de festa junina
+O quão boa é uma comida de Natal
+O quão bom é um salgadinho
+O quão boa é uma comida de rua
+O quão bom é um café da manhã
+O quão bom é algo pra comer vendo filme
+O quão boa é uma coisa pra levar pra praia
+O quão essencial é um item de higiene
+O quão confortável é uma roupa
+O quão chique é uma roupa
+O quão estranha é uma roupa
+O quão bonito é um sapato
+O quão confortável é um lugar pra dormir
+O quão bom é um lugar pra estudar
+O quão bom é um lugar pra se esconder
+O quão bom é um esconderijo num esconde-esconde
+O quão boa é uma arma num apocalipse zumbi
+O quão bom é um companheiro num apocalipse zumbi
+O quão confiável é uma pessoa
+O quão importante é uma pessoa na sua vida
+O quão legal é um parente
+O quão bom é um vizinho
+O quão bom é um professor
+O quão bom é um chefe
+O quão bom é um conselho
+O quão bom é um elogio
+O quão ofensivo é um xingamento
+O quão velho é algo
+O quão moderno é algo
+O quão infantil é algo
+O quão adulto é algo
+O quão brasileiro é algo
+O quão chique é algo
+O quão brega é algo
+O quão famoso é um lugar
+O quão famoso é um prato
+O quão famosa é uma marca
+O quão fácil é de fazer em casa
+O quão demorado é algo
+O quão cedo é um horário
+O quão tarde é um horário
+O quão alto é algo
+O quão pesado é um animal
+O quão veloz é um animal
+O quão barulhento é um animal
+O quão estranho é um animal
+O quão gostoso é um cheiro de comida
+O quão satisfatório é algo
+O quão relaxante é um som
+O quão arrepiante é um som
+O quão bom é um cheiro de casa

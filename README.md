@@ -71,6 +71,13 @@ Partida inteira de Secret Hitler pela rede (7 robôs jogadores + 1 tabuleiro, um
 tools/sh_net_test.sh godot
 ```
 
+Partida inteira de Ito ou de Sintonia pela rede (5 robôs jogadores + 1 tabuleiro, um cai e volta; confere que ninguém vê número alheio nem o alvo antes da hora):
+
+```bash
+tools/party_net_test.sh ito godot
+tools/party_net_test.sh sintonia godot
+```
+
 Trocar aparelho no meio da partida (a Eva some de vez, o tabuleiro abre o QR da vaga dela, um aparelho novo termina a partida no lugar dela e o antigo é recusado quando volta):
 
 ```bash

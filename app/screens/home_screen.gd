@@ -5,6 +5,8 @@ const ChapeuMenu := preload("res://games/chapeu/screens/chapeu_menu.gd")
 const HalliMenu := preload("res://games/halli_galli/screens/halli_menu.gd")
 const AvalonMenu := preload("res://games/avalon/screens/avalon_menu.gd")
 const ShMenu := preload("res://games/secret_hitler/screens/sh_menu.gd")
+const ItoMenu := preload("res://games/ito/screens/ito_menu.gd")
+const SintoniaMenu := preload("res://games/sintonia/screens/sintonia_menu.gd")
 const SettingsScreen := preload("res://app/screens/settings_screen.gd")
 const HistoryScreen := preload("res://app/screens/history_screen.gd")
 const JoinScreen := preload("res://app/screens/join_screen.gd")
@@ -15,6 +17,8 @@ const GAMES := [
 	{"id": "halli", "nome": "Halli Galli", "desc": "Cinco frutas iguais? Bata o sino primeiro!", "icone": "halli_galli", "cor": Tokens.MOSTARDA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "avalon", "nome": "Avalon", "desc": "Servos de Arthur contra lacaios de Mordred. Em quem confiar?", "icone": "avalon", "cor": Tokens.SALVIA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "secret_hitler", "nome": "Secret Hitler", "desc": "Liberais contra fascistas. Quem é o Hitler?", "icone": "secret_hitler", "cor": Tokens.VERMELHO, "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "sintonia", "nome": "Sintonia", "desc": "Uma dica, dois extremos. Acerte a agulha no alvo!", "icone": "sintonia", "cor": Tokens.AZUL, "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "ito", "nome": "Ito", "desc": "Números secretos e uma fila em ordem, sem dizer os números.", "icone": "ito", "cor": Tokens.VERMELHO, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
 ]
 
@@ -69,7 +73,7 @@ func _featured_card(g: Dictionary) -> Control:
 	tv.add_child(UI.label(g.desc, 18, Tokens.TINTA, Fonts.body_bold()))
 	row.add_child(tv)
 	v.add_child(row)
-	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu}.get(g.id, ChapeuMenu)
+	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu, "sintonia": SintoniaMenu, "ito": ItoMenu}.get(g.id, ChapeuMenu)
 	var play := UI.button("Jogar", g.botao, func(): App.push(menu.new()), "play")
 	v.add_child(play)
 	return c

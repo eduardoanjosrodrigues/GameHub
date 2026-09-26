@@ -9,7 +9,7 @@ Arte dos papéis, da capa e do fundo do tabuleiro (docs/PLANO_SECRET_HITLER.md �
 1. Gere **uma imagem por vez**, colando o **bloco de estilo** e depois o prompt da peça (os dois juntos, na mesma mensagem).
 2. Gere o **Liberal 1 primeiro**. Quando ficar bom, anexe ele como **imagem de referência** em todas as outras ("match the style of the attached image exactly"). Se quiser o baralho com cara de família do Avalon, anexe também o Merlin.
 3. Salve com o nome da tabela em `games/secret_hitler/art/roles/` (retratos) ou `games/secret_hitler/art/` (capa e mesa). PNG, JPG ou WEBP servem.
-4. Rode `tools/sync_web_assets.sh` (arruma a extensão e marca as imagens pra irem no APK e na página do navegador).
+4. Rode `tools/sync_web_assets.sh`: ele arruma a extensão, converte pra WebP qualidade 80 (o que vai no APK e na página do navegador) e guarda o original em `art_originais/`.
 
 Tamanhos: retratos em **2:3 vertical (1024 × 1536)**; capa e mesa em **16:9 (1920 × 1080)**. O app usa a imagem se ela existir; se não, mostra o marcador (ramo de oliveira, caveira ou chapéu). Se faltar uma variação (ex: `liberal_4`), usa outra que exista.
 
