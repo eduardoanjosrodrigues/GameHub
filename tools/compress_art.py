@@ -12,7 +12,7 @@ import subprocess
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIRS = ["games/avalon/art/roles", "games/avalon/art", "games/secret_hitler/art/roles", "games/secret_hitler/art"]
+DIRS = ["games/avalon/art/roles", "games/avalon/art", "games/secret_hitler/art/roles", "games/secret_hitler/art", "games/quem_foi/art"]
 KEEP = os.path.join(ROOT, "art_originais")
 QUALITY = 80
 

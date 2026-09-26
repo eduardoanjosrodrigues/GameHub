@@ -1,7 +1,7 @@
 extends Node
 ## Música com crossfade e efeitos sonoros com pool de players.
 
-const SFX_DIRS := ["res://app/audio/sfx/", "res://games/chapeu/audio/", "res://games/halli_galli/audio/"]
+const SFX_DIRS := ["res://app/audio/sfx/", "res://games/chapeu/audio/", "res://games/halli_galli/audio/", "res://games/quem_foi/audio/"]
 const MUSIC := {
 	"menu": "res://app/audio/music/menu.wav",
 	"turn": "res://games/chapeu/audio/turn.wav",

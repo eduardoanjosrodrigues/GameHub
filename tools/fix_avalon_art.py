@@ -8,7 +8,7 @@ Uso: python3 tools/fix_avalon_art.py
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIRS = ["games/avalon/art/roles", "games/avalon/art", "games/secret_hitler/art/roles", "games/secret_hitler/art"]
+DIRS = ["games/avalon/art/roles", "games/avalon/art", "games/secret_hitler/art/roles", "games/secret_hitler/art", "games/quem_foi/art"]
 
 
 def real_ext(path):

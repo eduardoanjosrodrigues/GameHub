@@ -41,7 +41,7 @@ func _create(role: String) -> void:
 			_name_edit.grab_focus()
 			return
 		Settings.remember_name(n)
-	var s := PartyHost.new(info.id, info.name, info.rules.call(), role, n)
+	var s: PartyHost = info.host.call(role, n) if info.has("host") else PartyHost.new(info.id, info.name, info.rules.call(), role, n)
 	var err := s.open_room()
 	if err != "":
 		s.free()

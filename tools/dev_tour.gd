@@ -79,6 +79,8 @@ func _run() -> void:
 		await _ito()
 	if set_name in ["all", "sintonia"]:
 		await _sintonia()
+	if set_name in ["all", "quem_foi"]:
+		await load("res://tools/quem_foi_tour.gd").new().run(self)
 	if set_name == "avalon_cards":
 		await _avalon_cards()
 	if set_name == "sh_cards":

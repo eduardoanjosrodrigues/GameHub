@@ -1,6 +1,6 @@
 # gamehub — Plano do Quem Foi?
 
-> Status: v1 · 2026-09-26 · plano, nada implementado
+> Status: v2 · 2026-09-26 · implementado (ver §11); falta testar com pessoas
 > Escopo: sétimo jogo do hub, **Quem Foi?** (versão brasileira da PaperGames do *Who Did It?*, da Blue Orange). Pelo **Wi-Fi**, cada um no seu celular (app ou navegador), com **tabuleiro opcional**. Usa a corrida justa do sino do Halli Galli.
 
 Legenda (a mesma dos outros planos): **[decidido]** veio das suas respostas; **[proposta]** é sugestão minha (lista em §10); **[verificar]** precisa ser confirmado.
@@ -131,3 +131,16 @@ Reaproveitamento [proposta]:
 | # | Pergunta |
 |---|---|
 | **P1** | Revisar as **[proposta]**: casos do §3, som e vibração (§4.3), janela da corrida (§5), direção de arte e 6 imagens em vez de 36 (§6), tirar a corrida do Halli Galli para uma peça comum (§7) |
+
+## 11. Status da implementação (2026-09-26)
+
+Feito: Q1 a Q4. Falta o Q5, o playtest.
+
+- **Regras** (`QuemFoiRules`): 9 testes em `tests/test_quem_foi_rules.gd`, cobrindo abertura, corrida, trava de 1 s, acusar o mesmo bicho, suspense de 5 s, mão vazia a salvo, "só um com bichos", quem começa, fim com empate e ajuda de memória.
+- **Rede**:
+  - `QuemFoiHost` e `QuemFoiClient` estendem o `PartyHost`/`PartyClient` da Sintonia e do Ito, com o `ClockSync` e a mesma janela de corrida do sino.
+  - Mudança em relação ao §7: **a corrida não foi tirada do Halli Galli**. A janela ficou copiada no `QuemFoiHost`, e o Halli Galli não foi tocado; assim não tem risco de mexer num jogo que já funciona.
+- **Teste de rede**: `tools/quem_foi_net_test.sh`, com 3 robôs com atrasos de rede diferentes, 1 tabuleiro e uma queda. Na última rodada, **41 de 41 corridas** foram ganhas por quem tocou primeiro, mesmo tendo a pior rede.
+- **Telas**: celular do jogador e tabuleiro, com a arte do Nano Banana, fundo da mesa no tabuleiro e capa no menu. Se existir a versão "culpada" de um bicho (`<bicho>_culpado`), ela aparece no fim da rodada.
+- **Navegador**: `web/quem_foi.js` e `web/quem_foi.css`, com o mesmo acerto de relógio. Testado no meio dos robôs: corrida, trava, acusação e fim de rodada.
+- **Sons**: `qf_pum`, `qf_plim` e `qf_descarga`, sintetizados por `tools/audio/generate_quem_foi_audio.py`.

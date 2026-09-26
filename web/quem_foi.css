@@ -1,0 +1,24 @@
+/* Quem Foi? no navegador: cartas dos bichos com a cor do dono, a pilha e o placar de cocôs. */
+.qf-hand { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.qf-card { border: 5px solid var(--c); background: color-mix(in srgb, var(--superficie) 78%, var(--c)); border-radius: 18px; padding: 6px 6px 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.qf-card img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 10px; pointer-events: none; }
+.qf-card b { font-family: "Fraunces", serif; font-size: 16px; }
+.qf-card:active { transform: scale(.96); }
+.qf-card.dim, .qf-hand.locked .qf-card { opacity: .42; }
+.qf-hand.locked { animation: qf-shake .3s; }
+@keyframes qf-shake { 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+.qf-pile { display: flex; justify-content: center; }
+.qf-pile .qf-card { width: 170px; cursor: default; }
+.qf-bigpoop { width: 150px; height: 150px; object-fit: contain; }
+.qf-score { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.qf-chip { display: flex; align-items: center; gap: 6px; border-radius: 14px; padding: 6px 10px; }
+.qf-chip b { display: block; font-size: 15px; }
+.qf-chip small { display: block; white-space: nowrap; color: var(--suave); font-weight: 700; font-size: 12px; }
+.qf-chip .avatar { width: 32px; height: 32px; font-size: 16px; }
+.qf-poop { width: 24px; height: 24px; object-fit: contain; }
+.qf-mini { width: 38px; height: 38px; object-fit: contain; }
+.qf-proof { gap: 4px; flex-wrap: wrap; }
+.qf-board .qf-pile .qf-card { width: 280px; }
+.qf-board .qf-card b { font-size: 24px; }
+.qf-board .qf-bigpoop { width: 240px; height: 240px; }
