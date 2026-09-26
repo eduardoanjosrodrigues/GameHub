@@ -63,7 +63,7 @@ func _update_safe_area() -> void:
 		_safe.add_theme_constant_override("margin_" + side, margins[side])
 
 
-## Fundo gelo com bolinhas e confetes estáticos bem suaves.
+## Fundo de papel creme com fibras e grãos bem sutis.
 class Background extends Control:
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -73,23 +73,19 @@ class Background extends Control:
 			queue_redraw()
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Tokens.GELO)
+		draw_rect(Rect2(Vector2.ZERO, size), Tokens.PAPEL)
 		var rng := RandomNumberGenerator.new()
-		rng.seed = 7
-		var colors := [Tokens.AZUL, Tokens.TURQUESA, Tokens.LIMA, Tokens.ROSA]
-		var step := 120.0
-		var y := 40.0
-		while y < size.y + step:
-			var x := 30.0 + fmod(y * 0.37, step)
-			while x < size.x + step:
-				var c: Color = colors[rng.randi() % colors.size()]
-				c.a = 0.10
-				var p := Vector2(x + rng.randf_range(-25, 25), y + rng.randf_range(-25, 25))
-				if rng.randf() < 0.5:
-					draw_circle(p, rng.randf_range(5, 9), c, true, -1.0, true)
-				else:
-					draw_set_transform(p, rng.randf() * TAU, Vector2.ONE)
-					draw_rect(Rect2(-8, -4, 16, 8), c)
-					draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
-				x += step
-			y += step
+		rng.seed = 11
+		# Grãos
+		var n := int(size.x * size.y / 900.0)
+		for i in n:
+			var p := Vector2(rng.randf() * size.x, rng.randf() * size.y)
+			var dark := rng.randf() < 0.6
+			var c := Color(Tokens.TINTA, rng.randf_range(0.025, 0.055)) if dark else Color(1, 1, 1, rng.randf_range(0.25, 0.5))
+			draw_rect(Rect2(p, Vector2(rng.randf_range(1.0, 2.2), rng.randf_range(1.0, 2.2))), c)
+		# Fibras
+		for i in int(n / 30.0):
+			var a := Vector2(rng.randf() * size.x, rng.randf() * size.y)
+			var ang := rng.randf() * TAU
+			var len := rng.randf_range(6, 16)
+			draw_line(a, a + Vector2(cos(ang), sin(ang)) * len, Color(Tokens.TINTA_SUAVE, 0.06), 1.0, true)

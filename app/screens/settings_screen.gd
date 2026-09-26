@@ -42,7 +42,7 @@ func _build() -> void:
 	av.add_child(UI.label("gamehub versão %s" % ProjectSettings.get_setting("application/config/version", "1.0.0"), 18, Tokens.TINTA_SUAVE))
 	av.add_child(UI.label("O app não coleta dados pessoais. Nomes, configurações e histórico ficam só neste aparelho.", 16, Tokens.TINTA_SUAVE))
 	if PRIVACY_URL != "":
-		av.add_child(UI.small_button("Política de privacidade", CartoonButton.Variant.SECONDARY, func(): OS.shell_open(PRIVACY_URL)))
+		av.add_child(UI.small_button("Política de privacidade", AppButton.Variant.SECONDARY, func(): OS.shell_open(PRIVACY_URL)))
 	_col.add_child(about)
 
 
@@ -62,7 +62,7 @@ func _volume_row(title_text: String, icon_name: String, value: float, setter: Ca
 	var steps := UI.hbox(8)
 	for i in 6:
 		var level := i / 5.0
-		var b := UI.small_button("", CartoonButton.Variant.PRIMARY if value >= level - 0.01 and i > 0 else CartoonButton.Variant.SECONDARY)
+		var b := UI.small_button("", AppButton.Variant.PRIMARY if value >= level - 0.01 and i > 0 else AppButton.Variant.SECONDARY)
 		b.text = "Mudo" if i == 0 else ""
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size.x = 0

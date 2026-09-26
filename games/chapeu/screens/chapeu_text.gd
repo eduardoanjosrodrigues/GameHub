@@ -15,14 +15,14 @@ const ROUNDS := {
 		"regra": "Só pode dar UMA palavra de dica. Pense bem antes de falar!",
 		"curta": "Só uma palavra de dica",
 		"icone": "rodada_uma_palavra",
-		"cor": Tokens.TURQUESA,
+		"cor": Tokens.MOSTARDA,
 	},
 	"mimica": {
 		"nome": "Mímica",
 		"regra": "Só gestos, sem som nenhum. Vale apontar, dançar e fazer careta.",
 		"curta": "Só mímica, sem som",
 		"icone": "rodada_mimica",
-		"cor": Tokens.ROSA,
+		"cor": Tokens.SALVIA,
 	},
 }
 

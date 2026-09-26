@@ -1,6 +1,6 @@
 # gamehub — Plano de implementação da Fase 1
 
-> Status: rascunho v1 · 2026-09-25
+> Status: v2 · 2026-09-25 · implementação da Fase 1 feita (ver §14)
 > Escopo: app **gamehub** (hub de jogos para Android) + primeiro jogo completo, o **Chapéu**.
 
 Legenda usada no documento:
@@ -38,8 +38,8 @@ O gamehub é um app mobile com vários joguinhos de festa: alguns single player,
 | Plataforma | Só Android, **Android 12+** (API 31) |
 | Orientação | Retrato em todos os aparelhos |
 | Idioma | Só pt-BR |
-| Estilo visual | Cartoon colorido: formas arredondadas, contorno grosso, sombra dura |
-| Paleta | Vibrante fria (azul, turquesa, verde-limão, rosa, fundo gelo), usada no hub e no Chapéu |
+| Estilo visual | Jogo de tabuleiro de papelaria: papel creme, tinta, cores de impressão, sombras suaves (§7; revisado a seu pedido) |
+| Paleta | Cobalto, tomate, mostarda e sálvia sobre papel creme (§7.1), usada no hub e no Chapéu |
 | Identidade por jogo | Cada jogo futuro terá visual próprio; na Fase 1 hub e Chapéu compartilham a paleta |
 | Tema | Só claro |
 | Artes | Todas em vetor (SVG), geradas dentro do projeto |
@@ -261,9 +261,9 @@ res://
 
 1. **Descoberta automática**: o host transmite um sinal UDP broadcast na porta **7778** a cada 1 s com `{app: "gamehub", jogo: "chapeu", nome_sala, porta, jogadores, v}`. Quem abre "Entrar" escuta e lista as salas.
    - Exige a permissão `CHANGE_WIFI_MULTICAST_STATE` no export do Android.
-2. **QR code**: o host mostra um QR com `gamehub://entrar?ip=<ip>&porta=<porta>&sala=<código>`.
-   - Gerar o QR: codificador em GDScript dentro do projeto [verificar se já há algo nativo no 4.7].
-   - Ler o QR: precisa de câmera + decodificador. **Risco técnico** (ver §11): provavelmente via plugin Android (ex: ZXing / ML Kit) [verificar].
+2. **QR code**: o host mostra um QR com `gamehub://entrar?c=<código da sala>`.
+   - Gerar o QR: codificador próprio em GDScript (`net/qr_code.gd`), validado com um decodificador independente (jsQR).
+   - **Ler o QR** (mudança em relação à primeira versão do plano): em vez de câmera dentro do app, quem entra aponta a **câmera do próprio celular** pro QR. O link `gamehub://entrar` abre o gamehub direto na sala (filtro de intent no `AndroidManifest`). Assim o app não precisa da permissão de câmera nem de plugin nativo.
 3. **Código / IP**: o host mostra um código curto de 6 caracteres que codifica o IP e a porta (e o IP por extenso, como último recurso). O cliente digita o código.
 
 ### 6.3 Identidade e reconexão
@@ -299,74 +299,60 @@ res://
 
 ## 7. Design system
 
-### 7.1 Paleta [decidido a direção; tons de apoio são proposta]
+> **Revisado em 2026-09-25.** A direção "cartoon colorido + paleta vibrante fria" foi descartada a seu pedido e substituída por esta, escolhida por mim: **jogo de tabuleiro de papelaria**. Continua só tema claro.
+
+A ideia: o app parece um jogo de tabuleiro moderno bem impresso. Papel creme, tinta quase preta, poucas cores de impressão e tipografia com personalidade. Combina com o próprio Chapéu (papeizinhos dentro de uma cartola).
+
+### 7.1 Paleta (contraste conferido por script, WCAG AA)
 
 | Token | Hex | Uso |
 |---|---|---|
-| `azul` | `#3A86FF` | Cor primária, botões principais, **Time Azul** |
-| `vermelho` | `#FF3B4E` | **Time Vermelho** [proposta de tom] |
-| `rosa` | `#FF4D8D` | Destaque, pular/penalidade |
-| `turquesa` | `#06D6A0` | Sucesso, "Acertou!" |
-| `lima` | `#C6F432` | Brilho e realce (cronômetro, confete, badges) |
-| `gelo` | `#F4F7FF` | Fundo das telas |
-| `branco` | `#FFFFFF` | Cards e superfícies |
-| `tinta` | `#1B1F3B` | Texto, contornos e sombras duras |
-| `tinta-suave` | `#5A6080` | Texto secundário |
-| `azul-escuro` | `#1F5FCC` | Detalhes do azul (faixas, anel do cronômetro, sombra interna); nunca atrás de texto |
-| `vermelho-escuro` | `#D42637` | Detalhes do vermelho; nunca atrás de texto |
-| `rosa-escuro` | `#D93672` | Detalhes do rosa; nunca atrás de texto |
-| `turquesa-escuro` | `#04A77D` | Detalhes do turquesa; nunca atrás de texto |
+| `PAPEL` | `#F5EFE3` | Fundo das telas (com grão de papel bem sutil) |
+| `SUPERFICIE` | `#FFFCF6` | Cartões e botões secundários |
+| `TINTA` | `#1F1D1A` | Texto principal, botão principal |
+| `TINTA_SUAVE` | `#6B6358` | Texto secundário |
+| `LINHA` | `#E3DACB` | Bordas finas e divisórias |
+| `AZUL` | `#2B59C3` | **Time Azul**, rodada Descrever |
+| `VERMELHO` | `#C8392B` | **Time Vermelho**, alerta dos últimos 10 s |
+| `MOSTARDA` | `#F2B233` | Destaque (botão "Jogar", rodada Uma palavra, ícone do app) |
+| `SALVIA` | `#2F7D5B` | Sucesso ("Acertou!", "Começar"), rodada Mímica |
+| `*_ESCURO` | `#1F4494` `#9E2A1F` `#7A5200` `#1F5C42` | Texto colorido sobre papel e fundos tingidos |
 
-**Regra de contraste** (conferida por script, padrão WCAG): texto sobre `azul`, `vermelho`, `rosa`, `turquesa`, `lima`, `gelo` e `branco` usa **`tinta`** (4.6:1 a 16:1). Texto branco só em títulos grandes (≥ 24 px, negrito) sobre `azul`, `vermelho` ou `rosa` (3.1:1 a 3.5:1, aceitável só pra texto grande). Os tons `-escuro` do azul, vermelho e rosa ficam entre 2.7:1 e 3.6:1 com `tinta`, por isso **o botão pressionado mantém a cor** e só desce 4 px (§7.3).
+Regras de contraste:
+- Texto branco sobre azul, vermelho e sálvia (5:1 a 6,3:1); texto em tinta sobre mostarda (9:1).
+- Cartões "coloridos" usam a cor **tingida** (14% sobre o papel) com texto em tinta (≥ 13:1). Só o placar usa a cor cheia, com texto claro.
 
-**Times**: Time Azul e Time Vermelho. Os avatares dos jogadores usam a cor do time. O vermelho não faz parte da paleta fria original; entrou só como cor de time.
+### 7.2 Tipografia (OFL, embutidas)
 
-### 7.2 Tipografia [proposta]
-
-- **Títulos e botões**: *Fredoka* (arredondada, cara de cartoon), SemiBold/Bold.
-- **Texto**: *Nunito*, Regular/Bold.
-- Ambas com licença OFL, embutidas no projeto (funcionam offline).
-- Escala (px na resolução base): 56 palavra da vez · 40 título · 28 subtítulo · 22 botão · 18 texto · 14 legenda.
+- **Fraunces** (serifada variável, eixo "soft" no máximo): títulos, a palavra da vez, números do placar e do cronômetro. Dá cara de carta impressa.
+- **Manrope** (sem-serifa): botões, rótulos e texto.
+- Escala (px na base 720×1280): 60 palavra da vez · 40 título · 26 subtítulo · 20 botão · 18 texto · 14 legenda.
 
 ### 7.3 Forma e profundidade
 
-- Contorno `tinta` de **3 px** em botões, cards e avatares.
-- Sombra dura: deslocada 0, +6 px, cor `tinta`, sem desfoque. Ao pressionar, o botão desce 4 px e a sombra encolhe (efeito de "apertar").
-- Raio dos cantos: 20 px em cards, 999 px (pílula) em botões.
-- Espaçamento em múltiplos de 8 px.
-- Área mínima de toque: 56 px de altura.
+- Cantos: 22 px em cartões, 18 px em botões, 14 px em campos.
+- Bordas finas (1,5 a 2 px) na cor `LINHA`; nada de contorno grosso.
+- Sombras difusas e suaves (tinta a 10%); botões coloridos têm sombra da própria cor. Ao tocar, o botão desce 3 px e escurece 8%.
+- Espaçamento em múltiplos de 8 px; área mínima de toque 56 px.
 
 ### 7.4 Componentes
 
 | Componente | Descrição |
 |---|---|
-| `BotaoCartoon` | Primário (azul), secundário (branco), sucesso (turquesa), perigo (rosa); com som e vibração leve ao tocar |
-| `CardJogo` | Card do hub com ilustração, nome e estado ("Jogar" / "Em breve") |
-| `Avatar` | Círculo com a cor do time + inicial; indicador de desconectado |
-| `Cronometro` | Anel que esvazia; fica `rosa` e pulsa nos últimos 10 s |
-| `Placar` | Os dois times lado a lado com os pontos |
-| `CartaPalavra` | Carta grande com a palavra; anima entrando e saindo (acertou: voa pra cima; pulou: volta pro chapéu) |
-| `Modal` | Confirmações (sair da partida etc.) |
-| `Toast` | Avisos curtos ("Ana entrou", "Reconectando...") |
-| `CampoTexto` | Input no estilo cartoon, com o teclado do Android |
+| `AppButton` | Principal (tinta), secundário (papel com borda), sucesso (sálvia), destaque (mostarda), perigo (papel com texto vermelho), times (azul/vermelho) |
+| `Avatar` | Círculo na cor do time com a inicial serifada em branco; pontinho vermelho quando desconectado |
+| `TimerRing` | Disco de papel com anel fino em tinta; nos últimos 10 s o anel e o número ficam vermelhos e o disco pulsa |
+| `Scoreboard` | Dois cartões sólidos (azul e vermelho) com números grandes em Fraunces |
+| Cartão da palavra | Cartão de papel grande com a palavra em Fraunces; entra com leve giro |
+| `Logo` | "game" em tinta + "hub" em azul, itálico, com uma fita mostarda embaixo e ponto vermelho |
+| `Confetti` | Papeizinhos coloridos que giram e "viram" enquanto caem |
+| `QrView` | QR em tinta sobre cartão branco puro (melhor pra câmera) |
 
-### 7.5 Animação
+### 7.5 Ilustrações (SVG gerado no projeto)
 
-- Transições entre telas: deslizar + leve "quique" (Tween com `TRANS_BACK`), 250 ms.
-- Botões: escala 0.95 ao pressionar.
-- Acertou: confete `lima`/`turquesa`/`azul`/`rosa`.
-- Fim da partida: chapéu pulando + confete com a cor do time vencedor.
-
-### 7.6 Artes (todas em SVG, geradas no projeto) [decidido]
-
-- Ícone do app (formato adaptativo do Android: frente + fundo).
-- Logo "gamehub".
-- Ilustração do Chapéu (chapéu cartoon com papeizinhos saindo).
-- Ícones: jogar, configurações, histórico, voltar, pausar, pular, check, wifi, QR, tablet, pessoa, troféu.
-- Ilustração das 3 rodadas (boca falando, "1", mãos de mímica).
-- Placeholder "Em breve" pros próximos jogos.
-
----
+- **Cartola** preta com faixa vermelha e papeizinhos saindo (ícone do app sobre fundo mostarda).
+- Rodadas: balão azul com linhas (Descrever), balão mostarda com uma palavra (Uma palavra), duas mãos (Mímica).
+- Ícones de interface com traço de 3,4 px, pontas arredondadas.
 
 ## 8. Telas
 
@@ -441,7 +427,7 @@ Eu produzo o básico dentro do projeto:
 - `minSdk` **31** (Android 12). `targetSdk`: o exigido pela Play Store na data de publicação [verificar].
 - Arquitetura: `arm64-v8a` (+ `armeabi-v7a` se aparecer aparelho de teste que precise) [proposta].
 - Formato: **AAB** pra loja, APK pra testes.
-- Permissões: `INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_MULTICAST_STATE`, `VIBRATE`, `CAMERA` (QR, pedida só quando tocar em "Ler QR").
+- Permissões: `INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_MULTICAST_STATE`, `VIBRATE`. (Sem `CAMERA`: o QR é lido pela câmera do sistema.)
 - **Rede local nas versões novas do Android**: o Android vem restringindo acesso à rede local (proteção de rede local). Verificar se o `targetSdk` exigido obriga pedir permissão específica pra falar com aparelhos da mesma rede [verificar].
 - Ambiente: instalar Android SDK (command-line tools, platform-tools, build-tools, platform), templates de export do Godot 4.7.2, e confirmar qual versão de JDK o 4.7.2 exige (tem JDK 21 instalado) [verificar].
 - Keystore de upload guardada fora do repositório, com backup.
@@ -463,7 +449,7 @@ Eu produzo o básico dentro do projeto:
 
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Leitura de QR precisa de câmera + decodificador | Pode exigir plugin Android nativo | Fazer por último entre as formas de entrar; descoberta automática e código já cobrem o básico |
+| Nem todo app de câmera oferece abrir links `gamehub://` | QR não abre o app em alguns aparelhos | Código da sala e descoberta automática sempre visíveis; testar no seu celular |
 | Roteadores com isolamento de clientes (Wi-Fi de hotel, empresa, alguns de operadora) | Aparelhos não se enxergam | Mensagem clara na tela "Entrar" sugerindo usar o roteador do celular do host |
 | Broadcast UDP filtrado por alguns aparelhos | Descoberta automática falha | Código/IP e QR como alternativa, sempre visíveis |
 | Mudanças de permissão de rede local no Android | Conexão bloqueada no Android mais novo | Verificar no início do M5 (§12) e testar num aparelho com Android recente |
@@ -503,6 +489,26 @@ Cada marco termina com algo que dá pra instalar e testar no celular.
 
 | # | Pergunta |
 |---|---|
-| **P2** | Empate nos três critérios ao mesmo tempo (mesmos pontos totais, mesmo número de rodadas vencidas e mesmos pontos na mímica): declarar empate, ou outra regra? |
+| **P2** | Empate nos três critérios ao mesmo tempo: implementado como **empate** (sugestão minha; troque se quiser outra regra). |
 | **P12** | Política de privacidade (fica pra depois, antes do M9): onde hospedar, e preencher nome do desenvolvedor, e-mail de contato e data em [politica-de-privacidade.md](politica-de-privacidade.md). |
-| **P11** | Revisar todas as **[proposta]** do documento: padrões de palavras (4 por jogador, 30 da lista), temas das listas, fontes Fredoka + Nunito, tons de apoio da paleta, tom do vermelho do time (`#FF3B4E`), contador de quantas vezes cada um explicou, renderer Compatibility, portas 7777/7778, reconexão por até 60 s, sem migração de host, música durante a vez, arquiteturas do build, framework de testes, vencedor de rodada empatada. |
+| **P11** | Revisar todas as **[proposta]** do documento: padrões de palavras (4 por jogador, 30 da lista), temas das listas, nova estética de papelaria (§7), contador de quantas vezes cada um explicou, renderer Compatibility, portas 7777/7778, reconexão por até 60 s, sem migração de host, música durante a vez, arquiteturas do build, framework de testes, vencedor de rodada empatada. |
+
+
+---
+
+## 14. Status da implementação (2026-09-25)
+
+| Marco | Status |
+|---|---|
+| M0 Ambiente | ✓ Android SDK, JDK 17, template Gradle, chave de upload (fora do repo) |
+| M1 Design system | ✓ refeito na estética de papelaria (§7) |
+| M2 Casca do hub | ✓ início, configurações, histórico, voltar do Android |
+| M3 Regras | ✓ `ChapeuRules` + 18 testes (`tests/test_rules.gd`) |
+| M4 Passa-e-joga | ✓ |
+| M5 Rede básica | ✓ testada com 4 processos (`tools/net_test.sh`) |
+| M6 Descoberta e QR | ✓ broadcast testado na rede local; QR validado por decodificador independente |
+| M7 Tabuleiro e reconexão | ✓ reconexão testada (queda e volta no meio da partida); entrada atrasada recusada |
+| M8 Polimento | ✓ sons e músicas sintetizados, vibração, animações. **Falta**: playtest com pessoas e revisão das listas de palavras |
+| M9 Play Store | Parcial: AAB assinado, ícones, capturas e textos prontos. **Falta**: conta de desenvolvedor, hospedar a política, teste fechado de 14 dias |
+
+Ainda não testado em aparelho real (nenhum celular estava conectado). Ver `docs/ANDROID.md`.

@@ -5,14 +5,14 @@ extends Screen
 func _ready() -> void:
 	var col := make_column()
 	make_header(col, "Como jogar")
-	col.add_child(_step("1. Palavras no chapéu", "Cada jogador escreve algumas palavras ou nomes em segredo (ou o app sorteia de uma lista pronta).", "chapeu", Tokens.BRANCO))
-	col.add_child(_step("2. Dois times", "Time Azul e Time Vermelho. Na sua vez, o time escolhe quem vai explicar e tem 60 segundos pra acertar o máximo que der. O Time Azul começa.", "people", Tokens.BRANCO))
+	col.add_child(_step("1. Palavras no chapéu", "Cada jogador escreve algumas palavras ou nomes em segredo (ou o app sorteia de uma lista pronta).", "chapeu", Tokens.SUPERFICIE))
+	col.add_child(_step("2. Dois times", "Time Azul e Time Vermelho. Na sua vez, o time escolhe quem vai explicar e tem 60 segundos pra acertar o máximo que der. O Time Azul começa.", "people", Tokens.SUPERFICIE))
 	col.add_child(UI.label("3. Três rodadas com as mesmas palavras", 24, Tokens.TINTA, Fonts.title()))
 	for key in ["descrever", "uma_palavra", "mimica"]:
 		var r: Dictionary = ChapeuText.round_info(key)
 		col.add_child(_step(r.nome, r.regra, r.icone, r.cor))
-	col.add_child(_step("Pontos", "Acertou: +1. Pulou: −1 (a palavra volta pro chapéu). Se o chapéu esvaziar no meio da sua vez, você começa a próxima rodada com o tempo que sobrou.", "check", Tokens.LIMA))
-	col.add_child(_step("Quem vence", "Mais pontos no total. Se empatar, vence quem ganhou mais rodadas; se ainda empatar, quem fez mais na mímica.", "trophy", Tokens.BRANCO))
+	col.add_child(_step("Pontos", "Acertou: +1. Pulou: −1 (a palavra volta pro chapéu). Se o chapéu esvaziar no meio da sua vez, você começa a próxima rodada com o tempo que sobrou.", "check", Tokens.MOSTARDA))
+	col.add_child(_step("Quem vence", "Mais pontos no total. Se empatar, vence quem ganhou mais rodadas; se ainda empatar, quem fez mais na mímica.", "trophy", Tokens.SUPERFICIE))
 
 
 func _step(title_text: String, body: String, icon_name: String, color: Color) -> Control:

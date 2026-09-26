@@ -9,8 +9,8 @@ const JoinScreen := preload("res://games/chapeu/screens/join_screen.gd")
 ## Catálogo de jogos. Os próximos entram aqui.
 const GAMES := [
 	{"id": "chapeu", "nome": "Chapéu", "desc": "Explique, resuma e faça mímica. Festa garantida!", "icone": "chapeu", "cor": Tokens.AZUL, "pronto": true},
-	{"id": "em_breve_1", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.BRANCO, "pronto": false},
-	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.BRANCO, "pronto": false},
+	{"id": "em_breve_1", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
+	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
 ]
 
 
@@ -62,7 +62,7 @@ func _featured_card(g: Dictionary) -> Control:
 	tv.add_child(UI.label(g.desc, 18, Tokens.TINTA, Fonts.body_bold()))
 	row.add_child(tv)
 	v.add_child(row)
-	var play := UI.button("Jogar", CartoonButton.Variant.ACCENT, func(): App.push(ChapeuMenu.new()), "play")
+	var play := UI.button("Jogar", AppButton.Variant.ACCENT, func(): App.push(ChapeuMenu.new()), "play")
 	v.add_child(play)
 	ic.pivot_offset = Vector2(75, 75)
 	var tw := ic.create_tween().set_loops()

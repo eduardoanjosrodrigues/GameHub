@@ -128,7 +128,7 @@ func back_requested() -> void:
 
 # --- Avisos e confirmações -------------------------------------------------
 
-func toast(text: String, color := Tokens.BRANCO) -> void:
+func toast(text: String, color := Tokens.SUPERFICIE) -> void:
 	if _toast_box == null:
 		return
 	var c := UI.card(color, 18)
@@ -156,7 +156,7 @@ func confirm(title_text: String, body: String, yes_text: String, on_yes: Callabl
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.add_child(center)
-	var card := UI.card(Tokens.BRANCO, 28)
+	var card := UI.card(Tokens.SUPERFICIE, 28)
 	card.custom_minimum_size.x = min(560.0, _host.size.x - 48.0)
 	center.add_child(card)
 	var v := UI.vbox(20)
@@ -165,8 +165,8 @@ func confirm(title_text: String, body: String, yes_text: String, on_yes: Callabl
 	if body != "":
 		v.add_child(UI.label(body, 20, Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
 	var row := UI.hbox(14)
-	row.add_child(UI.button(no_text, CartoonButton.Variant.SECONDARY, _close_modal))
-	row.add_child(UI.button(yes_text, CartoonButton.Variant.DANGER if danger else CartoonButton.Variant.PRIMARY, func():
+	row.add_child(UI.button(no_text, AppButton.Variant.SECONDARY, _close_modal))
+	row.add_child(UI.button(yes_text, AppButton.Variant.DANGER if danger else AppButton.Variant.PRIMARY, func():
 		_close_modal()
 		on_yes.call()))
 	v.add_child(row)

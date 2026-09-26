@@ -1,9 +1,16 @@
 # Godot
 .godot/
-/android/
 
 # Builds
 /build/
+/android/build/build/
+/android/build/.gradle/
+/android/build/libs/
+/android/build/assetPackInstallTime/src/main/assets/
+/android/build/src/main/assets/
+/android/build/src/debug/
+/android/build/src/release/
+/android/build/local.properties
 
 # Chaves de assinatura (nunca versionar)
 *.keystore

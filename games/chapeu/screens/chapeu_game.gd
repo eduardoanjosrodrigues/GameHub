@@ -40,7 +40,7 @@ func _ready() -> void:
 	add_child(session)
 	session.view_changed.connect(_on_view)
 	session.time_changed.connect(_on_time)
-	session.error.connect(func(m): App.toast(m, Tokens.ROSA))
+	session.error.connect(func(m): App.toast(m, Tokens.VERMELHO))
 	session.connection_changed.connect(_on_connection)
 	session.ended.connect(_on_ended)
 	if session.local_role == "board":
@@ -155,7 +155,7 @@ func _handle_events(events: Array) -> void:
 				Audio.sfx("hit")
 				Haptics.hit()
 				if _word_card and is_instance_valid(_word_card):
-					Confetti.burst(self, _word_card.get_global_rect().get_center() - get_global_rect().position, 24)
+					Confetti.burst(self, _word_card.get_global_rect().get_center() - get_global_rect().position, 16)
 			"skip":
 				Audio.sfx("skip")
 				Haptics.skip()
@@ -185,8 +185,8 @@ func _handle_events(events: Array) -> void:
 			"game_over":
 				Audio.sfx("win")
 				var winner: String = e.get("result", {}).get("winner", "")
-				var colors := [Tokens.team_color(winner), Tokens.LIMA, Tokens.BRANCO] if winner != "" else Confetti.COLORS
-				Confetti.burst(self, Vector2(size.x / 2.0, size.y * 0.35), 90, colors, 3.0)
+				var colors := [Tokens.team_color(winner), Tokens.MOSTARDA, Tokens.SUPERFICIE] if winner != "" else Confetti.COLORS
+				Confetti.burst(self, Vector2(size.x / 2.0, size.y * 0.2), 60, colors, 2.6)
 
 
 func _on_connection(state: String) -> void:
@@ -196,14 +196,14 @@ func _on_connection(state: String) -> void:
 	if state == "reconnecting":
 		_conn_overlay = _overlay_card("Reconectando ao host...", "Não feche o app. Se a rede voltar, você volta pro mesmo lugar.", [])
 	elif state == "connected":
-		App.toast("Reconectado!", Tokens.TURQUESA)
+		App.toast("Reconectado!", Tokens.SALVIA)
 
 
 func _on_ended(reason: String) -> void:
 	if _leaving:
 		return
 	_leaving = true
-	App.toast(reason, Tokens.ROSA)
+	App.toast(reason, Tokens.VERMELHO)
 	_go_to_menu()
 
 
@@ -312,7 +312,7 @@ func _build_connecting() -> void:
 	tw.tween_property(hat, "rotation", 0.2, 0.4).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(hat, "rotation", -0.2, 0.4).set_trans(Tween.TRANS_SINE)
 	_root.add_child(UI.subtitle("Conectando à sala..."))
-	_root.add_child(UI.button("Cancelar", CartoonButton.Variant.SECONDARY, _leave))
+	_root.add_child(UI.button("Cancelar", AppButton.Variant.SECONDARY, _leave))
 
 
 # --- Lobby -----------------------------------------------------------------
@@ -327,7 +327,7 @@ func _build_local_lobby() -> void:
 	_name_edit = UI.line_edit("Nome do jogador", "", 20)
 	_name_edit.text_submitted.connect(func(_t): _add_local_player())
 	row.add_child(_name_edit)
-	row.add_child(UI.icon_button("plus", _add_local_player, CartoonButton.Variant.SUCCESS))
+	row.add_child(UI.icon_button("plus", _add_local_player, AppButton.Variant.SUCCESS))
 	av.add_child(row)
 	av.add_child(UI.label("De 4 a 12 jogadores, pelo menos 2 em cada time. Toque em ⇄ pra trocar de time.", 16, Tokens.TINTA_SUAVE))
 	_root.add_child(add)
@@ -348,7 +348,7 @@ func _build_wifi_lobby() -> void:
 	_header("Sala")
 	var code: String = v.get("room_code", "")
 	if session.is_host:
-		var rc := UI.card(Tokens.BRANCO, 24)
+		var rc := UI.card(Tokens.SUPERFICIE, 24)
 		var rv := UI.vbox(12)
 		rc.add_child(rv)
 		rv.add_child(UI.label("Chame a galera!", 26, Tokens.TINTA, Fonts.title(), HORIZONTAL_ALIGNMENT_CENTER))
@@ -376,7 +376,7 @@ func _teams_block(local_edit: bool) -> Control:
 	var box: BoxContainer = UI.hbox(16) if wide else UI.vbox(16)
 	var me: Dictionary = _me()
 	for team in ChapeuRules.TEAMS:
-		var c := UI.card(Tokens.BRANCO, 20)
+		var c := UI.card(Tokens.SUPERFICIE, 20)
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tv := UI.vbox(10)
 		c.add_child(tv)
@@ -402,7 +402,7 @@ func _teams_block(local_edit: bool) -> Control:
 				prow.add_child(UI.icon_button("close", func(): session.send({"type": "remove_player", "id": pid})))
 			tv.add_child(prow)
 		if not local_edit and not me.is_empty() and me.team != team:
-			var variant := CartoonButton.Variant.TEAM_AZUL if team == "azul" else CartoonButton.Variant.TEAM_VERMELHO
+			var variant := AppButton.Variant.TEAM_AZUL if team == "azul" else AppButton.Variant.TEAM_VERMELHO
 			var t: String = team
 			tv.add_child(UI.small_button("Entrar no %s" % Tokens.team_name(team), variant, func(): session.send({"type": "set_team", "team": t})))
 		box.add_child(c)
@@ -411,7 +411,7 @@ func _teams_block(local_edit: bool) -> Control:
 
 func _config_summary() -> Control:
 	var cfg: Dictionary = v.config
-	var c := UI.card(Tokens.GELO, 20)
+	var c := UI.card(Tokens.PAPEL, 20)
 	var cv := UI.vbox(10)
 	c.add_child(cv)
 	cv.add_child(UI.label("Partida", 22, Tokens.TINTA, Fonts.title()))
@@ -434,7 +434,7 @@ func _config_summary() -> Control:
 	lines.append("60 s por vez · pular custa 1 ponto · 3 rodadas")
 	cv.add_child(UI.label("\n".join(lines), 17, Tokens.TINTA, Fonts.body()))
 	if session.is_host:
-		cv.add_child(UI.small_button("Configurar", CartoonButton.Variant.SECONDARY, func():
+		cv.add_child(UI.small_button("Configurar", AppButton.Variant.SECONDARY, func():
 			_show_config = true
 			_rebuild(), "settings"))
 	return c
@@ -442,7 +442,7 @@ func _config_summary() -> Control:
 
 func _start_button() -> void:
 	var why: String = v.can_start
-	var b := UI.button("Começar partida", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "start"}), "play")
+	var b := UI.button("Começar partida", AppButton.Variant.SUCCESS, func(): session.send({"type": "start"}), "play")
 	b.height = 84
 	b.font_size = 26
 	b.disabled = why != ""
@@ -472,7 +472,7 @@ func _build_config() -> void:
 		var themes := UI.vbox(10)
 		for th in v.themes:
 			var on: bool = th.id in cfg.themes
-			var b := UI.small_button("%s (%d)" % [th.nome, th.count], CartoonButton.Variant.PRIMARY if on else CartoonButton.Variant.SECONDARY, Callable(), "check" if on else "")
+			var b := UI.small_button("%s (%d)" % [th.nome, th.count], AppButton.Variant.PRIMARY if on else AppButton.Variant.SECONDARY, Callable(), "check" if on else "")
 			b.selected = on
 			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			var id: String = th.id
@@ -489,7 +489,7 @@ func _build_config() -> void:
 		cv.add_child(UI.setting_block("Time adversário vê a palavra", UI.toggle(cfg.opponent_sees_word, func(on): _set_cfg({"opponent_sees_word": on})), "Pra fiscalizar quem explica. Seu time nunca vê."))
 	_root.add_child(c)
 	_root.add_child(UI.caption("Fixo: 60 segundos por vez, pular custa 1 ponto, 3 rodadas (Descrever, Uma palavra, Mímica)."))
-	_root.add_child(UI.button("Pronto", CartoonButton.Variant.SUCCESS, func():
+	_root.add_child(UI.button("Pronto", AppButton.Variant.SUCCESS, func():
 		_show_config = false
 		_rebuild(), "check"))
 
@@ -526,13 +526,13 @@ func _build_writing() -> void:
 			var cv := UI.vbox(16)
 			c.add_child(cv)
 			cv.add_child(UI.label("Passe o celular para", 24, Tokens.TINTA, Fonts.title(), HORIZONTAL_ALIGNMENT_CENTER))
-			var av := Avatar.new(p.name, Tokens.BRANCO, 110)
+			var av := Avatar.new(p.name, Tokens.SUPERFICIE, 110)
 			av.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			cv.add_child(av)
 			cv.add_child(UI.title(p.name, 48))
 			cv.add_child(UI.label("Só %s pode olhar a próxima tela." % p.name, 18, Tokens.TINTA, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
 			_root.add_child(c)
-			_root.add_child(UI.button("Sou %s, escrever" % p.name, CartoonButton.Variant.SUCCESS, func():
+			_root.add_child(UI.button("Sou %s, escrever" % p.name, AppButton.Variant.SUCCESS, func():
 				_writer_revealed = true
 				_rebuild(), "check"))
 			_progress_label = UI.caption(_writing_progress_text())
@@ -590,7 +590,7 @@ func _word_form(n: int, on_done: Callable, done_text: String) -> void:
 			else:
 				_submit_words(on_done))
 	_root.add_child(c)
-	_root.add_child(UI.button(done_text, CartoonButton.Variant.SUCCESS, func(): _submit_words(on_done), "check"))
+	_root.add_child(UI.button(done_text, AppButton.Variant.SUCCESS, func(): _submit_words(on_done), "check"))
 	_root.add_child(UI.spacer(260)) # espaço pro teclado
 	if not _word_edits.is_empty():
 		_word_edits[0].grab_focus.call_deferred()
@@ -601,7 +601,7 @@ func _submit_words(on_done: Callable) -> void:
 	for e in _word_edits:
 		var w := TextNorm.clean(e.text)
 		if w == "":
-			App.toast("Preencha todas as palavras", Tokens.ROSA)
+			App.toast("Preencha todas as palavras", Tokens.VERMELHO)
 			e.grab_focus()
 			return
 		words.append(w)
@@ -631,7 +631,7 @@ func _build_round_intro() -> void:
 	if int(v.round) > 0:
 		_root.add_child(Scoreboard.new(v.totals, session.local_role == "board"))
 	if session.is_host:
-		_root.add_child(UI.button("Começar rodada", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "next"}), "play"))
+		_root.add_child(UI.button("Começar rodada", AppButton.Variant.SUCCESS, func(): session.send({"type": "next"}), "play"))
 	else:
 		_root.add_child(UI.caption("Esperando o host..."))
 
@@ -671,7 +671,7 @@ func _build_turn_ready() -> void:
 			cv.add_child(UI.label("Continua com o tempo que sobrou: %d s" % int(ceil(v.carry_ms / 1000.0)), 20, Tokens.TINTA, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
 		_root.add_child(c)
 		if session.mode == "local" or i_explain:
-			var b := UI.button("Começar!", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "start_turn"}), "play")
+			var b := UI.button("Começar!", AppButton.Variant.SUCCESS, func(): session.send({"type": "start_turn"}), "play")
 			b.height = 96
 			b.font_size = 32
 			_root.add_child(b)
@@ -699,7 +699,7 @@ func _explainer_choices(team: String, small: bool) -> Control:
 		var label: String = "%s  ·  explicou %d×" % [p.name, p.explained] if p.explained > 0 else p.name
 		if not p.connected:
 			label = "%s (desconectado)" % p.name
-		var variant := CartoonButton.Variant.SECONDARY if small else (CartoonButton.Variant.TEAM_AZUL if team == "azul" else CartoonButton.Variant.TEAM_VERMELHO)
+		var variant := AppButton.Variant.SECONDARY if small else (AppButton.Variant.TEAM_AZUL if team == "azul" else AppButton.Variant.TEAM_VERMELHO)
 		var b := UI.small_button(label, variant) if small else UI.button(label, variant)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.disabled = not p.connected or p.id == v.explainer
@@ -745,8 +745,9 @@ func _build_turn() -> void:
 	if i_explain and not is_board:
 		_ring.custom_minimum_size = Vector2(170, 170)
 		_ring.diameter = 170
+		_root.add_child(UI.spacer(6))
 		_root.add_child(_ring)
-		_word_card = UI.card(Tokens.BRANCO, 28)
+		_word_card = UI.card(Tokens.SUPERFICIE, 28)
 		_word_card.custom_minimum_size.y = 220
 		var wc := CenterContainer.new()
 		_word_card.add_child(wc)
@@ -757,11 +758,11 @@ func _build_turn() -> void:
 		_stats_label = UI.label(_turn_stats_text(), 20, Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER)
 		_root.add_child(_stats_label)
 		var row := UI.hbox(16)
-		var skip := UI.button("Pular", CartoonButton.Variant.DANGER, func(): session.send({"type": "skip"}), "skip")
+		var skip := UI.button("Pular", AppButton.Variant.DANGER, func(): session.send({"type": "skip"}), "skip")
 		skip.height = 110
 		skip.font_size = 28
 		skip.sound = ""
-		var hit := UI.button("Acertou!", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "hit"}), "check")
+		var hit := UI.button("Acertou!", AppButton.Variant.SUCCESS, func(): session.send({"type": "hit"}), "check")
 		hit.height = 110
 		hit.font_size = 28
 		hit.sound = ""
@@ -794,7 +795,7 @@ func _build_turn() -> void:
 		_root.add_child(UI.subtitle("Vez do %s" % Tokens.team_name(team)))
 		_root.add_child(UI.caption("%s está explicando. Fica de olho!" % explainer.get("name", "")))
 		if v.config.opponent_sees_word:
-			_word_card = UI.card(Tokens.GELO, 20)
+			_word_card = UI.card(Tokens.PAPEL, 20)
 			var wv := UI.vbox(4)
 			_word_card.add_child(wv)
 			wv.add_child(UI.label("A palavra é", 16, Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
@@ -808,7 +809,7 @@ func _build_turn() -> void:
 
 
 func _build_paused(explainer: Dictionary, i_explain: bool) -> void:
-	var c := UI.card(Tokens.LIMA, 28)
+	var c := UI.card(Tokens.MOSTARDA, 28)
 	var cv := UI.vbox(14)
 	c.add_child(cv)
 	var disconnected: bool = v.pause_reason == "disconnect"
@@ -820,11 +821,11 @@ func _build_paused(explainer: Dictionary, i_explain: bool) -> void:
 		cv.add_child(UI.label("Restam %d s" % int(ceil(_time_ms / 1000.0)), 24, Tokens.TINTA, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
 	_root.add_child(c)
 	if not disconnected and i_explain:
-		var b := UI.button("Continuar", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "resume"}), "play")
+		var b := UI.button("Continuar", AppButton.Variant.SUCCESS, func(): session.send({"type": "resume"}), "play")
 		b.height = 96
 		_root.add_child(b)
 	elif disconnected and session.is_host:
-		_root.add_child(UI.button("Encerrar a vez de %s" % explainer.get("name", ""), CartoonButton.Variant.DANGER, func(): session.send({"type": "end_turn"})))
+		_root.add_child(UI.button("Encerrar a vez de %s" % explainer.get("name", ""), AppButton.Variant.DANGER, func(): session.send({"type": "end_turn"})))
 	elif not disconnected:
 		_root.add_child(UI.caption("%s pausou o jogo." % explainer.get("name", "")))
 	_root.add_child(Scoreboard.new(v.totals, session.local_role == "board", v.team_turn))
@@ -867,7 +868,7 @@ func _build_turn_summary() -> void:
 		flow.add_theme_constant_override("h_separation", 10)
 		flow.add_theme_constant_override("v_separation", 10)
 		for w in v.hit_words:
-			var chip := UI.card(Tokens.GELO, 12)
+			var chip := UI.card(Tokens.PAPEL, 12)
 			var wl := UI.label(w, 18, Tokens.TINTA, Fonts.body_bold())
 			wl.autowrap_mode = TextServer.AUTOWRAP_OFF
 			chip.add_child(wl)
@@ -879,7 +880,7 @@ func _build_turn_summary() -> void:
 	_root.add_child(Scoreboard.new(v.totals, session.local_role == "board"))
 	var can_next: bool = session.is_host or (not me.is_empty() and me.id == v.explainer)
 	if can_next:
-		_root.add_child(UI.button("Continuar", CartoonButton.Variant.PRIMARY, func(): session.send({"type": "next"}), "play"))
+		_root.add_child(UI.button("Continuar", AppButton.Variant.PRIMARY, func(): session.send({"type": "next"}), "play"))
 	else:
 		_root.add_child(UI.caption("Esperando %s continuar..." % explainer.get("name", "")))
 
@@ -904,7 +905,7 @@ func _build_round_end() -> void:
 	_root.add_child(Scoreboard.new(v.totals, session.local_role == "board"))
 	if session.is_host:
 		var last := r >= ChapeuRules.ROUNDS.size() - 1
-		_root.add_child(UI.button("Ver resultado" if last else "Próxima rodada", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "next"}), "trophy" if last else "play"))
+		_root.add_child(UI.button("Ver resultado" if last else "Próxima rodada", AppButton.Variant.SUCCESS, func(): session.send({"type": "next"}), "trophy" if last else "play"))
 	else:
 		_root.add_child(UI.caption("Esperando o host..."))
 
@@ -913,7 +914,7 @@ func _build_game_over() -> void:
 	var res: Dictionary = v.result
 	var winner: String = res.get("winner", "")
 	_root.add_child(UI.spacer(10))
-	var c := UI.card(Tokens.team_color(winner) if winner != "" else Tokens.LIMA, 30)
+	var c := UI.card(Tokens.team_color(winner) if winner != "" else Tokens.MOSTARDA, 30)
 	var cv := UI.vbox(10)
 	c.add_child(cv)
 	var trophy := UI.texture("trophy", 110, Tokens.TINTA)
@@ -946,9 +947,9 @@ func _build_game_over() -> void:
 		tv.add_child(row)
 	_root.add_child(table)
 	if session.is_host:
-		_root.add_child(UI.button("Jogar de novo", CartoonButton.Variant.SUCCESS, func(): session.send({"type": "rematch"}), "shuffle"))
+		_root.add_child(UI.button("Jogar de novo", AppButton.Variant.SUCCESS, func(): session.send({"type": "rematch"}), "shuffle"))
 		_root.add_child(UI.caption("Mesmos times e mesma configuração, palavras novas."))
-	_root.add_child(UI.button("Sair", CartoonButton.Variant.SECONDARY, _leave, "home"))
+	_root.add_child(UI.button("Sair", AppButton.Variant.SECONDARY, _leave, "home"))
 
 
 func _save_history() -> void:
@@ -992,7 +993,7 @@ func _overlay_card(title_text: String, body: String, buttons: Array) -> Control:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.add_child(center)
-	var c := UI.card(Tokens.BRANCO, 28)
+	var c := UI.card(Tokens.SUPERFICIE, 28)
 	c.custom_minimum_size.x = min(520.0, size.x - 48.0)
 	center.add_child(c)
 	var cv := UI.vbox(16)
@@ -1001,5 +1002,5 @@ func _overlay_card(title_text: String, body: String, buttons: Array) -> Control:
 	cv.add_child(UI.label(body, 18, Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
 	for b in buttons:
 		cv.add_child(b)
-	cv.add_child(UI.button("Sair da partida", CartoonButton.Variant.SECONDARY, _leave))
+	cv.add_child(UI.button("Sair da partida", AppButton.Variant.SECONDARY, _leave))
 	return shade

@@ -1,11 +1,13 @@
 class_name DevTour
 extends Node
 ## Ferramenta de desenvolvimento: percorre as telas e salva capturas em PNG.
-## Uso: godot --resolution 720x1280 -- --tour=/caminho/da/pasta [--tour-set=all|game|board]
+## Uso: godot -- --tour=/caminho/da/pasta [--tour-set=all|hub|game|board] [--tour-size=1080x1920]
+## Com --tour-size, renderiza fora da tela no tamanho exato (simulando o stretch do projeto).
 
 var out_dir := ""
 var set_name := "all"
 var _n := 0
+var _vp: SubViewport
 
 
 static func requested() -> bool:
@@ -22,20 +24,43 @@ static func start(main: Node) -> void:
 			t.out_dir = a.substr(7)
 		elif a.begins_with("--tour-set="):
 			t.set_name = a.substr(11)
+		elif a.begins_with("--tour-size="):
+			var wh := a.substr(12).split("x")
+			t._offscreen(main, Vector2i(int(wh[0]), int(wh[1])))
 	main.add_child(t)
 	t._run.call_deferred()
+
+
+## Move o app pra uma SubViewport do tamanho pedido, com o mesmo stretch do projeto
+## (720x1280 base, aspecto "expand").
+func _offscreen(main: Node, px: Vector2i) -> void:
+	_vp = SubViewport.new()
+	_vp.size = px
+	_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	var k: float = min(px.x / 720.0, px.y / 1280.0)
+	_vp.size_2d_override = Vector2i(roundi(px.x / k), roundi(px.y / k))
+	_vp.size_2d_override_stretch = true
+	var root := main.get_tree().root
+	root.add_child.call_deferred(_vp)
+	(func():
+		root.remove_child(main)
+		_vp.add_child(main)
+		(main as Control).theme = root.theme).call_deferred()
 
 
 func _shot(label: String) -> void:
 	await get_tree().create_timer(0.7).timeout
 	await RenderingServer.frame_post_draw
-	var img := get_viewport().get_texture().get_image()
+	var img := (_vp.get_texture() if _vp else get_viewport().get_texture()).get_image()
 	_n += 1
 	img.save_png("%s/%02d_%s.png" % [out_dir, _n, label])
 
 
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
+	# O tour não grava nada: histórico e configurações ficam só na memória.
+	History.persist = false
+	History.entries = []
 	Settings.music_volume = 0.0
 	Settings.sfx_volume = 0.0
 	if set_name in ["all", "hub"]:
@@ -53,7 +78,7 @@ func _hub() -> void:
 	App.push(load("res://app/screens/settings_screen.gd").new())
 	await _shot("settings")
 	App.back()
-	History.add({"date": "2026-09-25T21:40:00", "game": "chapeu", "game_name": "Chapéu", "mode": "local", "winner": "azul", "criterion": "pontos",
+	History.entries.push_front({"date": "2026-09-25T21:40:00", "game": "chapeu", "game_name": "Chapéu", "mode": "local", "winner": "azul", "criterion": "pontos",
 		"totals": {"azul": 31, "vermelho": 24}, "scores": [[12, 9], [10, 8], [9, 7]],
 		"players": [{"name": "Ana", "team": "azul"}, {"name": "Bruno", "team": "azul"}, {"name": "Carla", "team": "vermelho"}, {"name": "Davi", "team": "vermelho"}]})
 	App.push(load("res://app/screens/history_screen.gd").new())

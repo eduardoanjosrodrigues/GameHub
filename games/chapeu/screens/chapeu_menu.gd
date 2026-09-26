@@ -15,13 +15,13 @@ func _ready() -> void:
 	col.add_child(hat)
 	col.add_child(UI.caption("Cada um escreve palavras, tudo vai pro chapéu, e os times tentam adivinhar em 3 rodadas."))
 	col.add_child(UI.spacer(6))
-	col.add_child(_option("Passa-e-joga", "Um celular só, passando de mão em mão", "phone", CartoonButton.Variant.PRIMARY, func():
+	col.add_child(_option("Passa-e-joga", "Um celular só, passando de mão em mão", "phone", AppButton.Variant.PRIMARY, func():
 		App.push(GameScreen.new(LocalSession.new()))))
-	col.add_child(_option("Criar sala", "Cada um no seu celular, pelo Wi-Fi", "wifi", CartoonButton.Variant.SUCCESS, func():
+	col.add_child(_option("Criar sala", "Cada um no seu celular, pelo Wi-Fi", "wifi", AppButton.Variant.SUCCESS, func():
 		App.push(CreateRoom.new())))
-	col.add_child(_option("Entrar numa sala", "Alguém já criou? Entre por aqui", "enter", CartoonButton.Variant.ACCENT, func():
+	col.add_child(_option("Entrar numa sala", "Alguém já criou? Entre por aqui", "enter", AppButton.Variant.ACCENT, func():
 		App.push(JoinScreen.new())))
-	col.add_child(UI.small_button("Como jogar", CartoonButton.Variant.SECONDARY, func(): App.push(HowTo.new()), "book"))
+	col.add_child(UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(HowTo.new()), "book"))
 
 
 func _option(title_text: String, desc: String, icon_name: String, variant: int, on_press: Callable) -> Control:

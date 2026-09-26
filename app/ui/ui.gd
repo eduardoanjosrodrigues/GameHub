@@ -59,7 +59,7 @@ static func spacer(h := 0.0, expand := false) -> Control:
 	return c
 
 
-static func card(bg := Tokens.BRANCO, pad := 24) -> PanelContainer:
+static func card(bg := Tokens.SUPERFICIE, pad := 24) -> PanelContainer:
 	var p := PanelContainer.new()
 	var s := ThemeBuilder.card_style(bg)
 	s.content_margin_left = pad
@@ -70,16 +70,16 @@ static func card(bg := Tokens.BRANCO, pad := 24) -> PanelContainer:
 	return p
 
 
-static func button(text: String, variant := CartoonButton.Variant.PRIMARY, on_press := Callable(), icon_name := "") -> CartoonButton:
-	var b := CartoonButton.new(text, variant, icon(icon_name) if icon_name != "" else null)
+static func button(text: String, variant := AppButton.Variant.PRIMARY, on_press := Callable(), icon_name := "") -> AppButton:
+	var b := AppButton.new(text, variant, icon(icon_name) if icon_name != "" else null)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if on_press.is_valid():
 		b.pressed.connect(on_press)
 	return b
 
 
-static func small_button(text: String, variant := CartoonButton.Variant.SECONDARY, on_press := Callable(), icon_name := "") -> CartoonButton:
-	var b := CartoonButton.new(text, variant, icon(icon_name) if icon_name != "" else null)
+static func small_button(text: String, variant := AppButton.Variant.SECONDARY, on_press := Callable(), icon_name := "") -> AppButton:
+	var b := AppButton.new(text, variant, icon(icon_name) if icon_name != "" else null)
 	b.height = 58
 	b.font_size = 18
 	if on_press.is_valid():
@@ -87,8 +87,8 @@ static func small_button(text: String, variant := CartoonButton.Variant.SECONDAR
 	return b
 
 
-static func icon_button(icon_name: String, on_press := Callable(), variant := CartoonButton.Variant.SECONDARY) -> CartoonButton:
-	var b := CartoonButton.new("", variant, icon(icon_name))
+static func icon_button(icon_name: String, on_press := Callable(), variant := AppButton.Variant.SECONDARY) -> AppButton:
+	var b := AppButton.new("", variant, icon(icon_name))
 	b.height = 64
 	b.custom_minimum_size = Vector2(64, 64)
 	if on_press.is_valid():
@@ -162,7 +162,7 @@ static func player_row(p_name: String, color: Color, connected := true, extra :=
 static func segmented(options: Array, selected: String, on_select: Callable, enabled := true) -> HBoxContainer:
 	var row := hbox(10)
 	for opt in options:
-		var b := small_button(opt[1], CartoonButton.Variant.PRIMARY if opt[0] == selected else CartoonButton.Variant.SECONDARY)
+		var b := small_button(opt[1], AppButton.Variant.PRIMARY if opt[0] == selected else AppButton.Variant.SECONDARY)
 		b.selected = opt[0] == selected
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.disabled = not enabled and opt[0] != selected
@@ -190,8 +190,8 @@ static func stepper(value: int, min_v: int, max_v: int, step: int, on_change: Ca
 
 
 ## Interruptor liga/desliga no estilo cartoon.
-static func toggle(on: bool, on_change: Callable, enabled := true) -> CartoonButton:
-	var b := small_button("Ligado" if on else "Desligado", CartoonButton.Variant.SUCCESS if on else CartoonButton.Variant.SECONDARY)
+static func toggle(on: bool, on_change: Callable, enabled := true) -> AppButton:
+	var b := small_button("Ligado" if on else "Desligado", AppButton.Variant.SUCCESS if on else AppButton.Variant.SECONDARY)
 	b.custom_minimum_size.x = 150
 	b.disabled = not enabled
 	b.pressed.connect(func(): on_change.call(not on))

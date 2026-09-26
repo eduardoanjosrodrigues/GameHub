@@ -28,7 +28,7 @@ func _build() -> void:
 	for e in History.entries:
 		_col.add_child(_entry_card(e))
 	_col.add_child(UI.spacer(8))
-	_col.add_child(UI.small_button("Apagar histórico", CartoonButton.Variant.SECONDARY, func():
+	_col.add_child(UI.small_button("Apagar histórico", AppButton.Variant.SECONDARY, func():
 		App.confirm("Apagar histórico?", "Todas as partidas salvas neste aparelho serão apagadas.", "Apagar", func():
 			History.clear()
 			_build()), "trash"))
@@ -36,7 +36,7 @@ func _build() -> void:
 
 func _entry_card(e: Dictionary) -> Control:
 	var winner: String = e.get("winner", "")
-	var c := UI.card(Tokens.BRANCO, 20)
+	var c := UI.card(Tokens.SUPERFICIE, 20)
 	var v := UI.vbox(8)
 	c.add_child(v)
 	var head := UI.hbox(10)
@@ -59,7 +59,7 @@ func _entry_card(e: Dictionary) -> Control:
 	v.add_child(line)
 	var result_text := "Empate!" if winner == "" else "Venceu o %s" % Tokens.team_name(winner)
 	v.add_child(UI.label(result_text, 17, Tokens.TINTA_SUAVE, Fonts.body_bold()))
-	var open := UI.small_button("Ver detalhes", CartoonButton.Variant.SECONDARY, func(): App.push(HistoryDetail.new(e)))
+	var open := UI.small_button("Ver detalhes", AppButton.Variant.SECONDARY, func(): App.push(HistoryDetail.new(e)))
 	v.add_child(open)
 	return c
 

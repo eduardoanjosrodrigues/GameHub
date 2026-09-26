@@ -7,6 +7,8 @@ const PATH := "user://history.json"
 const MAX_ENTRIES := 100
 
 var entries: Array = []
+## Ferramentas de desenvolvimento desligam a gravação em disco.
+var persist := true
 
 
 func _ready() -> void:
@@ -28,6 +30,9 @@ func add(entry: Dictionary) -> void:
 	entries.push_front(entry)
 	if entries.size() > MAX_ENTRIES:
 		entries.resize(MAX_ENTRIES)
+	if not persist:
+		changed.emit()
+		return
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(entries))
