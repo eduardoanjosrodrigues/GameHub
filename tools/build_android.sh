@@ -14,6 +14,8 @@ mkdir -p build
 if [ ! -d android/build/libs ]; then
   unzip -q -o "$HOME/.local/share/godot/export_templates/4.7.2.stable/android_source.zip" "libs/*" -d android/build
 fi
+# Antes de tudo, confere se o pacote exportado abre sem erro de script.
+tools/check_export.sh "$G" || exit 1
 case "${1:-debug}" in
   debug|install)
     "$G" --headless --export-debug "Android" build/gamehub-debug.apk

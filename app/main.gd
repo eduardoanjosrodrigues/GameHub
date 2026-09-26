@@ -2,6 +2,9 @@ extends Control
 ## Raiz do app: fundo, área segura (notch/barra de gestos), telas e camada de avisos.
 
 const SplashScreen := preload("res://app/screens/splash_screen.gd")
+## Ferramentas de desenvolvimento (ficam fora do export; por isso são carregadas pelo caminho,
+## nunca pelo nome da classe — senão este script não compila no app instalado).
+const DEV_TOOLS := {"--bot=": "res://tools/net_bot.gd", "--tour=": "res://tools/dev_tour.gd"}
 
 var _safe: MarginContainer
 var _host: Control
@@ -37,14 +40,19 @@ func _ready() -> void:
 	_update_safe_area()
 
 	App.register_main(self, _host, _overlay)
-	if NetBot.requested():
-		NetBot.start(self)
-		return
-	if DevTour.requested():
-		DevTour.start(self)
+	if _start_dev_tool():
 		return
 	App.push(SplashScreen.new())
 	App.check_deep_link()
+
+
+func _start_dev_tool() -> bool:
+	for a in OS.get_cmdline_user_args():
+		for prefix in DEV_TOOLS:
+			if a.begins_with(prefix) and ResourceLoader.exists(DEV_TOOLS[prefix]):
+				load(DEV_TOOLS[prefix]).start(self)
+				return true
+	return false
 
 
 func _update_safe_area() -> void:
