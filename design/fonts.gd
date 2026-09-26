@@ -21,9 +21,6 @@ static func title() -> Font:
 
 
 ## Destaques em itálico (ex: logo).
-static func title_italic() -> Font:
-	return _variation(FRAUNCES, {"wght": 700, "opsz": 72, "SOFT": 100, "WONK": 1}, true)
-
 
 ## Botões e rótulos.
 static func ui() -> Font:

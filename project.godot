@@ -14,11 +14,11 @@ config/name="gamehub"
 config/description="Hub de joguinhos de festa. Primeiro jogo: Chapéu."
 config/version="1.0.0"
 run/main_scene="res://app/main.tscn"
+config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://design/icons/app_icon.svg"
 boot_splash/bg_color=Color(0.956863, 0.968627, 1, 1)
 boot_splash/show_image=false
-config/quit_on_go_back=false
+config/icon="res://design/icons/app_icon.svg"
 
 [autoload]
 
@@ -42,7 +42,6 @@ window/handheld/orientation=1
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
-timers/tooltip_delay_sec=0.5
 
 [input_devices]
 
@@ -50,8 +49,7 @@ pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
-textures/vram_compression/import_etc2_astc=true
-
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.956863, 0.968627, 1, 1)

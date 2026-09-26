@@ -18,6 +18,12 @@ O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/
 | `tools/` | Tour de capturas de tela, robôs de teste de rede, gerador de sons, build do Android |
 | `android/build/` | Template Gradle do Godot com o filtro do link `gamehub://entrar` (QR) |
 
+## Créditos
+
+- Fontes: Fraunces e Manrope (SIL Open Font License), em `design/fonts/`.
+- Ícones: [Phosphor Icons](https://phosphoricons.com) (MIT), em `design/icons/`.
+- Ilustrações, sons e músicas: feitos no próprio projeto.
+
 ## Comandos
 
 Use o executável do Godot 4.7.2 (aqui: `~/Downloads/Godot_v4.7.2-stable_linux.x86_64`, chamado de `godot` abaixo).

@@ -344,7 +344,7 @@ Regras de contraste:
 | `TimerRing` | Disco de papel com anel fino em tinta; nos últimos 10 s o anel e o número ficam vermelhos e o disco pulsa |
 | `Scoreboard` | Dois cartões sólidos (azul e vermelho) com números grandes em Fraunces |
 | Cartão da palavra | Cartão de papel grande com a palavra em Fraunces; entra com leve giro |
-| `Logo` | "game" em tinta + "hub" em azul, itálico, com uma fita mostarda embaixo e ponto vermelho |
+| `Logo` | "game" em tinta + "hub" em cobalto sobre uma fita mostarda + ponto final vermelho; estática |
 | `Confetti` | Papeizinhos coloridos que giram e "viram" enquanto caem |
 | `QrView` | QR em tinta sobre cartão branco puro (melhor pra câmera) |
 
@@ -352,7 +352,7 @@ Regras de contraste:
 
 - **Cartola** preta com faixa vermelha e papeizinhos saindo (ícone do app sobre fundo mostarda).
 - Rodadas: balão azul com linhas (Descrever), balão mostarda com uma palavra (Uma palavra), duas mãos (Mímica).
-- Ícones de interface com traço de 3,4 px, pontas arredondadas.
+- Ícones de interface: biblioteca **Phosphor Icons** (licença MIT), peso Bold (Fill no play e na pausa), em `design/icons/` com a licença em `LICENSE-phosphor.txt`.
 
 ## 8. Telas
 
