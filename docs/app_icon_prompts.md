@@ -6,8 +6,8 @@ Hoje o ícone é a cartola do Chapéu. O novo é um **leque de 4 cartas** nas co
 
 1. Cole o **bloco de estilo** e depois **uma** das variações, os dois na mesma mensagem. Gere umas 3 de cada variação que você gostar.
 2. Para ficar com cara de família, anexe o **Duque 1** do Coup (`art_originais/coup/art/duque_1.jpg`) e escreva "match the painting style of the attached image, but not its subject".
-3. Salve a escolhida como `design/icons/app_icon_art.png` (ou `.jpg`), quadrada, de 1024 × 1024 para cima. Se não conseguir decidir, salve mais de uma com qualquer nome em `design/icons/` e me diga os nomes.
-4. Eu gero todos os tamanhos do Android e da loja, e mostro como fica na tela do celular.
+3. Salve a escolhida como `art_originais/app_icon/app_icon_art.png` (ou `.jpg`), quadrada, de 1024 × 1024 para cima. As outras podem ficar na mesma pasta: ela não vai para o APK.
+4. Rode `python3 tools/app_icon.py`: ele separa o fundo, encaixa o desenho na área que o Android não recorta e gera os tamanhos em `design/store/`.
 
 Por que o desenho tem que ficar no meio: o Android recorta o ícone em círculo, quadrado arredondado ou gota, conforme o aparelho, e corta até 1/6 de cada borda. Por isso o prompt pede as cartas dentro dos 60% do meio e o fundo liso de ponta a ponta.
 
