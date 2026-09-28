@@ -14,7 +14,7 @@
 
 ## Configuração do app
 
-- Pacote: `com.eduardorodrigues.gamehub` (permanente depois da primeira publicação).
+- Pacote: `com.softbuilders.gamehub`, o do app GameHub que já existia no Play Console (o pacote é permanente lá). Até 2026-09-28 era `com.eduardorodrigues.gamehub`; quem tinha essa versão instalada fica com os dois apps no celular.
 - Android 12+ (`minSdk 31`), `targetSdk 36`, só `arm64-v8a`, retrato.
 - Permissões: internet, estado da rede e do Wi-Fi, multicast de Wi-Fi (descoberta de salas), vibração. **Não usa câmera.**
 - Link `gamehub://entrar?c=CODIGO`: declarado em `android/build/src/main/AndroidManifest.xml` num alias próprio (`.GameHubJoinLink`), porque o Godot regenera o alias do launcher a cada export.
