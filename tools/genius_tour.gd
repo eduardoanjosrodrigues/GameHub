@@ -29,6 +29,7 @@ func run(tour) -> void:
 	await tree.create_timer(0.4).timeout
 	await tour._shot("gn_solo_over")
 	App.home()
+	await _check_release(tree)
 
 	# Passa o aparelho.
 	var loc := PartyLocal.new("genius", GeniusRules.new(3))
@@ -92,3 +93,24 @@ func _click(board: Control, color: int, down: bool) -> InputEventMouseButton:
 	var off: Vector2 = [Vector2(-0.3, -0.3), Vector2(0.3, -0.3), Vector2(-0.3, 0.3), Vector2(0.3, 0.3)][color]
 	e.position = s / 2.0 + off * s
 	return e
+
+
+## Soltar o último botão da rodada com a próxima sequência já agendada apaga o botão e para o som.
+func _check_release(tree: SceneTree) -> void:
+	var solo: Screen = load("res://games/genius/screens/genius_solo.gd").new()
+	App.push(solo)
+	await tree.process_frame
+	solo._start()
+	solo._seq = [2]
+	solo._play_round(0)
+	await tree.create_timer(0.8).timeout
+	var b: GeniusBoard = solo._board
+	b._gui_input(_click(b, 2, true))
+	await tree.create_timer(0.3).timeout
+	b._gui_input(_click(b, 2, false))
+	await tree.process_frame
+	if b._lit != -1 or b.tones._on:
+		print("TOUR ERRO: botão ficou aceso depois do último toque (lit=%d)" % b._lit)
+	else:
+		print("TOUR ok: botão apaga depois do último toque")
+	App.home()

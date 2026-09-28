@@ -59,7 +59,6 @@ func play_sequence(seq: Array, start_ms: int) -> void:
 	_seq_start = start_ms
 	_seq_step = -1
 	interactive = false
-	_release_touch()
 
 
 func is_playing() -> bool:
@@ -116,6 +115,10 @@ func _step_playback(now: int) -> void:
 		return
 	var in_light := t % every < light
 	if in_light and i != _seq_step:
+		# Quem ainda segura o último botão da rodada anterior solta aqui.
+		if _touch >= 0:
+			_touch = -1
+			_release_pending = false
 		_seq_step = i
 		var left := light - t % every
 		# Entrou tarde demais nesta cor (tela remontada): só a luz, sem som picado.
@@ -165,7 +168,8 @@ func _release_touch() -> void:
 func _end_touch() -> void:
 	var c := _touch
 	_touch = -1
-	if _flash_color < 0 and _seq_start < 0:
+	# Com a próxima sequência só agendada (ainda não começou a tocar), o botão apaga normalmente.
+	if _flash_color < 0 and _seq_step < 0:
 		_set_lit(-1)
 		tones.release()
 	released.emit(c)

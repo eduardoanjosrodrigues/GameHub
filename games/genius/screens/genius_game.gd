@@ -7,7 +7,7 @@ extends PartyGameScreen
 ## decide de verdade.
 
 ## Passa o aparelho: pausa entre "Pronto" e a sequência, e antes de passar a vez.
-const LOCAL_LEAD_MS := 700
+const LOCAL_LEAD_MS := 1000
 const AFTER_OK_MS := 700
 const AFTER_FAIL_MS := 1700
 

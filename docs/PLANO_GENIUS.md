@@ -30,7 +30,7 @@ Legenda (a mesma dos outros planos): **[decidido]** veio das suas respostas; **[
 - A sequência é sorteada uma cor por vez, qualquer uma das 4, e **pode repetir** a mesma cor seguida (como no original) [proposta].
 - Uma rodada: o aparelho **toca** a sequência inteira (cada cor acende e soa), depois o jogador **repete** tocando os botões. Durante a reprodução, os botões não respondem.
 - Cada toque do jogador acende o botão e toca a nota dele, **enquanto o dedo estiver apertado** (como o original), com um mínimo de 0,15 s [proposta].
-- Acertou a sequência inteira → pausa curta (~0,8 s [proposta]) e a próxima rodada começa com uma cor a mais.
+- Acertou a sequência inteira → pausa curta (~1,3 s [proposta]) e a próxima rodada começa com uma cor a mais.
 - Errou → som de erro (o "buzz" grave do original), o botão certo **pisca** para mostrar qual era [proposta], e a partida acaba.
 - O placar de uma partida é o **número de cores da maior sequência completada**.
 
@@ -118,7 +118,7 @@ Notas do Simon original [verificar]:
 ## 9. Propostas para você confirmar
 
 1. A sequência pode repetir a mesma cor seguida (§2).
-2. O botão fica aceso enquanto o dedo estiver apertado, com mínimo de 0,15 s; pausa de 0,8 s entre rodadas (§2).
+2. O botão fica aceso enquanto o dedo estiver apertado, com mínimo de 0,15 s; pausa de 1,3 s entre rodadas (§2).
 3. Ao errar, o botão certo pisca (§2).
 4. A sequência não tem fim; acima de 31 cores, só comemora e segue na velocidade máxima (§2.1).
 5. Os tons são gerados pelo app, sem arquivos de áudio (§2.2).

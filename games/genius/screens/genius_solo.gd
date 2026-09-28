@@ -4,7 +4,7 @@ extends Screen
 
 const MENU := "res://games/genius/screens/genius_menu.gd"
 ## Pausa entre acertar e a próxima rodada (§2), e antes da primeira.
-const NEXT_MS := 800
+const NEXT_MS := 1300
 const LEGEND := 31 # o original "vencia" aqui (§2.1)
 
 var _board: GeniusBoard

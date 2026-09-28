@@ -165,7 +165,8 @@
       const wait = MIN_PRESS_MS - (performance.now() - b.touchAt);
       const end = () => {
         b.touch = -1;
-        if (b.flash < 0 && !b.seq) { setLit(-1); toneOff(); }
+        // Com a próxima sequência só agendada (ainda não começou a tocar), o botão apaga normalmente.
+        if (b.flash < 0 && b.step < 0) { setLit(-1); toneOff(); }
       };
       if (wait > 0) setTimeout(end, wait); else end();
     }
@@ -192,6 +193,7 @@
           } else {
             const on = t % every < light;
             if (on && i !== b.step) {
+              b.touch = -1;
               b.step = i;
               const left = light - (t % every);
               if (left > 60) toneOn(FREQS[b.seq[i]], left);
