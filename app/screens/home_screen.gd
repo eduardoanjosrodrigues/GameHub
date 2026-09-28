@@ -9,6 +9,7 @@ const ItoMenu := preload("res://games/ito/screens/ito_menu.gd")
 const SintoniaMenu := preload("res://games/sintonia/screens/sintonia_menu.gd")
 const QuemFoiMenu := preload("res://games/quem_foi/screens/quem_foi_menu.gd")
 const CoupMenu := preload("res://games/coup/screens/coup_menu.gd")
+const GeniusMenu := preload("res://games/genius/screens/genius_menu.gd")
 const SettingsScreen := preload("res://app/screens/settings_screen.gd")
 const HistoryScreen := preload("res://app/screens/history_screen.gd")
 const JoinScreen := preload("res://app/screens/join_screen.gd")
@@ -23,6 +24,7 @@ const GAMES := [
 	{"id": "ito", "nome": "Ito", "desc": "Números secretos e uma fila em ordem, sem dizer os números.", "icone": "ito", "cor": Tokens.VERMELHO, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "quem_foi", "nome": "Quem Foi?", "desc": "Um cocô no meio da sala! Passe a culpa pro bicho de alguém.", "icone": "quem_foi", "cor": Tokens.MOSTARDA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "coup", "nome": "Coup", "desc": "Blefe na corte: diga que é o Duque e torça pra ninguém desafiar.", "icone": "coup", "cor": Color("#6E3B93"), "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "genius", "nome": "Genius", "desc": "Olhe as cores, escute os sons e repita. Uma cor a mais a cada acerto!", "icone": "genius", "cor": Tokens.SALVIA, "botao": AppButton.Variant.SUCCESS, "pronto": true},
 	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
 ]
 
@@ -77,7 +79,7 @@ func _featured_card(g: Dictionary) -> Control:
 	tv.add_child(UI.label(g.desc, 18, Tokens.TINTA, Fonts.body_bold()))
 	row.add_child(tv)
 	v.add_child(row)
-	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu, "sintonia": SintoniaMenu, "ito": ItoMenu, "quem_foi": QuemFoiMenu, "coup": CoupMenu}.get(g.id, ChapeuMenu)
+	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu, "sintonia": SintoniaMenu, "ito": ItoMenu, "quem_foi": QuemFoiMenu, "coup": CoupMenu, "genius": GeniusMenu}.get(g.id, ChapeuMenu)
 	var play := UI.button("Jogar", g.botao, func(): App.push(menu.new()), "play")
 	v.add_child(play)
 	return c
