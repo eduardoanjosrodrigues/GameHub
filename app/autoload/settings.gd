@@ -10,6 +10,8 @@ var sfx_volume := 0.9
 var vibration := true
 var last_name := ""
 var device_id := ""
+## Quando cada jogo foi aberto pela última vez (id -> segundos Unix): ordena a tela inicial.
+var last_played := {}
 
 var _cfg := ConfigFile.new()
 
@@ -29,6 +31,8 @@ func load_settings() -> void:
 	vibration = bool(_cfg.get_value("feedback", "vibration", vibration))
 	last_name = str(_cfg.get_value("player", "last_name", last_name))
 	device_id = str(_cfg.get_value("device", "id", device_id))
+	var lp = _cfg.get_value("played", "last", {})
+	last_played = lp if lp is Dictionary else {}
 
 
 func save_settings() -> void:
@@ -37,6 +41,7 @@ func save_settings() -> void:
 	_cfg.set_value("feedback", "vibration", vibration)
 	_cfg.set_value("player", "last_name", last_name)
 	_cfg.set_value("device", "id", device_id)
+	_cfg.set_value("played", "last", last_played)
 	_cfg.save(PATH)
 	changed.emit()
 
@@ -61,6 +66,11 @@ func remember_name(n: String) -> void:
 	if n != "" and n != last_name:
 		last_name = n
 		save_settings()
+
+
+func mark_played(game_id: String) -> void:
+	last_played[game_id] = int(Time.get_unix_time_from_system())
+	save_settings()
 
 
 ## Identificador aleatório do aparelho (não tem relação com dados do aparelho).

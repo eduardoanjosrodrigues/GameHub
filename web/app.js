@@ -363,6 +363,7 @@ const GH = (() => {
     meta: { chapeu: { nome: "Chapéu", icone: "chapeu" }, halli: { nome: "Halli Galli", icone: "halli_galli" }, avalon: { nome: "Avalon", icone: "avalon" },
       secret_hitler: { nome: "Secret Hitler", icone: "secret_hitler" }, sintonia: { nome: "Sintonia", icone: "sintonia" }, ito: { nome: "Ito", icone: "ito" },
       quem_foi: { nome: "Quem Foi?", icone: "quem_foi" }, coup: { nome: "Coup", icone: "coup" },
+      wordle: { nome: "Wordle", icone: "wordle" }, senha: { nome: "Senha", icone: "senha" },
       genius: { nome: "Genius", icone: "genius" } },
     boardGames: ["avalon", "secret_hitler", "sintonia", "ito", "quem_foi", "coup"],
   };

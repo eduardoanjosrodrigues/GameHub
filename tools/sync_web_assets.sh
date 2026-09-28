@@ -21,7 +21,7 @@ cp design/icons/avalon.svg "$OUT/"
 cp games/avalon/art/*.svg "$OUT/"
 for f in games/avalon/art/emblems/*.svg; do cp "$f" "$OUT/emblema_$(basename "$f")"; done
 cp design/icons/secret_hitler.svg "$OUT/"
-cp design/icons/{sintonia,ito,quem_foi,coup,genius}.svg "$OUT/"
+cp design/icons/{sintonia,ito,quem_foi,coup,wordle,senha,genius}.svg "$OUT/"
 for f in games/coup/art/emblems/*.svg; do cp "$f" "$OUT/coup_$(basename "$f")"; done
 cp games/quem_foi/audio/qf_{pum,plim,descarga}.wav "$OUT/"
 for f in games/secret_hitler/art/*.svg; do cp "$f" "$OUT/sh_$(basename "$f")"; done

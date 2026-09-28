@@ -6,6 +6,8 @@ O segundo é o **Halli Galli**: cada um vira uma carta na sua vez e, quando a me
 
 O terceiro é o **Avalon**, de papéis secretos (5 a 10 pessoas): cada celular mostra o papel e o que a pessoa sabe, os votos são secretos e revelados juntos, e as cartas de missão são embaralhadas. Um tablet, TV ou notebook pode ser o tabuleiro. Plano em [docs/PLANO_AVALON.md](docs/PLANO_AVALON.md); os prompts da arte estão em [docs/avalon_prompts.md](docs/avalon_prompts.md).
 
+Os primeiros jogos solo são o **Wordle** (palavra do dia, treino, Dueto/Quarteto e Corrida no Wi-Fi) e o **Senha** (tipo Mastermind, com senha do dia, Duelo e Corrida). Plano em [docs/PLANO_WORDLE_SENHA.md](docs/PLANO_WORDLE_SENHA.md).
+
 O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/PLANO_FASE_1.md). O do Halli Galli está em [docs/PLANO_HALLI_GALLI.md](docs/PLANO_HALLI_GALLI.md).
 
 ## Estrutura
@@ -29,6 +31,7 @@ O plano da Fase 1, com todas as decisões, está em [docs/PLANO_FASE_1.md](docs/
 
 - Fontes: Fraunces e Manrope (SIL Open Font License), em `design/fonts/`.
 - Ícones: [Phosphor Icons](https://phosphoricons.com) (MIT), em `design/icons/`.
+- Palavras válidas do Wordle: [VERO](https://pt-br.libreoffice.org/projetos/projeto-vero-verificador-ortografico/), do LibreOffice (LGPLv3/MPL), em `games/wordle/data/palpites.txt`.
 - Ilustrações, sons e músicas: feitos no próprio projeto.
 
 ## Comandos
@@ -51,6 +54,13 @@ Partida inteira pela rede com 4 robôs (inclui queda de conexão e alguém tenta
 
 ```bash
 tools/net_test.sh godot
+```
+
+Wordle e Senha pela rede (Corrida com queda de conexão, ou Duelo):
+
+```bash
+tools/desafio_net_test.sh wordle corrida pontos godot
+tools/desafio_net_test.sh senha duelo tentativas godot
 ```
 
 Justiça do sino do Halli Galli pela rede (4 robôs com atrasos diferentes; quem toca primeiro tem a pior rede e tem que ganhar todas):

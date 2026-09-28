@@ -4,7 +4,7 @@ extends Control
 const SplashScreen := preload("res://app/screens/splash_screen.gd")
 ## Ferramentas de desenvolvimento (ficam fora do export; por isso são carregadas pelo caminho,
 ## nunca pelo nome da classe — senão este script não compila no app instalado).
-const DEV_TOOLS := {"--bot=": "res://tools/net_bot.gd", "--hbot=": "res://tools/halli_bot.gd", "--abot=": "res://tools/avalon_bot.gd", "--sbot=": "res://tools/sh_bot.gd", "--pbot=": "res://tools/party_bot.gd", "--qbot=": "res://tools/quem_foi_bot.gd", "--cbot=": "res://tools/coup_bot.gd", "--gbot=": "res://tools/genius_bot.gd", "--tour=": "res://tools/dev_tour.gd"}
+const DEV_TOOLS := {"--bot=": "res://tools/net_bot.gd", "--hbot=": "res://tools/halli_bot.gd", "--abot=": "res://tools/avalon_bot.gd", "--sbot=": "res://tools/sh_bot.gd", "--pbot=": "res://tools/party_bot.gd", "--qbot=": "res://tools/quem_foi_bot.gd", "--cbot=": "res://tools/coup_bot.gd", "--dbot=": "res://tools/desafio_bot.gd", "--gbot=": "res://tools/genius_bot.gd", "--tour=": "res://tools/dev_tour.gd"}
 
 var _safe: MarginContainer
 var _host: Control
