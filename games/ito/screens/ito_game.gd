@@ -3,14 +3,17 @@ extends PartyGameScreen
 ## o celular só. A fila é uma coluna com o fio vermelho: toque numa carta (da mão ou da fila) e
 ## depois em "Colocar aqui" pra pôr ou mudar de lugar.
 
-const REVEAL_STEP_S := 0.6
+const FLIP_LOCK_MS := 450 # evita virar duas com um toque duplo
+const REVEAL_HOLD_S := 0.9 # a última carta gira antes do veredito aparecer
 
 var _sel := "" # carta escolhida pra pôr ou mudar de lugar
 var _sel_new := false # veio da mão (pôr) ou da fila (mover)
 var _pass_round := 0 # celular só: rodada em que todos já viram os números
 var _pass_i := 0
 var _pass_open := false
-var _anim_round := -1 # rodada cuja revelação já foi animada
+var _seen_round := -1 # revelação: rodada e quantas viradas este aparelho já mostrou
+var _seen_shown := 0
+var _flip_lock := 0
 
 
 func _menu_path() -> String:
@@ -387,34 +390,178 @@ func _peek_show(pid: String, pname: String) -> void:
 
 
 # --- Revelação -------------------------------------------------------------
+# O host vira as cartas da fila uma por uma, tocando no monte (como no Halli Galli). Cada toque
+# chega em todos os aparelhos ao mesmo tempo e a carta gira na pilha de cima.
 
 func _build_reveal() -> void:
 	_header("Revelação")
 	_status()
 	_theme_block()
+	var row: Array = v.row
+	var shown := int(v.shown)
+	var animate := false
+	if _seen_round != int(v.round_no):
+		_seen_round = int(v.round_no)
+		_seen_shown = shown
+	elif shown > _seen_shown:
+		animate = true
+		_seen_shown = shown
+	var done := shown >= row.size()
+	_root.add_child(_stage(row, shown, animate))
+	_root.add_child(_reveal_row(row, shown))
+	if not done:
+		return
 	var res: Dictionary = v.result
-	var errors: Array = res.get("errors", [])
+	var result := _result_card(res)
+	_root.add_child(result)
+	var cont := UI.button("Próxima rodada" if res.get("next", "") == "round" else "Ver o fim", AppButton.Variant.SUCCESS, func(): session.send({"type": "continue"}), "play")
+	cont.height = 80
+	cont.visible = _member() or _board
+	_root.add_child(cont)
+	if not animate:
+		return
+	# A última carta acabou de virar: o veredito espera ela cair na pilha.
+	result.visible = false
+	cont.disabled = true
+	var tw := result.create_tween()
+	tw.tween_interval(REVEAL_HOLD_S)
+	tw.tween_callback(func():
+		result.visible = true
+		cont.disabled = false
+		Audio.sfx("win" if res.get("ok", false) else "skip")
+		if res.get("ok", false):
+			Haptics.hit()
+			Confetti.burst(self, Vector2(size.x / 2.0, size.y * 0.3), 50, [ItoArt.FIO, Tokens.MOSTARDA, Tokens.SALVIA], 2.2)
+		else:
+			Haptics.skip())
+
+
+## O monte (cartas por virar) e a pilha (a última virada), lado a lado.
+func _stage(row: Array, shown: int, animate: bool) -> Control:
+	var c := UI.card(Tokens.PAPEL, 20)
+	var cv := UI.vbox(14)
+	c.add_child(cv)
+	var w := float(_fs(180, 240))
+	var left := row.size() - shown
+	var can := session.is_host and left > 0
+	var hb := UI.hbox(_fs(28, 64))
+	hb.alignment = BoxContainer.ALIGNMENT_CENTER
+	cv.add_child(hb)
+	var deck_col := UI.vbox(8)
+	deck_col.custom_minimum_size.x = w + 14
+	var deck := ItoArt.CardStack.new(left, w, can)
+	deck.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	deck.tapped.connect(_on_flip_tap)
+	deck_col.add_child(deck)
+	var dl := "Nenhuma no monte" if left == 0 else ("Falta 1 carta" if left == 1 else "Faltam %d cartas" % left)
+	deck_col.add_child(UI.label(dl, _fs(16, 22), Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+	hb.add_child(deck_col)
+	var pile_col := UI.vbox(6)
+	pile_col.custom_minimum_size.x = w + 14
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(w, w * 1.3 + 14)
+	holder.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pile_col.add_child(holder)
+	if shown > 0:
+		var last: Dictionary = row[shown - 1]
+		var face := _pile_card(holder, last)
+		pile_col.add_child(UI.label(_name(last.owner), _fs(19, 26), Tokens.TINTA, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+		if last.word != "":
+			pile_col.add_child(UI.label("“%s”" % last.word, _fs(17, 24), Tokens.TINTA, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
+		if shown > 1:
+			pile_col.add_child(UI.label("Fora de ordem!" if last.bad else "Em ordem", _fs(18, 26), Tokens.VERMELHO_ESCURO if last.bad else Tokens.SALVIA_ESCURO, Fonts.title_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+		if animate:
+			_animate_flip(holder, face, last.bad)
+	else:
+		var slot := ItoArt.CardStack.new(0, w, false)
+		holder.add_child(slot)
+		pile_col.add_child(UI.label("A menor da fila vem primeiro", _fs(16, 22), Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
+	hb.add_child(pile_col)
+	if left > 0:
+		var top := 0
+		for i in shown:
+			top = maxi(top, int(row[i].n))
+		var nxt: Dictionary = row[shown]
+		var who := "Próxima: %s" % _name(nxt.owner) + (" · “%s”" % nxt.word if nxt.word != "" else "")
+		cv.add_child(UI.label(who, _fs(19, 26), Tokens.TINTA, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+		if top > 0:
+			cv.add_child(UI.label("Tem que ser maior que %d" % top, _fs(17, 24), Tokens.TINTA_SUAVE, Fonts.body(), HORIZONTAL_ALIGNMENT_CENTER))
+		var hint := "Toque no monte pra virar a próxima carta." if can else "O host vira as cartas, uma por uma."
+		cv.add_child(UI.label(hint, _fs(16, 22), Tokens.MOSTARDA_ESCURO if can else Tokens.TINTA_SUAVE, Fonts.body_bold(), HORIZONTAL_ALIGNMENT_CENTER))
+	return c
+
+
+func _pile_card(holder: Control, r: Dictionary) -> Control:
+	var w: float = holder.custom_minimum_size.x
+	var face := ItoArt.number_card(int(r.n), w, Tokens.VERMELHO if r.bad else Tokens.SALVIA)
+	holder.add_child(face)
+	face.size = Vector2(w, w * 1.3)
+	face.pivot_offset = face.size / 2.0
+	return face
+
+
+## A carta gira no lugar: o verso encolhe, a frente abre, dá um pulinho e assenta.
+## Fora de ordem, ela treme.
+func _animate_flip(holder: Control, face: Control, bad: bool) -> void:
+	var back := ItoArt.number_card(-1, face.size.x)
+	holder.add_child(back)
+	back.size = face.size
+	back.pivot_offset = face.pivot_offset
+	face.scale = Vector2(0.0, 1.08)
+	Audio.sfx("hg_flip")
+	Haptics.hg_flip()
+	var tw := holder.create_tween()
+	tw.tween_property(back, "scale", Vector2(0.0, 1.08), 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tw.tween_callback(back.queue_free)
+	tw.tween_property(face, "scale", Vector2(1.12, 1.12), 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_callback(func():
+		Audio.sfx("buzzer" if bad else "tick")
+		if bad:
+			Haptics.skip())
+	tw.tween_property(face, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if bad:
+		for k in 4:
+			tw.tween_property(face, "position:x", 10.0 if k % 2 == 0 else -10.0, 0.05)
+		tw.tween_property(face, "position:x", 0.0, 0.05)
+
+
+func _on_flip_tap() -> void:
+	var now := Time.get_ticks_msec()
+	if now < _flip_lock:
+		return
+	_flip_lock = now + FLIP_LOCK_MS
+	session.send({"type": "flip"})
+
+
+## A fila com o fio, enchendo de números conforme o host vira.
+func _reveal_row(row: Array, shown: int) -> Control:
 	var c := UI.card(Tokens.SUPERFICIE, 18)
 	var th := ItoArt.ThreadLine.new()
 	th.add_theme_constant_override("separation", 8)
 	c.add_child(th)
 	th.add_child(_end_marker("0 · o mínimo"))
-	var slots: Array = []
-	for r in v.row:
+	for i in row.size():
+		var r: Dictionary = row[i]
+		var bg := Tokens.tint(Tokens.VERMELHO, 0.35) if r.bad else Tokens.tint(_color(r.owner), 0.25)
+		var style := ThemeBuilder.card_style(bg)
+		if i == shown - 1:
+			style.border_color = Tokens.TINTA
+			style.set_border_width_all(3)
 		var p := PanelContainer.new()
 		p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		p.add_theme_stylebox_override("panel", ThemeBuilder.card_style(Tokens.tint(_color(r.owner), 0.25)))
-		var row := UI.hbox(12)
-		p.add_child(row)
+		p.add_theme_stylebox_override("panel", style)
+		var hb := UI.hbox(12)
+		p.add_child(hb)
 		var txt := UI.vbox(2)
 		txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		txt.add_child(UI.label(_name(r.owner), _fs(19, 26), Tokens.TINTA, Fonts.body_bold()))
 		if r.word != "":
 			txt.add_child(UI.label("“%s”" % r.word, _fs(17, 24), Tokens.TINTA, Fonts.body()))
-		row.add_child(txt)
-		var holder := CenterContainer.new()
-		holder.custom_minimum_size = Vector2(_fs(56, 76), _fs(70, 96))
-		row.add_child(holder)
+		hb.add_child(txt)
+		var mini := ItoArt.number_card(int(r.n), _fs(52, 70), (Tokens.VERMELHO if r.bad else Tokens.SALVIA) if i < shown else ItoArt.VERSO)
+		mini.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hb.add_child(mini)
 		var m := UI.margin(0, 0, 0)
 		m.add_theme_constant_override("margin_left", 52)
 		m.add_theme_constant_override("margin_top", 4)
@@ -422,47 +569,8 @@ func _build_reveal() -> void:
 		m.set_meta("knot", true)
 		m.add_child(p)
 		th.add_child(m)
-		slots.append({"holder": holder, "panel": p, "n": int(r.n), "bad": r.card in errors})
 	th.add_child(_end_marker("100 · o máximo"))
-	_root.add_child(c)
-	var result := _result_card(res)
-	_root.add_child(result)
-	var cont := UI.button("Próxima rodada" if res.get("next", "") == "round" else "Ver o fim", AppButton.Variant.SUCCESS, func(): session.send({"type": "continue"}), "play")
-	cont.height = 80
-	cont.visible = _member() or _board
-	_root.add_child(cont)
-	if int(v.round_no) == _anim_round:
-		for s in slots:
-			_flip(s)
-		return
-	# Suspense: os números aparecem um por um.
-	result.visible = false
-	cont.disabled = true
-	var tw := create_tween()
-	for s in slots:
-		tw.tween_interval(REVEAL_STEP_S)
-		tw.tween_callback(func():
-			if is_instance_valid(s.holder):
-				_flip(s)
-				Audio.sfx("buzzer" if s.bad else "tick")
-				if s.bad:
-					Haptics.skip())
-	tw.tween_interval(0.4)
-	tw.tween_callback(func():
-		_anim_round = int(v.round_no)
-		if is_instance_valid(result):
-			result.visible = true
-			cont.disabled = false
-			Audio.sfx("win" if res.get("ok", false) else "skip")
-			if res.get("ok", false):
-				Confetti.burst(self, Vector2(size.x / 2.0, size.y * 0.3), 40, [ItoArt.FIO, Tokens.MOSTARDA, Tokens.SALVIA], 2.0))
-
-
-func _flip(s: Dictionary) -> void:
-	UI.clear(s.holder)
-	s.holder.add_child(ItoArt.number_card(s.n, _fs(52, 70), Tokens.VERMELHO if s.bad else Tokens.SALVIA))
-	if s.bad:
-		(s.panel as PanelContainer).add_theme_stylebox_override("panel", ThemeBuilder.card_style(Tokens.tint(Tokens.VERMELHO, 0.35)))
+	return c
 
 
 func _result_card(res: Dictionary) -> Control:
@@ -518,7 +626,7 @@ func _before_rebuild(events: Array) -> void:
 				_pass_round = 0
 				_pass_i = 0
 				_pass_open = false
-				_anim_round = -1
+				_seen_round = -1
 			"dealt":
 				_sel = ""
 

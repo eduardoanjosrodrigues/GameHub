@@ -42,7 +42,9 @@ var best := 0 # maior nível vencido nesta sequência
 var round_no := 0
 var cards := {} # id da carta -> {id, owner, n, word}
 var row: Array = [] # ids das cartas na fila, da menor pra maior
-var result := {} # na revelação: {errors: [ids], lost, ok, next: "round" | "game_over", won}
+var result := {} # na revelação: {errors: [ids], lost, ok, next: "round" | "game_over", won,
+		# e como a mesa estava antes (level, lives, best, extreme), pra mostrar enquanto vira}
+var shown := 0 # na revelação: quantas cartas da fila o host já virou
 var rounds: Array = [] # {level, theme, cards: [{owner, n, word}], errors}
 var round_since := 0
 var end_reason := "" # "lives" | "won" | "finished"
@@ -95,6 +97,10 @@ func extreme() -> bool:
 		if cards_of(p.id) >= 3:
 			return true
 	return false
+
+
+func all_shown() -> bool:
+	return shown >= row.size()
 
 
 func all_placed() -> bool:
@@ -318,8 +324,9 @@ func _a_reveal(actor: Dictionary, _a: Dictionary) -> Dictionary:
 			errors.append(id)
 		top = maxi(top, n)
 	var lvl := level()
+	var before := {"level": lvl, "lives": lives, "best": best, "extreme": extreme()}
 	rounds.append({"level": lvl, "theme": theme, "cards": row.map(func(id): return {"owner": cards[id].owner, "n": cards[id].n, "word": cards[id].word}), "errors": errors.size()})
-	result = {"errors": errors, "lost": 0, "ok": errors.is_empty(), "next": "round", "won": false}
+	result = {"errors": errors, "lost": 0, "ok": errors.is_empty(), "next": "round", "won": false, "before": before}
 	if config.mode == MODE_DESAFIO:
 		if errors.is_empty():
 			best = maxi(best, lvl)
@@ -332,7 +339,24 @@ func _a_reveal(actor: Dictionary, _a: Dictionary) -> Dictionary:
 			if lives <= 0:
 				result.next = "game_over"
 	phase = PHASE_REVEAL
-	return _ok([{"type": "phase", "phase": phase}, {"type": "revealed", "errors": errors.size(), "ok": errors.is_empty()}])
+	shown = 0
+	return _ok([{"type": "phase", "phase": phase}, {"type": "revealed"}])
+
+
+## O host vira a próxima carta da fila, da menor pra maior. Todos veem ao mesmo tempo.
+func _a_flip(actor: Dictionary, _a: Dictionary) -> Dictionary:
+	if phase != PHASE_REVEAL:
+		return _err("Não é hora de virar cartas.")
+	if not actor.get("host", false):
+		return _err("Só o host vira as cartas.")
+	if all_shown():
+		return _err("Todas as cartas já foram viradas.")
+	var id: String = row[shown]
+	shown += 1
+	var ev := {"type": "flip", "card": id, "bad": id in result.errors, "done": all_shown()}
+	if ev.done:
+		ev["ok"] = result.ok
+	return _ok([ev])
 
 
 func _a_continue(actor: Dictionary, _a: Dictionary) -> Dictionary:
@@ -340,6 +364,8 @@ func _a_continue(actor: Dictionary, _a: Dictionary) -> Dictionary:
 		return _err("Nada pra continuar.")
 	if not (_is_member(actor) or actor.get("board", false)):
 		return _err("Só quem está na partida continua.")
+	if not all_shown():
+		return _err("Virem todas as cartas primeiro.")
 	if result.next == "game_over":
 		end_reason = "won" if result.won else "lives"
 		phase = PHASE_GAME_OVER
@@ -372,18 +398,32 @@ func set_connected(id: String, connected: bool) -> Array:
 func view_for(viewer: Dictionary, now := 0) -> Dictionary:
 	var you: String = viewer.get("id", "")
 	var open := phase in [PHASE_REVEAL, PHASE_GAME_OVER]
+	var revealing := phase == PHASE_REVEAL
+	var done := phase == PHASE_GAME_OVER or (revealing and all_shown())
 	var hide_owner := extreme() and not open
 	var out_row: Array = []
-	for id in row:
-		var c: Dictionary = cards[id]
+	var bad_shown := 0
+	for i in row.size():
+		var c: Dictionary = cards[row[i]]
 		var mine: bool = you != "" and c.owner == you
+		# Na revelação, cada número só aparece depois que o host vira a carta (até o próprio).
+		var face: bool = phase == PHASE_GAME_OVER or (revealing and i < shown) or (not open and mine)
+		var bad: bool = revealing and i < shown and c.id in result.errors
+		if bad:
+			bad_shown += 1
 		out_row.append({
-			"card": id,
+			"card": c.id,
 			"owner": "" if hide_owner and not mine else c.owner,
 			"word": c.word,
-			"n": c.n if open or mine else -1,
+			"n": c.n if face else -1,
 			"mine": mine,
+			"bad": bad,
 		})
+	# Enquanto vira, a mesa mostra como estava antes: cada carta fora de ordem quebra um coração.
+	var before: Dictionary = result.get("before", {}) if revealing else {}
+	var show_lives := lives
+	if not before.is_empty():
+		show_lives = int(before.lives) - mini(bad_shown, int(result.lost))
 	var hand: Array = []
 	var pending := {} # id -> cartas que ainda não foram pra fila
 	for id in cards:
@@ -412,11 +452,11 @@ func view_for(viewer: Dictionary, now := 0) -> Dictionary:
 		"config": config.duplicate(true),
 		"local": local_mode,
 		"can_start": can_start(),
-		"level": level(),
-		"lives": lives,
+		"level": int(before.level) if not before.is_empty() else level(),
+		"lives": show_lives,
 		"max_lives": LIVES,
-		"best": best,
-		"extreme": extreme(),
+		"best": int(before.best) if not before.is_empty() and not done else best,
+		"extreme": bool(before.extreme) if not before.is_empty() else extreme(),
 		"round_no": round_no,
 		"theme": theme,
 		"theme_options": theme_options.duplicate() if phase == PHASE_THEME else [],
@@ -428,8 +468,9 @@ func view_for(viewer: Dictionary, now := 0) -> Dictionary:
 		"pending_total": cards.size() - row.size(),
 		"loose": loose,
 		"all_placed": all_placed(),
-		"result": result.duplicate(true) if open and phase == PHASE_REVEAL else {},
-		"rounds": rounds.duplicate(true) if open else [],
+		"shown": shown if revealing else 0,
+		"result": result.duplicate(true) if revealing and done else {},
+		"rounds": rounds.duplicate(true) if phase == PHASE_GAME_OVER else [],
 		"end_reason": end_reason,
 		"timer_left_ms": maxi(0, int(config.timer_min) * 60000 - (now - round_since)) if phase == PHASE_PLAY and int(config.timer_min) > 0 else -1,
 	}
@@ -497,6 +538,7 @@ func _deal(events: Array) -> Array:
 		theme_options[1] = themes.draw(rng)
 	theme_options = theme_options.filter(func(t): return t != "")
 	result = {}
+	shown = 0
 	round_no += 1
 	phase = PHASE_THEME
 	events.append({"type": "phase", "phase": phase})

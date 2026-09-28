@@ -221,12 +221,34 @@ img.qr { width: min(100%, 320px); aspect-ratio: 1; margin: 0 auto; display: bloc
 .ito-thread::before { content: ""; position: absolute; left: 16px; top: 10px; bottom: 10px; width: 4px; border-radius: 2px; background: var(--vermelho); }
 .ito-end { color: var(--suave); font-weight: 700; font-size: 15px; position: relative; }
 .ito-item { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; min-height: 58px; cursor: pointer; }
+.ito-item > .grow { flex: 1 1 0; min-width: 0; }
 .ito-item b { display: block; font-size: 18px; }
 .ito-item small { display: block; font-size: 16px; }
 .ito-end::before, .ito-item::before { content: ""; position: absolute; left: -31px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--vermelho); }
 .ito-item.sel { outline: 3px solid var(--tinta); }
 .ito-slot { width: 54px; height: 68px; flex: none; border-radius: 12px; background: #2B2A33; }
 .ito-slot:has(.ito-card) { background: none; }
+.ito-card.big { width: 150px; height: 195px; font-size: 68px; margin: 0; }
+.ito-stage { display: flex; justify-content: center; gap: 24px; }
+.ito-pilecol { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 164px; text-align: center; }
+.ito-pilecol small { color: var(--suave); font-weight: 700; }
+.ito-pilecol b { font-size: 18px; }
+.ito-deck > .ito-card { border-color: var(--superficie); }
+.ito-deck { box-shadow: 4px 4px 0 -1px #2B2A33, 8px 8px 0 -2px #2B2A33; border-radius: 18px; }
+.ito-empty { width: 150px; height: 195px; border: 3px solid var(--linha, #E3DACB); border-radius: 18px; }
+.ito-card.flip { animation: ito-flip 0.56s ease-out; }
+.ito-card.flip.shake { animation: ito-flip 0.56s ease-out, ito-shake 0.25s 0.56s linear; }
+@keyframes ito-flip {
+  0% { transform: scaleX(1); background: #2B2A33; color: transparent; }
+  28% { transform: scaleX(0) scaleY(1.08); background: #2B2A33; color: transparent; }
+  29% { background: var(--superficie); color: inherit; }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes ito-shake { 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+@media (max-width: 380px) { .ito-card.big, .ito-empty { width: 124px; height: 161px; font-size: 56px; } .ito-pilecol { width: 136px; } .ito-stage { gap: 14px; } }
+.av-board .ito-card.big, .av-board .ito-empty { width: 210px; height: 273px; font-size: 96px; }
+.av-board .ito-pilecol { width: 224px; }
 .av-board .ito-card.mini { width: 70px; height: 90px; font-size: 34px; }
 .av-board .ito-item b { font-size: 24px; }
 

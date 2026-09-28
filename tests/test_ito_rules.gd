@@ -27,6 +27,11 @@ func _play(r: ItoRules, order: Callable) -> void:
 		check(r.apply(_as(c.owner), {"type": "place", "card": c.id, "to": i}).ok, "pôr %s" % c.id)
 
 
+func _flip_all(r: ItoRules) -> void:
+	while not r.all_shown():
+		check(r.apply(HOST, {"type": "flip"}).ok, "vira")
+
+
 func _sorted(r: ItoRules) -> Callable:
 	return func(ids: Array) -> Array:
 		var out := ids.duplicate()
@@ -118,6 +123,7 @@ func test_errors_left_to_right() -> void:
 		r2.cards[ids2[i]].n = n2[i]
 		r2.apply(_as(r2.cards[ids2[i]].owner), {"type": "place", "card": ids2[i], "to": i})
 	r2.apply(_as("p0"), {"type": "reveal"})
+	_flip_all(r2)
 	eq(r2.result.errors.size(), 3, "três erros")
 	eq(r2.lives, 3, "rodada solta não tem vidas")
 	eq(r2.result.next, "round", "segue")
@@ -131,6 +137,7 @@ func test_desafio_progression_and_extreme() -> void:
 	r.apply(_as("p0"), {"type": "reveal"})
 	check(r.result.ok, "acertou")
 	eq(r.best, 1, "recorde 1")
+	_flip_all(r)
 	r.apply(_as("p1"), {"type": "continue"})
 	eq(r.level(), 2, "nível 2")
 	eq(r.total_cards(), 4, "uma carta a mais")
@@ -139,6 +146,7 @@ func test_desafio_progression_and_extreme() -> void:
 	for k in 3:
 		_play(r, _sorted(r))
 		r.apply(_as("p0"), {"type": "reveal"})
+		_flip_all(r)
 		r.apply(_as("p0"), {"type": "continue"})
 	eq(r.level(), 5, "nível 5")
 	check(r.extreme(), "extremo com alguém em 3")
@@ -158,6 +166,7 @@ func test_desafio_lives_and_repeat() -> void:
 	r.apply(_as("p0"), {"type": "reveal"})
 	eq(r.result.errors.size(), 2, "dois erros")
 	eq(r.lives, 1, "perdeu 2 vidas")
+	_flip_all(r)
 	r.apply(_as("p0"), {"type": "continue"})
 	eq(r.level(), 1, "repete o nível")
 	eq(r.round_no, 2, "rodada nova")
@@ -166,6 +175,7 @@ func test_desafio_lives_and_repeat() -> void:
 	eq(r.lives, 0, "sem vidas")
 	eq(r.result.lost, 1, "perde só o que tinha")
 	eq(r.result.next, "game_over", "acaba")
+	_flip_all(r)
 	r.apply(_as("p0"), {"type": "continue"})
 	eq(r.phase, "game_over", "fim")
 	eq(r.end_reason, "lives", "motivo")
@@ -194,7 +204,40 @@ func test_view_hides_numbers() -> void:
 	r.apply(_as("p2"), {"type": "place", "card": last, "to": 2})
 	r.apply(_as("p2"), {"type": "reveal"})
 	b = r.view_for({"id": "", "role": "board"})
-	check(b.row.all(func(x): return x.n > 0), "na revelação todos veem")
+	check(b.row.all(func(x): return x.n == -1), "na revelação, antes de virar, ninguém vê")
+	eq(r.view_for({"id": "p0", "role": "player"}).row[0].n, -1, "nem o próprio")
+	_flip_all(r)
+	b = r.view_for({"id": "", "role": "board"})
+	check(b.row.all(func(x): return x.n > 0), "depois de virar todos veem")
+
+
+func test_flip_one_by_one() -> void:
+	var r := _game(3, "desafio", 4)
+	_play(r, _reversed(r))
+	r.apply(_as("p1"), {"type": "reveal"})
+	eq(r.lives, 1, "as vidas já saem nas regras")
+	var v := r.view_for({"id": "p1", "role": "player"})
+	eq(v.shown, 0, "nenhuma virada")
+	eq(v.lives, 3, "a mesa ainda mostra 3 vidas")
+	eq(v.level, 1, "nível de antes")
+	eq(v.result, {}, "resultado escondido")
+	check(not r.apply(_as("p1"), {"type": "flip"}).ok, "só o host vira")
+	check(not r.apply(_as("p1"), {"type": "continue"}).ok, "não continua antes de virar tudo")
+	var res := r.apply(HOST, {"type": "flip"})
+	check(res.ok, "vira a primeira")
+	eq(res.events[0].bad, false, "a primeira nunca está fora de ordem")
+	v = r.view_for({"id": "", "role": "board"})
+	check(v.row[0].n > 0 and v.row[1].n == -1, "só a primeira aparece")
+	res = r.apply(HOST, {"type": "flip"})
+	eq(res.events[0].bad, true, "a segunda está fora de ordem")
+	eq(r.view_for({"id": "", "role": "board"}).lives, 2, "quebra um coração")
+	res = r.apply(HOST, {"type": "flip"})
+	eq(res.events[0].done, true, "última")
+	v = r.view_for({"id": "", "role": "board"})
+	eq(v.lives, 1, "duas vidas a menos")
+	eq(v.result.errors.size(), 2, "resultado aparece no fim")
+	check(not r.apply(HOST, {"type": "flip"}).ok, "nada mais pra virar")
+	check(r.apply(_as("p1"), {"type": "continue"}).ok, "continua")
 
 
 func test_local_mode() -> void:
@@ -214,6 +257,7 @@ func test_local_mode() -> void:
 	for i in ids.size():
 		check(r.apply(L, {"type": "place", "card": ids[i], "to": i}).ok, "local põe qualquer carta")
 	r.apply(L, {"type": "reveal"})
+	_flip_all(r)
 	r.apply(L, {"type": "continue"})
 	# Até todos com 2: com 2 jogadores, nível 3 é o último.
 	for k in 2:
@@ -224,6 +268,7 @@ func test_local_mode() -> void:
 			r.apply(L, {"type": "place", "card": ids[i], "to": i})
 		check(not r.extreme(), "celular só não tem extremo")
 		r.apply(L, {"type": "reveal"})
+		_flip_all(r)
 		r.apply(L, {"type": "continue"})
 	eq(r.phase, "game_over", "venceu com todos em 2")
 	eq(r.end_reason, "won", "vitória")

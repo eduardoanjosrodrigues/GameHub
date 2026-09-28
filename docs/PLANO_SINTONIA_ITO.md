@@ -97,7 +97,7 @@ O app faz o que o jogo físico faz com peças: esconde o alvo e os números, sor
   - Se quiser, escreve uma **palavra-chave**, que aparece embaixo da carta.
   - **Qualquer um pode arrastar qualquer carta da fila**, ao vivo [proposta], enquanto o grupo discute. É como mexer nas cartas no meio da mesa.
   - Cada carta mostra o **nome do dono** (menos no modo extremo) e, se tiver, a palavra-chave.
-- **Revelar**: quando todas as cartas estão na fila, aparece "Revelar". Quem aperta vê uma confirmação: "Todo mundo concorda com a ordem?". Os números aparecem **um por um, da esquerda para a direita**, com um pequeno suspense.
+- **Revelar**: quando todas as cartas estão na fila, aparece "Revelar". Quem aperta vê uma confirmação: "Todo mundo concorda com a ordem?". Aí **o host vira as cartas uma por uma**, da menor para a maior, tocando no monte (como no Halli Galli). Cada virada aparece em todos os aparelhos ao mesmo tempo; o resultado e "Próxima rodada" só aparecem depois da última. (Mudado em 2026-09-26: antes os números apareciam sozinhos a cada 0,6 s, rápido demais.)
 - **Erro**: cada número **menor que algum já revelado antes dele** conta como 1 erro.
 
 ### 4.2 Modo Desafio [decidido + proposta nos detalhes]
@@ -158,7 +158,7 @@ Funciona como o passa-e-joga do Chapéu, com uma tela "Passe para Fulano, toque 
   - Depois o tema escolhido fica fixo no topo.
 - **Minha mão**: os meus números em cartas grandes, cada uma com o campo opcional de palavra-chave e o botão "Pôr na fila". Tem "Esconder", como o "Meu papel" do Avalon.
 - **A fila**: horizontal e rolável, com o **0** fixo no começo. Cada carta é arrastável e mostra o nome e a palavra-chave. A minha carta aparece destacada e mostra o meu número só para mim.
-- **Revelar**: a confirmação e depois o número de cada carta virando, da esquerda para a direita. As fora de ordem ficam vermelhas e tremem. As vidas aparecem como corações no topo.
+- **Revelar**: a confirmação e depois um monte de cartas de costas (pulsando no aparelho do host) ao lado de uma pilha com a última carta virada. Cada toque do host gira a próxima carta na pilha, com o dono, a palavra-chave e "Em ordem" ou "Fora de ordem!"; embaixo, "Próxima: fulano" e "Tem que ser maior que N". As fora de ordem ficam vermelhas, tremem e quebram um coração na hora. A fila com o fio vai se enchendo de números embaixo.
 - **Fim de rodada**: "Acertaram! Nível 4" ou "2 erros, −2 vidas". Na Rodada solta, só o placar.
 - **Fim do Desafio**: o nível alcançado, o recorde e "Jogar de novo".
 

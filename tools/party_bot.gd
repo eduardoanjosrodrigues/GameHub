@@ -100,7 +100,7 @@ func _on_view(v: Dictionary, events: Array) -> void:
 
 func _key(v: Dictionary) -> String:
 	if game == "ito":
-		return "%s|%d|%d|%s|%s" % [v.phase, int(v.round_no), v.players.size(), ",".join(v.row.map(func(r): return r.card)), v.hand.map(func(c): return c.word).hash()]
+		return "%s|%d|%d|%s|%s|%d" % [v.phase, int(v.round_no), v.players.size(), ",".join(v.row.map(func(r): return r.card)), v.hand.map(func(c): return c.word).hash(), int(v.shown)]
 	return "%s|%d|%d|%s|%s|%s" % [v.phase, v.rounds.size(), v.players.size(), v.psychic, v.side, v.theme.hash()]
 
 
@@ -110,11 +110,16 @@ func _check_ito(v: Dictionary) -> void:
 	var open: bool = v.phase in ["reveal", "game_over"]
 	if board and not v.hand.is_empty():
 		_log("ERRO: tabuleiro recebeu números")
-	for r in v.row:
+	for i in v.row.size():
+		var r: Dictionary = v.row[i]
 		if int(r.n) >= 0 and not open and not r.mine:
 			_log("ERRO: viu o número de outro na fila")
+		if v.phase == "reveal" and (int(r.n) >= 0) != (i < int(v.shown)):
+			_log("ERRO: número da revelação fora da virada")
 		if v.extreme and not open and not r.mine and r.owner != "":
 			_log("ERRO: modo extremo mostrou o dono")
+	if v.phase == "reveal" and int(v.shown) < v.row.size() and not v.result.is_empty():
+		_log("ERRO: resultado antes de virar tudo")
 	if not v.loose.is_empty():
 		_log("ERRO: recebeu cartas soltas do celular só")
 
@@ -150,7 +155,7 @@ func _act(v: Dictionary) -> void:
 func _act_ito(v: Dictionary) -> void:
 	var wait := int(OS.get_environment("BOT_CONTINUE_MS")) if OS.get_environment("BOT_CONTINUE_MS") != "" else 60
 	if board:
-		if v.phase == "reveal" and rng.randf() < 0.3:
+		if v.phase == "reveal" and int(v.shown) >= v.row.size() and rng.randf() < 0.3:
 			await _wait(wait + 300)
 			session.send({"type": "continue"})
 		return
@@ -196,7 +201,8 @@ func _act_ito(v: Dictionary) -> void:
 		"reveal":
 			if session.is_host:
 				await _wait(wait)
-				session.send({"type": "continue"})
+				# O host vira carta por carta; só depois alguém continua.
+				session.send({"type": "flip" if int(v.shown) < v.row.size() else "continue"})
 
 
 ## Primeira carta fora do lugar pelas palavras-chave: {card, to}.

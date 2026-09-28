@@ -4,13 +4,13 @@
 (() => {
   const { h, button, card, player, mount, toast, sound, vibrate, act, st } = GH;
   const COLORS = ["#2B59C3", "#C8392B", "#2F7D5B", "#E0A21F", "#6E3B93", "#1E7F86", "#D9772B", "#C4467A"];
-  const STEP_MS = 600;
 
   let v = null;
   let lastPhase = "";
   let sel = ""; // carta escolhida pra pôr ou mudar de lugar
   let selNew = false;
-  let animRound = -1;
+  let seenRound = -1; // revelação: rodada e quantas viradas esta tela já mostrou
+  let seenShown = 0;
   let timers = [];
   let timerMs = -1;
   let timerEl = null;
@@ -183,24 +183,51 @@
     return out;
   }
 
+  // O host vira as cartas uma por uma no app; aqui cada virada gira na pilha.
   function reveal() {
     timers.forEach(clearTimeout);
     timers = [];
-    const res = v.result || {};
-    const errors = res.errors || [];
-    const slots = [];
-    const items = v.row.map((r) => {
-      const holder = h("div.ito-slot");
-      const el = h("div.ito-item", { style: { background: tint(color(byId(r.owner).color), 25) } },
-        h("div.grow", h("b", nameOf(r.owner)), r.word ? h("small", `“${r.word}”`) : null), holder);
-      slots.push({ holder, el, n: r.n, bad: errors.includes(r.card) });
-      return el;
+    const row = v.row;
+    const shown = v.shown || 0;
+    const left = row.length - shown;
+    let animate = false;
+    if (seenRound !== v.round_no) { seenRound = v.round_no; seenShown = shown; }
+    else if (shown > seenShown) { animate = true; seenShown = shown; }
+    const done = left === 0;
+    const deck = left > 0 ? h("div.ito-deck", numCard(-1, "big")) : h("div.ito-empty");
+    const pileKids = [];
+    let top = 0;
+    for (let i = 0; i < shown; i++) top = Math.max(top, row[i].n);
+    if (shown > 0) {
+      const last = row[shown - 1];
+      const face = numCard(last.n, "big" + (animate ? ".flip" + (last.bad ? ".shake" : "") : ""), last.bad ? "var(--vermelho)" : "var(--salvia)");
+      pileKids.push(face, h("b", nameOf(last.owner)), last.word ? h("small", `“${last.word}”`) : null,
+        shown > 1 ? h("p.bold", { style: { color: last.bad ? "var(--vermelho-e)" : "var(--salvia-e)", fontFamily: "Fraunces" } }, last.bad ? "Fora de ordem!" : "Em ordem") : null);
+      if (animate) {
+        sound("tap");
+        timers.push(setTimeout(() => { sound(last.bad ? "buzzer" : "tick"); vibrate(last.bad ? 60 : 15); }, 320));
+      }
+    } else pileKids.push(h("div.ito-empty"), h("small", "A menor da fila vem primeiro"));
+    const stageKids = [h("div.ito-stage",
+      h("div.ito-pilecol", deck, h("small", left === 0 ? "Nenhuma no monte" : left === 1 ? "Falta 1 carta" : `Faltam ${left} cartas`)),
+      h("div.ito-pilecol", pileKids))];
+    if (!done) {
+      const nxt = row[shown];
+      stageKids.push(h("p.center.bold", `Próxima: ${nameOf(nxt.owner)}` + (nxt.word ? ` · “${nxt.word}”` : "")));
+      if (top > 0) stageKids.push(h("p.caption", `Tem que ser maior que ${top}`));
+      stageKids.push(h("p.caption.bold", "O host vira as cartas, uma por uma."));
+    }
+    const items = row.map((r, i) => {
+      const bg = r.bad ? tint("var(--vermelho)", 35) : tint(color(byId(r.owner).color), 25);
+      return h("div.ito-item" + (i === shown - 1 ? ".sel" : ""), { style: { background: bg } },
+        h("div.grow", h("b", nameOf(r.owner)), r.word ? h("small", `“${r.word}”`) : null),
+        numCard(r.n, "mini", i < shown ? (r.bad ? "var(--vermelho)" : "var(--salvia)") : "#2B2A33"));
     });
-    const flip = (s) => {
-      s.holder.replaceChildren(numCard(s.n, "mini", s.bad ? "var(--vermelho)" : "var(--salvia)"));
-      if (s.bad) s.el.style.background = tint("var(--vermelho)", 35);
-    };
-    const errs = errors.length;
+    const out = [header("Revelação"), status(), themeBlock(), card("var(--papel)", stageKids),
+      card(null, h("div.ito-thread", h("div.ito-end", "0 · o mínimo"), items, h("div.ito-end", "100 · o máximo")))];
+    if (!done) return out;
+    const res = v.result || {};
+    const errs = (res.errors || []).length;
     let resCard;
     if (res.ok) resCard = big("Acertaram!", tint("var(--salvia)", 45), desafio() ? (res.won ? "Venceram o Desafio!" : "Próximo nível: uma pessoa ganha mais uma carta.") : "Todos em ordem!");
     else {
@@ -209,20 +236,18 @@
       resCard = big("Quase!", tint("var(--vermelho)", 35), sub);
     }
     const cont = member() || board() ? button(res.next === "round" ? "Próxima rodada" : "Ver o fim", "success", () => act({ type: "continue" }), "play") : null;
-    if (animRound === v.round_no) slots.forEach(flip);
-    else {
+    if (animate) {
+      // A última carta gira antes do veredito.
       resCard.style.display = "none";
       if (cont) cont.disabled = true;
-      slots.forEach((s, i) => timers.push(setTimeout(() => { flip(s); sound(s.bad ? "buzzer" : "tick"); if (s.bad) vibrate(60); }, STEP_MS * (i + 1))));
       timers.push(setTimeout(() => {
-        animRound = v.round_no;
         resCard.style.display = "";
         if (cont) cont.disabled = false;
         sound(res.ok ? "win" : "skip");
-      }, STEP_MS * (slots.length + 1) + 300));
+      }, 900));
     }
-    return [header("Revelação"), status(), themeBlock(),
-      card(null, h("div.ito-thread", h("div.ito-end", "0 · o mínimo"), items, h("div.ito-end", "100 · o máximo"))), resCard, cont];
+    out.push(resCard, cont);
+    return out;
   }
 
   function gameOver() {
@@ -281,7 +306,7 @@
         swapSeat = "";
         GH.closeOverlay();
       }
-      if (evs.some((e) => e.type === "started")) animRound = -1;
+      if (evs.some((e) => e.type === "started")) seenRound = -1;
       if (evs.some((e) => e.type === "dealt")) sel = "";
       if (view.phase !== lastPhase) {
         GH.closeOverlay();

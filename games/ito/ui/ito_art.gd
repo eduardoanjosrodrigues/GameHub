@@ -13,6 +13,7 @@ static func number_card(n: int, w := 120.0, accent := FIO) -> Control:
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var s := ThemeBuilder.card_style(CARTA if n >= 0 else VERSO, 18)
+	s.bg_color = CARTA if n >= 0 else VERSO # card_style clareia cores fora do papel
 	s.border_color = accent
 	s.set_border_width_all(4)
 	p.add_theme_stylebox_override("panel", s)
@@ -42,6 +43,86 @@ class ThreadLine:
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_SORT_CHILDREN:
 			queue_redraw()
+
+
+## Monte da revelação: as cartas da fila que ainda não foram viradas, de costas. Quem pode virar
+## (o host) toca nele; aí o monte pulsa de leve pra chamar o toque.
+class CardStack:
+	extends Control
+
+	signal tapped
+
+	var count := 0
+	var w := 180.0
+	var active := false
+	var _t := 0.0
+	var _down := false
+	var _cancelled := false
+	var _press := Vector2.ZERO
+	var _back: StyleBoxFlat
+	var _glow: StyleBoxFlat
+
+	func _init(p_count: int, p_w: float, p_active: bool) -> void:
+		count = p_count
+		w = p_w
+		active = p_active and p_count > 0
+		custom_minimum_size = Vector2(w + 14, w * 1.3 + 14)
+		mouse_filter = Control.MOUSE_FILTER_PASS if active else Control.MOUSE_FILTER_IGNORE
+		_back = ThemeBuilder.card_style(ItoArt.VERSO, 18)
+		_back.bg_color = ItoArt.VERSO
+		_back.border_color = ItoArt.CARTA
+		_back.set_border_width_all(4)
+		_glow = StyleBoxFlat.new()
+		_glow.bg_color = Color.TRANSPARENT
+		_glow.border_color = Tokens.MOSTARDA
+		_glow.set_border_width_all(5)
+		_glow.set_corner_radius_all(22)
+		set_process(active)
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var sz := Vector2(w, w * 1.3)
+		if count <= 0:
+			var e := StyleBoxFlat.new()
+			e.bg_color = Color.TRANSPARENT
+			e.border_color = Tokens.LINHA
+			e.set_border_width_all(3)
+			e.set_corner_radius_all(18)
+			draw_style_box(e, Rect2(Vector2.ZERO, sz))
+			return
+		# As de baixo aparecem pela borda, como um monte de verdade.
+		for i in range(mini(count, 4) - 1, 0, -1):
+			draw_style_box(_back, Rect2(Vector2(i * 4.5, i * 4.5), sz))
+		var lift := (-5.0 - 4.0 * sin(_t * 4.0)) if active and not _down else 0.0
+		var top := Rect2(Vector2(0, lift), sz)
+		draw_style_box(_back, top)
+		var f := Fonts.title_bold()
+		var fs := int(w * 0.46)
+		var txt := "?"
+		var tw := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(f, top.get_center() + Vector2(-tw / 2.0, fs * 0.35), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, ItoArt.CARTA)
+		if active:
+			_glow.border_color = Color(Tokens.MOSTARDA, 0.55 + 0.45 * sin(_t * 4.0))
+			draw_style_box(_glow, top.grow(6))
+
+	func _gui_input(event: InputEvent) -> void:
+		if not active:
+			return
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_down = true
+				_cancelled = false
+				_press = event.position
+			elif _down:
+				_down = false
+				if not _cancelled and Rect2(Vector2.ZERO, size).has_point(event.position):
+					tapped.emit()
+		elif event is InputEventMouseMotion and _down and event.position.distance_to(_press) > 24:
+			_down = false
+			_cancelled = true
 
 
 ## Vidas: corações cheios e vazios.

@@ -677,7 +677,18 @@ func _ito() -> void:
 		await _shot("ito_%s_all_placed" % role)
 		r.apply({"id": "d_Bruno", "host": false}, {"type": "reveal"})
 		h._broadcast([{"type": "phase", "phase": "reveal"}])
-		await get_tree().create_timer(3.4).timeout
+		await _shot("ito_%s_reveal_start" % role)
+		# O host vira carta por carta; a 3ª (a que foi trocada de lugar) sai fora de ordem.
+		for k in 3:
+			h.send({"type": "flip"})
+			await get_tree().create_timer(0.25 if k == 2 else 0.8).timeout
+		await _shot("ito_%s_reveal_mid_anim" % role)
+		await get_tree().create_timer(0.6).timeout
+		await _shot("ito_%s_reveal_mid" % role)
+		while not r.all_shown():
+			h.send({"type": "flip"})
+			await get_tree().create_timer(0.3).timeout
+		await get_tree().create_timer(1.2).timeout
 		await _shot("ito_%s_reveal" % role)
 		r.lives = 1
 		r.best = 3
@@ -686,6 +697,8 @@ func _ito() -> void:
 		for id in r.cards:
 			r.apply({"id": r.cards[id].owner, "host": false}, {"type": "place", "card": id, "to": 0})
 		r.apply({"id": "d_Bruno", "host": false}, {"type": "reveal"})
+		while not r.all_shown():
+			r.apply({"id": "", "host": true}, {"type": "flip"})
 		r.apply({"id": "d_Bruno", "host": false}, {"type": "continue"})
 		h._broadcast([])
 		await _shot("ito_%s_game_over" % role)
