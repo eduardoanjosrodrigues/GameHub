@@ -205,14 +205,18 @@ func _a_accuse(actor: Dictionary, a: Dictionary) -> Dictionary:
 			return _err("Escolha um bicho da sua mão pra jogar.")
 		_place(accuser, play)
 		events.append({"type": "played", "id": accuser, "animal": play})
-		var alone := _only_one_left()
-		if alone != "":
-			return _ok(_end_round(alone, play, "ultimo", events))
+		if _only_one_left() == accuser:
+			return _ok(_end_round(accuser, play, "ultimo", events))
 	accused = animal
 	race_no += 1
 	race_at = int(actor.get("now", 0))
 	locked = {}
 	events.append({"type": "accused", "by": accuser, "animal": animal, "race": race_no})
+	# Quem acusa já esvaziou a mão e só sobrou uma pessoa com bichos: se acertou um bicho dela, ela
+	# fica com a culpa; se errou, cai no suspense e a culpa volta pra quem acusou.
+	var alone := _only_one_left()
+	if alone != "" and alone != accuser and has_animal(alone, animal):
+		return _ok(_end_round(alone, animal, "ultimo", events))
 	phase = PHASE_RACE
 	events.push_front({"type": "phase", "phase": phase})
 	if racers().is_empty():
@@ -272,9 +276,10 @@ func ring(taps: Array, _now: int) -> Dictionary:
 	var winner: String = best.player
 	_place(winner, accused)
 	var events: Array = [{"type": "won_race", "id": winner, "animal": accused, "race": race_no}]
-	var alone := _only_one_left()
-	if alone != "":
-		return _ok(_end_round(alone, accused, "ultimo", events))
+	# Só quem ganhou ainda tem bichos: não tem pra quem passar a culpa. Se quem sobrou é outra
+	# pessoa, quem ganhou ainda precisa acusar um bicho dela.
+	if _only_one_left() == winner:
+		return _ok(_end_round(winner, accused, "ultimo", events))
 	accuser = winner
 	accused = ""
 	phase = PHASE_ACCUSE
@@ -359,7 +364,7 @@ func _place(id: String, animal: String) -> void:
 	pile.append({"animal": animal, "owner": id})
 
 
-## Só uma pessoa ainda tem cartas: ela fica com a culpa (oficial).
+## Só uma pessoa ainda tem cartas (ou "" se forem várias ou nenhuma).
 func _only_one_left() -> String:
 	var left := with_cards()
 	return left[0] if left.size() == 1 else ""

@@ -38,7 +38,7 @@ Acharam um cocô enorme no meio da sala, e foi o bicho de alguém. Cada pessoa t
 5. **Mão vazia**: quem joga a última carta e passa a culpa adiante está a salvo e **sai da rodada**; todos os seus bichos são inocentes (oficial).
 6. **Fim da rodada** (oficial), de duas formas:
    - **Ninguém mais tem o bicho acusado**: o culpado é o bicho que acabou de ser jogado, e o **dono dele leva o cocô**. O app espera 5 s de suspense [decidido], mostra "Ninguém tem mais coelho!" e abre a mão de todo mundo como prova.
-   - **Só uma pessoa ainda tem cartas**: ela leva o cocô, porque não tem mais ninguém para quem passar a culpa.
+   - **Só uma pessoa ainda tem cartas**: ela leva o cocô, porque não tem mais ninguém para quem passar a culpa. Se quem jogou a penúltima mão esvaziou a própria mão com isso, ainda precisa acusar: acertando um bicho de quem sobrou, quem sobrou leva o cocô; errando, cai no "ninguém tem" e o cocô é de quem acusou [decidido].
 7. **Nova rodada**: todos pegam os 6 bichos de volta. Quem levou o cocô começa [decidido].
 8. **Fim da partida**: quando alguém chega a 3 cocôs (ou ao número da sala). Ganha quem tiver **menos**, e empate divide a vitória (oficial).
 

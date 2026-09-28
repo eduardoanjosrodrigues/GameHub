@@ -104,16 +104,47 @@ func test_empty_hand_is_safe_and_last_one_guilty() -> void:
 	r.hands["p0"] = ["gato"]
 	r.apply(_as("p0", 1000), {"type": "accuse", "play": "gato", "animal": "coelho"})
 	eq(r.hands["p0"], [], "mão vazia")
-	# p1 ganha com o último bicho dele: sobra só p2 com cartas.
+	# p1 ganha com o último bicho dele: sobra só p2 com cartas, mas p1 ainda precisa acusar.
 	r.hands["p1"] = ["coelho"]
 	_tap(r, "p1", 1100)
-	eq(r.phase, "round_end", "só um com cartas")
+	eq(r.phase, "accuse", "quem esvaziou a mão ainda acusa")
+	eq(r.accuser, "p1", "p1 acusa")
+	r.apply(_as("p1", 1200), {"type": "accuse", "animal": "gato"})
+	eq(r.phase, "round_end", "acertou um bicho de quem sobrou")
 	eq(r.last.guilty, "p2", "p2 fica com a culpa")
+	eq(r.last.animal, "gato", "o gato de p2")
 	eq(r.last.reason, "ultimo", "motivo")
 	r.apply(_as("p0"), {"type": "continue"})
 	eq(r.phase, "accuse", "nova rodada")
 	eq(r.accuser, "p2", "quem levou o cocô começa")
 	eq(r.hands["p0"].size(), 6, "mãos de volta")
+
+
+func test_last_accuser_misses() -> void:
+	var r := _game()
+	r.hands["p0"] = ["gato"]
+	r.apply(_as("p0", 1000), {"type": "accuse", "play": "gato", "animal": "coelho"})
+	r.hands["p1"] = ["coelho"]
+	r.hands["p2"].erase("peixe")
+	_tap(r, "p1", 1100)
+	# Errou: ninguém tem peixe, e o cocô volta pra quem acusou.
+	r.apply(_as("p1", 1200), {"type": "accuse", "animal": "peixe"})
+	eq(r.phase, "race", "suspense como sempre")
+	r.tick(1200 + QuemFoiRules.SUSPENSE_MS)
+	eq(r.phase, "round_end", "acabou")
+	eq(r.last.guilty, "p1", "p1 errou e leva")
+	eq(r.last.reason, "ninguem_tem", "motivo")
+
+
+func test_opening_last_card_hits_the_last_one() -> void:
+	var r := _game()
+	r.hands["p0"] = ["gato"]
+	r.hands["p2"] = []
+	# p0 joga o último bicho e acerta um coelho de p1, o único com bichos: sem corrida.
+	r.apply(_as("p0", 1000), {"type": "accuse", "play": "gato", "animal": "coelho"})
+	eq(r.phase, "round_end", "acertou quem sobrou")
+	eq(r.last.guilty, "p1", "p1 fica com a culpa")
+	eq(r.last.reason, "ultimo", "motivo")
 
 
 func test_game_end_and_ties() -> void:

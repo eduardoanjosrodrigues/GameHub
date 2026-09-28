@@ -304,7 +304,10 @@ func _build_round_end() -> void:
 		nl.custom_minimum_size.x = 110
 		line.add_child(nl)
 		if h.is_empty():
-			line.add_child(UI.label("nada, a salvo", 15, Tokens.TINTA_SUAVE, Fonts.body_bold()))
+			# Com quebra automática, dentro do hbox o rótulo encolhe até uma letra por linha.
+			var safe := UI.label("nada, a salvo", 15, Tokens.TINTA_SUAVE, Fonts.body_bold())
+			safe.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			line.add_child(safe)
 		for a in h:
 			line.add_child(QuemFoiArt.picture(a, _fs(40, 56)))
 		hv.add_child(line)
