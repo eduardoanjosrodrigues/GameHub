@@ -9,6 +9,8 @@ const ItoMenu := preload("res://games/ito/screens/ito_menu.gd")
 const SintoniaMenu := preload("res://games/sintonia/screens/sintonia_menu.gd")
 const QuemFoiMenu := preload("res://games/quem_foi/screens/quem_foi_menu.gd")
 const CoupMenu := preload("res://games/coup/screens/coup_menu.gd")
+const WordleMenu := preload("res://games/wordle/screens/wordle_menu.gd")
+const SenhaMenu := preload("res://games/senha/screens/senha_menu.gd")
 const SettingsScreen := preload("res://app/screens/settings_screen.gd")
 const HistoryScreen := preload("res://app/screens/history_screen.gd")
 const JoinScreen := preload("res://app/screens/join_screen.gd")
@@ -23,11 +25,38 @@ const GAMES := [
 	{"id": "ito", "nome": "Ito", "desc": "Números secretos e uma fila em ordem, sem dizer os números.", "icone": "ito", "cor": Tokens.VERMELHO, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "quem_foi", "nome": "Quem Foi?", "desc": "Um cocô no meio da sala! Passe a culpa pro bicho de alguém.", "icone": "quem_foi", "cor": Tokens.MOSTARDA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "coup", "nome": "Coup", "desc": "Blefe na corte: diga que é o Duque e torça pra ninguém desafiar.", "icone": "coup", "cor": Color("#6E3B93"), "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "wordle", "nome": "Wordle", "desc": "Uma palavra por dia, seis tentativas. Ou corrida no Wi-Fi!", "icone": "wordle", "cor": Tokens.SALVIA, "botao": AppButton.Variant.PRIMARY, "pronto": true},
+	{"id": "senha", "nome": "Senha", "desc": "Quebre a sequência secreta de cores. Sozinho ou em duelo.", "icone": "senha", "cor": Color("#1E7F86"), "botao": AppButton.Variant.PRIMARY, "pronto": true},
 	{"id": "em_breve_2", "nome": "Em breve", "desc": "Novo jogo chegando", "icone": "em_breve", "cor": Tokens.SUPERFICIE, "pronto": false},
 ]
 
 
 func _ready() -> void:
+	_build()
+	App.deep_link.connect(_on_deep_link)
+	# Aberto por um QR antes da tela existir.
+	var pending := App.take_pending_link()
+	if pending != "":
+		_on_deep_link.call_deferred(pending)
+	# Voltando pra cá, o jogo que acabou de ser aberto sobe pro topo.
+	visibility_changed.connect(func(): if visible: _build())
+
+
+## Ordem dos jogos: primeiro os abertos mais recentemente; os outros (e empates) em ordem alfabética.
+static func ordered(games: Array, last_played: Dictionary) -> Array:
+	var out := games.duplicate()
+	out.sort_custom(func(a, b):
+		var ta := int(last_played.get(a.id, 0))
+		var tb := int(last_played.get(b.id, 0))
+		if ta != tb:
+			return ta > tb
+		return TextNorm.normalize(a.nome) < TextNorm.normalize(b.nome))
+	return out
+
+
+func _build() -> void:
+	for ch in get_children():
+		ch.queue_free()
 	var col := make_column(true, 20, 22)
 	var top := UI.hbox(12)
 	top.add_child(UI.spacer(0, true))
@@ -38,9 +67,8 @@ func _ready() -> void:
 	col.add_child(UI.caption("Joguinhos pra jogar junto"))
 	col.add_child(UI.spacer(4))
 
-	for g in GAMES:
-		if g.pronto:
-			col.add_child(_featured_card(g))
+	for g in ordered(GAMES.filter(func(x): return x.pronto), Settings.last_played):
+		col.add_child(_featured_card(g))
 
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -50,11 +78,6 @@ func _ready() -> void:
 		if not g.pronto:
 			grid.add_child(_small_card(g))
 	col.add_child(grid)
-	App.deep_link.connect(_on_deep_link)
-	# Aberto por um QR antes da tela existir.
-	var pending := App.take_pending_link()
-	if pending != "":
-		_on_deep_link.call_deferred(pending)
 
 
 func _on_deep_link(code: String) -> void:
@@ -77,8 +100,10 @@ func _featured_card(g: Dictionary) -> Control:
 	tv.add_child(UI.label(g.desc, 18, Tokens.TINTA, Fonts.body_bold()))
 	row.add_child(tv)
 	v.add_child(row)
-	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu, "sintonia": SintoniaMenu, "ito": ItoMenu, "quem_foi": QuemFoiMenu, "coup": CoupMenu}.get(g.id, ChapeuMenu)
-	var play := UI.button("Jogar", g.botao, func(): App.push(menu.new()), "play")
+	var menu: Script = {"halli": HalliMenu, "avalon": AvalonMenu, "secret_hitler": ShMenu, "sintonia": SintoniaMenu, "ito": ItoMenu, "quem_foi": QuemFoiMenu, "coup": CoupMenu, "wordle": WordleMenu, "senha": SenhaMenu}.get(g.id, ChapeuMenu)
+	var play := UI.button("Jogar", g.botao, func():
+		Settings.mark_played(g.id)
+		App.push(menu.new()), "play")
 	v.add_child(play)
 	return c
 

@@ -1,6 +1,6 @@
 class_name PartyCreateRoom
 extends Screen
-## Criar sala da Sintonia ou do Ito: "Vou jogar" (com nome) ou "Este aparelho é o tabuleiro".
+## Criar sala dos jogos de tema: "Vou jogar" (com nome) ou "Este aparelho é o tabuleiro".
 
 var info := {}
 var _name_edit: LineEdit
@@ -24,6 +24,9 @@ func _ready() -> void:
 	v.add_child(_name_edit)
 	v.add_child(UI.button("Criar sala e jogar", AppButton.Variant.SUCCESS, func(): _create("player"), "person"))
 	col.add_child(c)
+	# Jogo sem tabuleiro (Wordle, Senha): só "Vou jogar".
+	if info.get("board_desc", "") == "":
+		return
 	var t := UI.card()
 	var tv := UI.vbox(12)
 	t.add_child(tv)

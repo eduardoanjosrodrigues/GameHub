@@ -83,6 +83,8 @@ func _run() -> void:
 		await load("res://tools/quem_foi_tour.gd").new().run(self)
 	if set_name in ["all", "coup"]:
 		await load("res://tools/coup_tour.gd").new().run(self)
+	if set_name in ["all", "desafio"]:
+		await load("res://tools/desafio_tour.gd").new().run(self)
 	if set_name == "avalon_cards":
 		await _avalon_cards()
 	if set_name == "sh_cards":

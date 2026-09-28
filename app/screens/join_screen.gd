@@ -6,7 +6,7 @@ const ChapeuGame := preload("res://games/chapeu/screens/chapeu_game.gd")
 const HalliGame := preload("res://games/halli_galli/screens/halli_wifi_game.gd")
 const AvalonGame := preload("res://games/avalon/screens/avalon_game.gd")
 const ShGame := preload("res://games/secret_hitler/screens/sh_game.gd")
-const GAME_NAMES := {"chapeu": "Chapéu", "halli": "Halli Galli", "avalon": "Avalon", "secret_hitler": "Secret Hitler", "sintonia": "Sintonia", "ito": "Ito", "quem_foi": "Quem Foi?", "coup": "Coup"}
+const GAME_NAMES := {"chapeu": "Chapéu", "halli": "Halli Galli", "avalon": "Avalon", "secret_hitler": "Secret Hitler", "sintonia": "Sintonia", "ito": "Ito", "quem_foi": "Quem Foi?", "coup": "Coup", "wordle": "Wordle", "senha": "Senha"}
 ## Jogos de tema (docs/PLANO_SINTONIA_ITO.md): mesma sessão, tela de cada um.
 const PARTY_GAMES := {"sintonia": "res://games/sintonia/screens/sintonia_game.gd", "ito": "res://games/ito/screens/ito_game.gd"}
 
@@ -152,6 +152,11 @@ func _join(ip: String, game := "") -> void:
 
 
 func _open(ip: String, game: String, n: String) -> void:
+	if game in ["wordle", "senha"] and _as_board and _seat_token == "":
+		_connecting = false
+		App.toast("O %s não tem tabuleiro: entre como jogador." % GAME_NAMES[game], Tokens.VERMELHO)
+		return
+	Settings.mark_played(game)
 	match game:
 		"halli":
 			if _as_board:
@@ -177,6 +182,14 @@ func _open(ip: String, game: String, n: String) -> void:
 			var qc := QuemFoiClient.new(ip, n, "player" if _seat_token != "" or not _as_board else "board")
 			qc.seat_token = _seat_token
 			App.replace(load("res://games/quem_foi/screens/quem_foi_game.gd").new(qc))
+		"wordle":
+			var wc := WordleClient.new(ip, n)
+			wc.seat_token = _seat_token
+			App.replace(load("res://games/wordle/screens/wordle_net.gd").new(wc))
+		"senha":
+			var snc := SenhaClient.new(ip, n)
+			snc.seat_token = _seat_token
+			App.replace(load("res://games/senha/screens/senha_net.gd").new(snc))
 		"sintonia", "ito":
 			var pc := PartyClient.new(game, ip, n, "player" if _seat_token != "" or not _as_board else "board")
 			pc.seat_token = _seat_token

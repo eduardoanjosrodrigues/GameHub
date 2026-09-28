@@ -1,0 +1,60 @@
+/* Wordle e Senha no navegador (web/desafio.js, web/wordle.js, web/senha.js). */
+.dz-count { font-family: "Fraunces", serif; font-weight: 800; font-size: 110px; line-height: 1; text-align: center; }
+.dz-timer { font-family: "Fraunces", serif; font-weight: 800; font-size: 24px; color: var(--vermelho-e); margin: 0; }
+.dz-minis { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+.dz-mini { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.dz-mini p { margin: 0; font-size: 15px; }
+.dz-mini.off { opacity: .45; }
+.dz-secret { font-family: "Fraunces", serif; font-weight: 800; font-size: 48px; text-align: center; letter-spacing: 4px; }
+
+.wd-grid { display: flex; flex-direction: column; gap: 7px; align-items: center; }
+.wd-grid.small { gap: 4px; }
+.wd-grid.mini { gap: 3px; }
+.wd-row { display: flex; gap: 7px; }
+.wd-grid.small .wd-row { gap: 4px; }
+.wd-grid.mini .wd-row { gap: 3px; }
+.wd-tile { width: min(15vw, 62px); height: min(15vw, 62px); border: 2px solid var(--linha); border-radius: 9px; background: var(--superficie);
+  display: flex; align-items: center; justify-content: center; font-family: "Fraunces", serif; font-weight: 800; font-size: min(8.5vw, 34px); }
+.wd-grid.small .wd-tile { width: 30px; height: 30px; font-size: 17px; border-radius: 5px; }
+.wd-grid.mini .wd-tile { width: 18px; height: 18px; border-radius: 3px; border-width: 1.5px; }
+.wd-tile.typed { border-color: var(--tinta); animation: pop .12s; }
+.wd-tile.c2 { background: var(--salvia); border-color: var(--salvia); color: var(--superficie); }
+.wd-tile.c1 { background: var(--mostarda); border-color: var(--mostarda); color: var(--tinta); }
+.wd-tile.c0 { background: var(--suave); border-color: var(--suave); color: var(--superficie); }
+.wd-tile.flip { animation: flip .34s ease-in both; }
+@keyframes flip { 0% { transform: scaleY(1); filter: brightness(1.6) saturate(0); } 50% { transform: scaleY(0); filter: brightness(1.6) saturate(0); } 51% { filter: none; } 100% { transform: scaleY(1); } }
+.shake { animation: shake .4s; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+.wd-kb { display: flex; flex-direction: column; gap: 6px; user-select: none; -webkit-user-select: none; }
+.wd-kr { display: flex; gap: 5px; justify-content: center; }
+.wd-key { flex: 1; max-width: 48px; min-height: 56px; border: none; border-radius: 9px; background: #EEE8DD; color: var(--tinta);
+  font-family: "Fraunces", serif; font-weight: 800; font-size: 19px; padding: 0; touch-action: manipulation; }
+.wd-key.wide { max-width: 76px; flex: 1.6; font-size: 13px; }
+.wd-key:active { background: var(--desab); }
+.wd-key.c2 { background: var(--salvia); color: var(--superficie); }
+.wd-key.c1 { background: var(--mostarda); color: var(--tinta); }
+.wd-key.c0 { background: var(--suave); color: var(--superficie); }
+.wd-key[disabled] { color: var(--texto-desab); }
+
+.sn-board { display: flex; flex-direction: column; gap: 6px; }
+.sn-board.mini { gap: 3px; }
+.sn-row { display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--papel) 50%, var(--superficie)); border-radius: 12px; padding: 4px 8px; }
+.sn-row.cur { background: var(--superficie); outline: 2px solid var(--tinta); }
+.sn-row.mini { padding: 2px 4px; gap: 4px; border-radius: 6px; }
+.sn-n { width: 20px; text-align: center; color: var(--suave); font-weight: 700; font-size: 14px; }
+.sn-row.mini .sn-n { display: none; }
+.sn-pegs { display: flex; gap: 6px; flex: 1; }
+.sn-row.mini .sn-pegs { gap: 3px; }
+.sn-cell { border-radius: 9px; padding: 2px; display: flex; min-width: 14px; min-height: 14px; }
+.sn-peg { display: block; }
+.sn-dots { display: grid; gap: 4px; width: 52px; }
+.sn-row.mini .sn-dots { width: 26px; gap: 2px; }
+.sn-dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--linha); transform: scale(.5); }
+.sn-row.mini .sn-dots span { width: 6px; height: 6px; }
+.sn-dots span.b { background: var(--tinta); transform: none; }
+.sn-dots span.w { background: var(--superficie); border: 2.5px solid var(--tinta); transform: none; box-sizing: border-box; }
+.sn-code { display: flex; gap: 8px; justify-content: center; }
+.sn-pal { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.sn-pick { border: none; background: none; padding: 0; border-radius: 50%; }
+.sn-pick[disabled] { opacity: .35; }
