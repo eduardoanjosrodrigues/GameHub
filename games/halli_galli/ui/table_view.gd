@@ -10,7 +10,7 @@ signal bell_requested(player_id: String, local_us: int)
 const SWIPE_PX := 40.0
 const MARGIN := 8.0
 
-## Cada área: {id, name, color, top, down, out, turn, ready}
+## Cada área: {id, name, color, top, up, down, out, turn, ready, recycle}
 var zones: Array = []
 var _layout: Array = [] # [{rect, rot}]
 var _touches := {} # index -> {zone, start, consumed}
@@ -35,7 +35,8 @@ func set_zones(z: Array) -> void:
 			if oz.id == nz.id:
 				old = oz
 		var a: Dictionary = _anim_of(nz.id)
-		if not old.is_empty() and int(nz.top) != int(old.top) and int(nz.top) >= 0:
+		# Carta nova na pilha (mesmo se for igual à de baixo) ou a de cima mudou: anima a virada.
+		if not old.is_empty() and int(nz.top) >= 0 and (int(nz.top) != int(old.top) or int(nz.up) > int(old.up)):
 			a.flip = 0.0
 	var resized := z.size() != zones.size()
 	zones = z
@@ -224,7 +225,8 @@ func _draw_zone(z: Dictionary, ls: Vector2, xf: Transform2D) -> void:
 	var cr: Rect2 = p.card
 	if int(z.top) >= 0:
 		var sx := absf(cos((1.0 - a.flip) * PI / 2.0))
-		var cxf := xf * Transform2D(0.0, cr.get_center()).scaled_local(Vector2(maxf(sx, 0.02), 1.0))
+		var lift := 1.0 + 0.08 * sin(a.flip * PI)
+		var cxf := xf * Transform2D(0.0, cr.get_center()).scaled_local(Vector2(maxf(sx, 0.02) * lift, lift))
 		HalliArt.draw_face(self, Rect2(-cr.size / 2.0, cr.size), int(z.top), cxf)
 		draw_set_transform_matrix(xf)
 	else:
@@ -238,7 +240,12 @@ func _draw_zone(z: Dictionary, ls: Vector2, xf: Transform2D) -> void:
 	if z.out:
 		sub = "saiu"
 	elif z.turn:
-		sub = "sua vez · arraste" if float(z.ready) >= 1.0 else "espera..."
+		if float(z.ready) < 1.0:
+			sub = "espera..."
+		else:
+			sub = "arraste pra desvirar a mesa" if z.get("recycle", false) else "sua vez · arraste"
+	elif int(z.down) == 0:
+		sub = "sem monte"
 	var fs := int(clampf(ls.y * 0.075, 18, 30))
 	var nw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var sw := body.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, fs - 6).x if sub != "" else 0.0

@@ -184,16 +184,17 @@ func test_wrong_bell_returns_table() -> void:
 	check("bell" in _types(res.events), "evento do sino")
 
 
-func test_wrong_bell_brings_out_player_back() -> void:
+func test_empty_pile_is_skipped_not_out() -> void:
 	var r := _rigged([[c(M, 2)], [c(A, 1), c(A, 1)], [c(L, 1), c(L, 1)]])
 	_flip(r, "p0", 0)
 	_flip(r, "p1", 1000)
-	_flip(r, "p2", 2000)
-	check(r.players[0].out, "p0 saiu na vez dele, com a carta na mesa")
-	var res := r.ring([{"player": "p1", "t": 2500}], 2600)
-	check(not r.players[0].out, "a carta voltou e p0 voltou pro jogo")
-	check("back_in" in _types(res.events), "evento de volta")
-	eq(r.out_order, ["p1"], "p0 saiu da lista; p1 pagou a última carta e saiu")
+	var res := _flip(r, "p2", 2000)
+	check(not r.players[0].out, "sem monte, mas com carta na mesa: continua")
+	check(not ("out" in _types(res.events)), "ninguém sai na virada")
+	eq(r.turn, "p1", "a vez pula quem está sem monte")
+	r.ring([{"player": "p1", "t": 2500}], 2600)
+	eq(r.players[0].down.size(), 1 + 1, "o sino errado devolveu a carta de p0 e ele ganhou 1")
+	check(not r.players[0].out, "p0 segue no jogo")
 
 
 func test_stale_bell_ignored() -> void:
@@ -214,7 +215,7 @@ func test_penalty_with_few_cards() -> void:
 	check(r.players[0].out, "sem carta nenhuma (nem na mesa): sai")
 
 
-func test_empty_pile_stays_until_turn_and_can_come_back() -> void:
+func test_empty_pile_can_come_back() -> void:
 	var r := _rigged([[c(B, 2)], [c(B, 3), c(M, 1)], [c(L, 1), c(L, 1)]])
 	_flip(r, "p0", 0)
 	check(not r.players[0].out, "sem monte, mas com carta na mesa: continua")
@@ -222,29 +223,67 @@ func test_empty_pile_stays_until_turn_and_can_come_back() -> void:
 	r.ring([{"player": "p0", "t": 1200}], 1300)
 	eq(r.players[0].down.size(), 2, "p0 voltou pro jogo ganhando a mesa")
 	eq(r.turn, "p0", "e começa")
-	var r2 := _rigged([[c(M, 2)], [c(A, 1), c(A, 1)], [c(L, 1), c(L, 1)]])
-	_flip(r2, "p0", 0)
-	_flip(r2, "p1", 1000)
-	var res := _flip(r2, "p2", 2000)
-	check(r2.players[0].out, "chegou a vez sem monte: saiu")
-	check("out" in _types(res.events), "evento de saída")
-	eq(r2.turn, "p1", "vez pula pro próximo")
-	eq(r2.players[0].up.size(), 1, "a carta dele continua na mesa")
-	var res2 := r2.ring([{"player": "p0", "t": 2100}], 2200)
-	eq(res2.events.size(), 0, "quem saiu não bate")
 
 
 func test_game_over() -> void:
-	var r := _rigged([[c(M, 2)], [c(A, 1), c(A, 1)]])
+	var r := _rigged([[c(B, 2)], [c(B, 3), c(M, 1)]])
 	_flip(r, "p0", 0)
 	var res := _flip(r, "p1", 1000)
-	check("game_over" in _types(res.events), "chegou a vez de p0 sem monte: acabou")
+	check(not ("game_over" in _types(res.events)), "p0 sem monte: a partida segue")
+	eq(r.turn, "p1", "p1 continua virando sozinho")
+	res = r.ring([{"player": "p1", "t": 1200}], 1300)
+	check("game_over" in _types(res.events), "p1 levou a mesa e p0 ficou sem nada: acabou")
 	eq(r.phase, HalliRules.PHASE_GAME_OVER, "fase final")
 	eq(r.winner, "p1", "vencedor")
 	eq(r.out_order, ["p0"], "ordem de saída")
 	eq(r.apply(HOST, {"type": "rematch"}).ok, true, "jogar de novo")
 	eq(r.phase, HalliRules.PHASE_PLAYING, "nova partida")
 	eq(r.players[0].down.size() + r.players[1].down.size(), 56, "baralho novo distribuído")
+
+
+func test_one_vs_one_keeps_flipping_then_recycles() -> void:
+	var r := _rigged([[c(M, 2)], [c(A, 1), c(A, 1), c(L, 1)]])
+	_flip(r, "p0", 0)
+	_flip(r, "p1", 1000)
+	eq(r.turn, "p1", "p0 sem monte: p1 vira de novo")
+	_flip(r, "p1", 1500)
+	eq(r.turn, "p1", "e de novo")
+	check(not r.needs_recycle(), "p1 ainda tem monte")
+	_flip(r, "p1", 2000)
+	check(r.needs_recycle(), "ninguém tem monte")
+	eq(r.turn, "p0", "a vez vai pro próximo, que desvira")
+	check(r.view_for({"id": "p0", "role": "player"}).recycle, "a visão avisa")
+	var res := _flip(r, "p0", 2500)
+	check("recycle" in _types(res.events), "desvirou a mesa")
+	eq(r.players[0].up.size(), 1, "p0 virou a primeira do monte novo")
+	eq(r.players[0].down.size(), 0, "p0 só tinha 1 carta")
+	eq(r.players[1].down.size(), 3, "p1 pegou as 3 dele de volta")
+	eq(r.turn, "p1", "e a vez segue")
+	var late := r.ring([{"player": "p1", "t": 2400}], 2600)
+	eq(late.events.size(), 0, "sino de antes da mesa desvirada não conta")
+
+
+func test_one_vs_one_wrong_bell_costs_three() -> void:
+	var r := _rigged([[c(M, 1), c(M, 1), c(M, 1), c(M, 1)], [c(A, 1)]])
+	eq(r.view_for({"id": "p0", "role": "player"}).penalty, 3, "a visão mostra a multa")
+	var res := r.ring([{"player": "p0", "t": 100}], 200)
+	var bell: Dictionary = res.events.filter(func(e): return e.type == "bell")[0]
+	eq(bell.cards, 3, "pagou 3")
+	eq(bell.got, {"p1": 3}, "todas pro outro")
+	eq(r.players[0].down.size(), 1, "ficou com 1")
+	eq(r.players[1].down.size(), 4, "p1 ficou com 4")
+	var r2 := _rigged([[c(M, 1), c(M, 1)], [c(A, 1)]])
+	res = r2.ring([{"player": "p0", "t": 100}], 200)
+	eq(res.events.filter(func(e): return e.type == "bell")[0].cards, 2, "com menos de 3, paga o que tem")
+	check(r2.players[0].out, "e sai")
+	eq(r2.phase, HalliRules.PHASE_GAME_OVER, "acabou")
+
+
+func test_three_players_wrong_bell_costs_one_each() -> void:
+	var r := _rigged([[c(M, 1), c(M, 1), c(M, 1), c(M, 1)], [c(A, 1)], [c(A, 1)]])
+	r.players.remove_at(2) # ficaram 2, mas a partida começou com 3
+	var res := r.ring([{"player": "p0", "t": 100}], 200)
+	eq(res.events.filter(func(e): return e.type == "bell")[0].cards, 1, "só 1: a partida não é de 2")
 
 
 func test_game_over_by_bell() -> void:

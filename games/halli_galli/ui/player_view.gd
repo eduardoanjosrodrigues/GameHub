@@ -42,8 +42,9 @@ func _init() -> void:
 	set_anchors_preset(PRESET_FULL_RECT)
 
 
-func set_top(card: int, animate: bool) -> void:
-	if card == top:
+## reflip: caiu uma carta nova na pilha; anima mesmo se ela for igual à de baixo.
+func set_top(card: int, animate: bool, reflip := false) -> void:
+	if card == top and not (reflip and card >= 0):
 		return
 	if card < 0 and top >= 0 and animate:
 		_leaving_card = top

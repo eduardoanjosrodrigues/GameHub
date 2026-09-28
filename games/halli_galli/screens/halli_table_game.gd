@@ -109,8 +109,8 @@ func _update_table() -> void:
 	var zones: Array = []
 	for p in v.players:
 		zones.append({
-			"id": p.id, "name": p.name, "color": p.color, "top": p.top, "down": p.down,
-			"out": p.out, "turn": p.id == v.turn, "ready": ready,
+			"id": p.id, "name": p.name, "color": p.color, "top": p.top, "up": p.up, "down": p.down,
+			"out": p.out, "turn": p.id == v.turn, "ready": ready, "recycle": v.get("recycle", false),
 		})
 	_tv.set_zones(zones)
 
@@ -161,6 +161,11 @@ func _handle_events(events: Array) -> void:
 			"out":
 				Audio.sfx("hg_out")
 				_tv.banner(e.player, "Saiu", Tokens.TINTA)
+			"recycle":
+				Audio.sfx("hg_flip")
+				for p in v.players:
+					if not p.out:
+						_tv.banner(p.id, "Mesa desvirada", Tokens.MOSTARDA)
 			"game_over":
 				Audio.sfx("win")
 				Haptics.hg_victory()

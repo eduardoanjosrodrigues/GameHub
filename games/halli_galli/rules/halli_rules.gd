@@ -16,6 +16,8 @@ const FRUITS := ["banana", "morango", "limao", "ameixa"]
 const PER_FRUIT := {1: 5, 2: 3, 3: 3, 4: 2, 5: 1}
 const FLIP_COOLDOWN_MS := 500
 const BELL_LOCK_MS := 1000
+## Numa partida que começou com 2 jogadores, sino errado custa 3 cartas em vez de 1.
+const PENALTY_1V1 := 3
 const MIN_PLAYERS := 2
 const MAX_PLAYERS_WIFI := 20
 const MAX_PLAYERS_TABLE := 6
@@ -40,6 +42,7 @@ var resolved_until := -100000
 var paused := false
 var winner := ""
 var out_order: Array = [] # ids na ordem em que saíram
+var start_count := 0 # quantos começaram a partida
 ## Último sino resolvido, pra tela mostrar: {player, ok, fruit, cards, margin_ms, t}
 var last_bell := {}
 var seq := 0 # versão do estado; sobe a cada mudança
@@ -148,6 +151,11 @@ func next_flip_at() -> int:
 
 func total_cards(p: Dictionary) -> int:
 	return p.down.size() + p.up.size()
+
+
+## Ninguém no jogo tem monte: quem está com a vez desvira a mesa (§3.5).
+func needs_recycle() -> bool:
+	return phase == PHASE_PLAYING and alive().all(func(q): return q.down.is_empty())
 
 
 # --- Ações -----------------------------------------------------------------
@@ -285,12 +293,18 @@ func _a_flip(actor: Dictionary, a: Dictionary) -> Dictionary:
 	var t := int(a.get("t", 0))
 	if t < next_flip_at():
 		return _err("Espere a mesa.")
+	var events: Array = []
 	if p.down.is_empty():
-		return _err("Sem cartas pra virar.")
+		if not needs_recycle():
+			return _err("Sem cartas pra virar.")
+		events.append_array(_recycle(t))
+		if p.down.is_empty():
+			events.append_array(_advance_turn(players.find(p)))
+			return _ok(events)
 	var c: int = p.down.pop_front()
 	p.up.append({"c": c, "t": t})
 	last_flip_t = t
-	var events: Array = [{"type": "flip", "player": id, "card": c}]
+	events.append({"type": "flip", "player": id, "card": c})
 	events.append_array(_advance_turn(players.find(p)))
 	events.append_array(_check_game_over())
 	return _ok(events)
@@ -298,7 +312,7 @@ func _a_flip(actor: Dictionary, a: Dictionary) -> Dictionary:
 
 ## Resolve os sinos de um momento. bells = [{player, t}], now = agora no relógio do host.
 ## Vale só o primeiro sino (menor horário): certo, leva a mesa; errado, a mesa volta pros donos e
-## quem bateu paga 1 carta pra cada um (§3.4). Os sinos seguintes do mesmo momento não contam.
+## quem bateu paga 1 carta pra cada um, ou 3 numa partida de 2 (§3.4). Os sinos seguintes do mesmo momento não contam.
 ## Na trava logo depois de um sino (BELL_LOCK_MS), um sino errado não conta nem pune: é a mão que
 ## chegou atrasada no sino que outro já bateu. Retorna {ok, events}.
 func ring(bells: Array, now: int) -> Dictionary:
@@ -395,6 +409,8 @@ func view_for(viewer: Dictionary) -> Dictionary:
 		"out_order": out_order.duplicate(),
 		"last_bell": last_bell.duplicate(),
 		"seq": seq,
+		"recycle": needs_recycle(),
+		"penalty": PENALTY_1V1 if start_count == 2 else 1,
 		"top": -1,
 		"next": -1,
 	}
@@ -419,6 +435,7 @@ func _deal(now: int) -> Dictionary:
 	for i in deck.size():
 		players[i % players.size()].down.append(deck[i])
 	phase = PHASE_PLAYING
+	start_count = players.size()
 	winner = ""
 	out_order = []
 	last_bell = {}
@@ -473,17 +490,24 @@ func _return_table() -> Array:
 func _penalty(id: String, t: int) -> Array:
 	var p := player(id)
 	var idx := players.find(p)
+	var each := PENALTY_1V1 if start_count == 2 else 1
 	var paid: Array = []
+	var got := {}
+	var total := 0
 	for q in _alive_from(idx):
 		if q.id == id:
 			continue
-		if p.down.is_empty():
-			break
-		q.down.append(p.down.pop_front())
-		paid.append(q.id)
+		for i in each:
+			if p.down.is_empty():
+				break
+			q.down.append(p.down.pop_front())
+			got[q.id] = int(got.get(q.id, 0)) + 1
+			total += 1
+		if got.has(q.id):
+			paid.append(q.id)
 	p.wrong += 1
-	last_bell = {"player": id, "ok": false, "fruit": -1, "cards": paid.size(), "margin_ms": -1, "t": t}
-	return [{"type": "bell", "player": id, "ok": false, "cards": paid.size(), "to": paid}]
+	last_bell = {"player": id, "ok": false, "fruit": -1, "cards": total, "margin_ms": -1, "t": t}
+	return [{"type": "bell", "player": id, "ok": false, "cards": total, "to": paid, "got": got}]
 
 
 ## Jogadores vivos a partir do próximo depois de idx, dando a volta (inclui o próprio no fim).
@@ -496,27 +520,45 @@ func _alive_from(idx: int) -> Array:
 	return out
 
 
-## Passa a vez pro próximo depois de idx. Quem recebe a vez sem monte, sai (§3.5).
+## Passa a vez pro próximo depois de idx que tem monte. Quem está sem monte é pulado, mas
+## continua no jogo enquanto tiver carta na mesa (§3.5). Se ninguém tiver monte, a vez fica com o
+## próximo da ordem, que desvira a mesa.
 func _advance_turn(idx: int) -> Array:
 	var events: Array = []
+	var fallback := {}
 	for k in players.size():
 		var q: Dictionary = players[(idx + 1 + k) % players.size()]
 		if q.out:
 			continue
 		if q.down.is_empty():
-			if alive().size() <= 1:
-				break
-			_set_out(q, events)
+			if fallback.is_empty():
+				fallback = q
 			continue
 		turn = q.id
 		events.append({"type": "turn", "player": turn})
 		return events
-	turn = ""
+	turn = fallback.get("id", "")
+	if turn != "":
+		events.append({"type": "turn", "player": turn})
 	return events
 
 
+## Cada um pega a própria pilha aberta, embaralha e vira de novo como monte. Sinos de antes disso
+## não contam mais: a mesa em que foram batidos não existe.
+func _recycle(t: int) -> Array:
+	for q in players:
+		if q.up.is_empty():
+			continue
+		var cards: Array = q.up.map(func(e): return int(e.c))
+		_shuffle(cards)
+		q.down.append_array(cards)
+		q.up = []
+	resolved_until = maxi(resolved_until, t)
+	return [{"type": "recycle"}]
+
+
 ## Depois de um sino: quem não tem mais carta nenhuma (nem na mesa) sai; e se o jogador da vez
-## ficou sem monte, a vez passa.
+## saiu ou ficou sem monte, a vez passa.
 func _eliminate_empty() -> Array:
 	var events: Array = []
 	for q in players:
@@ -525,8 +567,6 @@ func _eliminate_empty() -> Array:
 	var tp := player(turn)
 	if tp.is_empty() or tp.out or tp.down.is_empty():
 		var idx := players.find(tp) if not tp.is_empty() else -1
-		if not tp.is_empty() and not tp.out and tp.down.is_empty() and alive().size() > 1:
-			_set_out(tp, events)
 		events.append_array(_advance_turn(idx))
 	return events
 

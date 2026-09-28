@@ -68,9 +68,10 @@
 
   let v = null;
   let lastPhase = "";
-  let pending = null; // virada mostrada antes da resposta do host: {preTop, at}
+  let pending = null; // virada mostrada antes da resposta do host: {preUp, at}
   let ui = null; // elementos da tela de jogo
   let shownTop = -1;
+  let shownUp = 0; // quantas cartas a minha pilha aberta tinha no último desenho
   let pauseKey = "";
 
   const me = () => (v.players || []).find((p) => p.id === v.you) || null;
@@ -95,8 +96,9 @@
     });
   }
 
-  function setTop(c) {
-    if (!ui || c === shownTop) return;
+  // reflip: caiu uma carta nova na pilha; anima mesmo se ela for igual à de baixo.
+  function setTop(c, reflip) {
+    if (!ui || (c === shownTop && !(reflip && c >= 0))) return;
     const old = shownTop;
     shownTop = c;
     if (c < 0 && old >= 0) {
@@ -142,6 +144,7 @@
     root.append(svg, leave, status, hint, area, h("div.hg-bottom", pile, h("div.hg-who", weak, name, down)));
     ui = { root, svg, status, hint, card: cardEl, area, pile, count, name, down, weak };
     shownTop = -2;
+    shownUp = 0;
     mount(root);
     sizeBorder();
     gestures(root);
@@ -165,10 +168,11 @@
     if (!m || !ui) return;
     const col = color(m.color);
     ui.root.style.setProperty("--c", col);
-    if (pending && (v.top !== pending.preTop || v.turn !== v.you)) pending = null;
+    if (pending && (m.up !== pending.preUp || v.turn !== v.you)) pending = null;
     const myTurn = !pending && v.turn === v.you && !m.out;
     if (!pending) {
-      setTop(v.top);
+      setTop(v.top, m.up > shownUp);
+      shownUp = m.up;
       if (v.top < 0) ui.card.textContent = v.turn === v.you ? "Arraste pra virar" : "Sua carta aparece aqui";
       ui.count.textContent = m.down;
       ui.pile.classList.toggle("zero", m.down <= 0);
@@ -183,10 +187,16 @@
       ui.hint.textContent = "Toque duas vezes pra bater o sino";
     } else if (m.out) {
       ui.status.textContent = "Você saiu";
-      ui.hint.textContent = "Sua carta continua valendo até alguém levar a mesa";
+      ui.hint.textContent = "Pode torcer pelos outros";
+    } else if (myTurn && v.recycle) {
+      ui.status.textContent = "Sua vez!";
+      ui.hint.textContent = "Ninguém tem monte: arraste pra desvirar a mesa";
     } else if (myTurn) {
       ui.status.textContent = "Sua vez!";
       ui.hint.textContent = "Toque duas vezes pra bater o sino";
+    } else if (m.down === 0) {
+      ui.status.textContent = "Sem monte";
+      ui.hint.textContent = "Sua carta ainda vale: bata o sino certo pra voltar";
     } else {
       ui.status.textContent = turnP ? `Vez de ${turnP.name}` : "";
       ui.hint.textContent = "Toque duas vezes pra bater o sino";
@@ -271,14 +281,22 @@
 
   function flip() {
     if (!canAct() || pending) return;
-    if (v.turn !== v.you || clock.hostNow() < v.next_flip_at || v.next < 0) {
+    if (v.turn !== v.you || clock.hostNow() < v.next_flip_at || (v.next < 0 && !v.recycle)) {
       vibrate(10);
       return;
     }
+    if (v.recycle) {
+      // A carta do monte desvirado só o host sabe: espera a resposta.
+      vibrate(15);
+      sound("hg_flip");
+      act({ type: "flip", t: clock.hostNow() });
+      return;
+    }
     // Mostra a carta na hora; o host confirma em seguida.
-    pending = { preTop: v.top, at: performance.now() };
-    setTop(v.next);
     const m = me();
+    pending = { preUp: m.up, at: performance.now() };
+    setTop(v.next, true);
+    shownUp = m.up + 1;
     const left = Math.max(0, m.down - 1);
     ui.count.textContent = left;
     ui.down.textContent = `${left} ${left === 1 ? "carta" : "cartas"} no monte`;
@@ -321,7 +339,7 @@
       banner("Errou!", `A mesa voltou pros donos · −${e.cards} ${e.cards === 1 ? "carta" : "cartas"}`, "var(--vermelho)");
     } else if ((e.to || []).includes(v.you)) {
       vibrate(18);
-      toast(`${who.name} errou: sua carta voltou pro monte e ganhou +1`);
+      toast(`${who.name} errou: sua carta voltou pro monte e você ganhou +${(e.got || {})[v.you] || 1}`);
     } else {
       toast(`${who.name} errou: as cartas voltaram pro monte`);
     }
@@ -337,6 +355,9 @@
         case "back_in":
           if (e.player === v.you) { vibrate(200); toast("Sua carta voltou: você está de novo no jogo!", "green"); }
           else toast(`${e.name} voltou pro jogo`);
+          break;
+        case "recycle":
+          toast("Ninguém tinha monte: cada um desvirou a sua pilha");
           break;
         case "undo_flip":
           if (e.player === v.you) toast("Alguém bateu antes da sua carta: ela voltou pro monte");

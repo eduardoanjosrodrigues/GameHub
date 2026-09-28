@@ -14,8 +14,9 @@ var _pause_key := ""
 var _conn_overlay: Control
 var _leaving := false
 var _history_saved := false
-## Virada mostrada antes da resposta do host: {"pre_top", "at"}.
+## Virada mostrada antes da resposta do host: {"pre_up", "at"}.
 var _pending := {}
+var _shown_up := 0 # quantas cartas a minha pilha aberta tinha no último desenho
 ## QR da sala: do app (gamehub://) ou do navegador (página servida por este aparelho).
 var _qr_web := false
 var _swap: SeatSwap
@@ -105,6 +106,7 @@ func _on_view(nv: Dictionary, events: Array) -> void:
 
 func _on_phase_changed(phase: String) -> void:
 	_pending = {}
+	_shown_up = 0
 	var playing := phase == HalliRules.PHASE_PLAYING
 	_pv.visible = playing
 	_scroll.visible = not playing
@@ -161,8 +163,9 @@ func _update_play() -> void:
 	if _pending.is_empty():
 		_pv.my_turn = v.turn == v.you and not me.out
 		_pv.down = int(me.down)
-		_pv.set_top(int(v.top), true)
-	elif int(v.top) != int(_pending.pre_top) or v.turn != v.you:
+		_pv.set_top(int(v.top), true, int(me.up) > _shown_up)
+		_shown_up = int(me.up)
+	elif int(me.up) != int(_pending.pre_up) or v.turn != v.you:
 		# O host confirmou a virada (ou algo mudou a mesa): passa a valer o estado dele.
 		_pending = {}
 		_update_play()
@@ -172,10 +175,16 @@ func _update_play() -> void:
 		_pv.hint_text = "Toque duas vezes pra bater o sino"
 	elif me.out:
 		_pv.status_text = "Você saiu"
-		_pv.hint_text = "Sua carta continua valendo até alguém levar a mesa"
+		_pv.hint_text = "Pode torcer pelos outros"
+	elif _pv.my_turn and v.get("recycle", false):
+		_pv.status_text = "Sua vez!"
+		_pv.hint_text = "Ninguém tem monte: arraste pra desvirar a mesa"
 	elif _pv.my_turn:
 		_pv.status_text = "Sua vez!"
 		_pv.hint_text = "Toque duas vezes pra bater o sino"
+	elif int(me.down) == 0:
+		_pv.status_text = "Sem monte"
+		_pv.hint_text = "Sua carta ainda vale: bata o sino certo pra voltar"
 	else:
 		_pv.status_text = "Vez de %s" % turn_p.get("name", "...") if not turn_p.is_empty() else ""
 		_pv.hint_text = "Toque duas vezes pra bater o sino"
@@ -222,6 +231,8 @@ func _handle_events(events: Array) -> void:
 					App.toast("Sua carta voltou: você está de novo no jogo!", Tokens.SALVIA)
 				else:
 					App.toast("%s voltou pro jogo" % e.get("name", ""))
+			"recycle":
+				App.toast("Ninguém tinha monte: cada um desvirou a sua pilha", Tokens.MOSTARDA)
 			"undo_flip":
 				if e.player == you:
 					App.toast("Alguém bateu antes da sua carta: ela voltou pro monte")
@@ -268,7 +279,7 @@ func _on_bell(e: Dictionary, you: String) -> void:
 			_pv.show_banner("Errou!", "A mesa voltou pros donos · −%d %s" % [int(e.cards), "carta" if int(e.cards) == 1 else "cartas"], Tokens.VERMELHO)
 		elif you in e.get("to", []):
 			Haptics.hg_received()
-			App.toast("%s errou: sua carta voltou pro monte e ganhou +1" % name)
+			App.toast("%s errou: sua carta voltou pro monte e você ganhou +%d" % [name, int(e.get("got", {}).get(you, 1))])
 		else:
 			App.toast("%s errou: as cartas voltaram pro monte" % name)
 
@@ -283,16 +294,22 @@ func _can_act() -> bool:
 func _on_swipe() -> void:
 	if not _can_act() or not _pending.is_empty():
 		return
-	if v.turn != v.you or session.now_ms() < int(v.next_flip_at) or int(v.next) < 0:
+	var recycle: bool = v.get("recycle", false)
+	if v.turn != v.you or session.now_ms() < int(v.next_flip_at) or (int(v.next) < 0 and not recycle):
 		Haptics.hg_not_turn()
 		return
-	# Mostra a carta na hora; o host confirma em seguida (§5.2).
-	_pending = {"pre_top": int(v.top), "at": Time.get_ticks_msec()}
-	_pv.set_top(int(v.next), true)
-	_pv.down = maxi(0, _pv.down - 1)
-	_pv.my_turn = false
 	Haptics.hg_flip()
 	Audio.sfx("hg_flip")
+	if recycle:
+		# A carta do monte desvirado só o host sabe: espera a resposta.
+		session.send({"type": "flip"})
+		return
+	# Mostra a carta na hora; o host confirma em seguida (§5.2).
+	_pending = {"pre_up": int(_me().up), "at": Time.get_ticks_msec()}
+	_pv.set_top(int(v.next), true, true)
+	_shown_up = int(_me().up) + 1
+	_pv.down = maxi(0, _pv.down - 1)
+	_pv.my_turn = false
 	session.send({"type": "flip"})
 	_update_play()
 

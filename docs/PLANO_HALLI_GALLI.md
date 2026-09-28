@@ -77,14 +77,15 @@ A graça está na velocidade de reação. Por isso, no modo Wi-Fi, a coisa mais 
 
 - Qualquer jogador pode bater a qualquer momento, até na vez de outro.
 - **Acertou** (exatamente 5 de alguma fruta somando as cartas de cima de todas as pilhas abertas): leva todas as pilhas abertas para o fundo do próprio monte, embaralhadas [proposta]. Quem acertou começa a próxima vez [proposta].
-- **Errou** [corrigido por você em 2026-09-26]: primeiro, **todas as cartas abertas voltam pro fundo do monte de cada dono** (a mesa zera). Depois, quem bateu dá 1 carta do monte para cada outro jogador ainda no jogo. Se não tiver cartas para todos, dá o que tiver, seguindo a ordem da vez a partir do próximo [proposta]. Quem já tinha saído mas tinha carta na mesa recebe ela de volta e volta pro jogo [proposta].
+- **Errou** [corrigido por você em 2026-09-26]: primeiro, **todas as cartas abertas voltam pro fundo do monte de cada dono** (a mesa zera). Depois, quem bateu dá 1 carta do monte para cada outro jogador ainda no jogo. Se não tiver cartas para todos, dá o que tiver, seguindo a ordem da vez a partir do próximo [proposta]. **Numa partida que começou com 2 jogadores, a multa é de 3 cartas pro outro** [decidido em 2026-09-28]. Quem já tinha saído mas tinha carta na mesa recebe ela de volta e volta pro jogo [proposta].
 - Depois de um sino (certo ou errado), ninguém vira carta por 1 s. Todo mundo vê o resultado e ninguém vira no susto [proposta].
 - **Sino atrasado não pune** [proposta, veio na implementação]: durante esse 1 s, um sino errado não conta nem pune. É a mão que chega no sino que outro acabou de bater; sem isso, quem batesse 200 ms depois do vencedor pagaria carta. Um sino certo nesse 1 s (a mesa ainda tem 5 depois de um erro) vale normalmente.
 
 ### 3.5 Saída e vitória
 
 - Quem fica sem monte fechado continua no jogo enquanto tiver carta aberta: pode bater o sino e voltar se ganhar a mesa.
-- Quando chega a vez de alguém sem monte fechado, essa pessoa sai. A pilha aberta dela continua na mesa, valendo, até alguém ganhar a mesa [proposta].
+- **Sem monte, a vez é pulada, mas a pessoa não sai** [decidido em 2026-09-28; antes saía quando chegava a vez dela, e no 1 contra 1 isso acabava a partida na hora]. Os outros seguem virando (no 1 contra 1, o outro vira sozinho) até alguém bater o sino. Só sai quem ficar sem carta nenhuma depois de um sino.
+- **Ninguém com monte** [decidido em 2026-09-28]: a vez fica com o próximo da ordem, que arrasta pra desvirar a mesa: cada um pega a própria pilha aberta, embaralha e vira de novo como monte, e ele já vira a primeira carta. Sino com horário anterior a isso não conta.
 - Quem sai da partida não bate mais o sino.
 - Vence o último jogador com cartas.
 
