@@ -1,12 +1,12 @@
-# Política de Privacidade do gamehub
+# Política de Privacidade do GameHub
 
-Última atualização: [DATA DA PUBLICAÇÃO]
+Última atualização: 28 de setembro de 2026
 
-Esta política explica como o aplicativo **gamehub** ("o app"), desenvolvido por [NOME DO DESENVOLVEDOR], trata as suas informações.
+Esta política explica como o aplicativo **GameHub** ("o app"), desenvolvido por Eduardo Rodrigues, trata as suas informações.
 
 ## Resumo
 
-O gamehub **não coleta, não armazena em servidores e não compartilha** nenhum dado pessoal. O app não tem contas, não tem anúncios, não usa ferramentas de análise e não envia nada para a internet.
+O GameHub **não coleta, não armazena em servidores e não compartilha** nenhum dado pessoal. O app não tem contas, não tem anúncios, não usa ferramentas de análise e não envia nada para a internet.
 
 ## Informações guardadas no seu aparelho
 
@@ -24,23 +24,27 @@ Essas informações nunca saem do aparelho, exceto como descrito em "Partidas pe
 No modo multiplayer, o app se comunica **diretamente com os outros aparelhos da mesma rede Wi-Fi**, sem passar por nenhum servidor. Durante a partida, são trocados entre esses aparelhos apenas:
 
 - os nomes dos jogadores e os times escolhidos;
-- as palavras escritas para o jogo;
-- as jogadas e o placar;
+- o que os jogadores escrevem para o jogo (palavras, dicas e palavras-chave);
+- as jogadas, as cartas e o placar;
 - o identificador aleatório de reconexão.
 
 Essas informações são usadas só durante a partida e ficam visíveis apenas para os participantes dela.
 
+## Jogar pelo navegador
+
+Quem não tem o app pode entrar numa sala pelo navegador do celular, lendo o QR code. A página é servida **pelo próprio aparelho de quem criou a sala, na rede local**; nada passa pela internet nem por servidores nossos. O navegador guarda só o último nome digitado e a sala atual, para reconectar se a página recarregar.
+
 ## Permissões do Android
 
-- **Internet e estado da rede / Wi-Fi**: para encontrar e conectar aos outros aparelhos da mesma rede. O app não acessa a internet.
+- **Internet e estado da rede / Wi-Fi**: para encontrar e conectar aos outros aparelhos da mesma rede e servir a página de jogo pelo navegador. O app não envia nada para a internet.
 - **Multicast de Wi-Fi**: para encontrar partidas automaticamente na rede local.
 - **Vibração**: para dar retorno durante o jogo.
 
-O app não usa a câmera. Para entrar numa sala pelo QR code, você usa o app de câmera do próprio celular, que abre o gamehub.
+O app não usa a câmera. Para entrar numa sala pelo QR code, você usa o app de câmera do próprio celular, que abre o GameHub.
 
 ## Crianças
 
-O app é destinado a pessoas com 13 anos ou mais e não coleta intencionalmente dados de ninguém, incluindo crianças.
+O app é destinado a pessoas com **18 anos ou mais** e não coleta dados de ninguém, incluindo crianças e adolescentes.
 
 ## Seus direitos (LGPD)
 
@@ -52,4 +56,4 @@ Se esta política mudar, a nova versão será publicada neste mesmo endereço, c
 
 ## Contato
 
-Dúvidas: [E-MAIL DE CONTATO]
+Dúvidas: [eduardoanjosrodrigues@gmail.com](mailto:eduardoanjosrodrigues@gmail.com)

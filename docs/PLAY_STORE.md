@@ -23,7 +23,7 @@ Sem anúncios, sem cadastro e sem internet: funciona na rede da sua casa ou no r
 ## Classificação e público
 
 - Categoria: Jogos > Casual (ou Jogos de palavras).
-- Público-alvo: 13 anos ou mais (faixas 13–15, 16–17, 18+).
+- Público-alvo: 18 anos ou mais (só a faixa 18+), decidido em 2026-09-28.
 - Segurança dos dados: nenhum dado coletado nem compartilhado.
 - Anúncios: não.
 

@@ -2,7 +2,7 @@ extends Screen
 ## Configurações: música, efeitos, vibração, versão e política de privacidade.
 
 ## URL pública da política (preencher quando for hospedada — docs/PLANO_FASE_1.md P12).
-const PRIVACY_URL := ""
+const PRIVACY_URL := "https://eduardoanjosrodrigues.github.io/GameHub/privacidade/"
 
 var _col: VBoxContainer
 

@@ -441,7 +441,7 @@ Eu produzo o básico dentro do projeto:
 5. Política de privacidade: texto em [politica-de-privacidade.md](politica-de-privacidade.md). A loja exige uma URL pública; a hospedagem fica pra depois.
 6. Formulário de Segurança dos dados: "nenhum dado coletado ou compartilhado".
 7. Classificação indicativa (questionário IARC).
-8. Público-alvo: **13 anos ou mais** (faixas 13–15, 16–17 e 18+), escolhido por mim a seu pedido. Motivo: incluir menores de 13 coloca o app nas regras de "Famílias" da Play Store, com exigências extras. E como os jogadores digitam as próprias palavras, não dá pra garantir que o conteúdo seja adequado pra crianças.
+8. Público-alvo: **13 anos ou mais** (faixas 13–15, 16–17 e 18+), escolhido por mim a seu pedido. Motivo: incluir menores de 13 coloca o app nas regras de "Famílias" da Play Store, com exigências extras. E como os jogadores digitam as próprias palavras, não dá pra garantir que o conteúdo seja adequado pra crianças. **Mudado em 2026-09-28 para 18+** (a seu pedido, com a chegada de Secret Hitler e Coup).
 
 ---
 

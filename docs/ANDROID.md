@@ -56,7 +56,7 @@ Sai `build/gamehub.aab`, assinado com a chave de upload. A cada nova versão, au
 ## Publicar
 
 1. Criar a conta de desenvolvedor no Google Play Console (taxa única de US$ 25).
-2. Hospedar `docs/politica-de-privacidade.md` numa URL pública, preenchendo antes nome, e-mail e data.
+2. Política de privacidade: https://eduardoanjosrodrigues.github.io/GameHub/privacidade/ (GitHub Pages, pasta `docs/` do `main`). Depois de mudar `docs/politica-de-privacidade.md`, rode `tools/build_privacy_page.py` e faça commit e push.
 3. Criar o app no Console e preencher a ficha com os textos de [PLAY_STORE.md](PLAY_STORE.md) e as imagens de `design/store/`.
 4. Ativar o Play App Signing e subir o `build/gamehub.aab`.
 5. Contas pessoais novas precisam de **teste fechado com pelo menos 12 testadores por 14 dias seguidos** antes de liberar a produção. Confirme a regra atual no Console.
