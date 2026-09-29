@@ -61,6 +61,7 @@ func _run() -> void:
 	# O tour não grava nada: histórico e configurações ficam só na memória.
 	History.persist = false
 	History.entries = []
+	GeniusStore.persist = false
 	Settings.music_volume = 0.0
 	Settings.sfx_volume = 0.0
 	if set_name in ["all", "hub"]:

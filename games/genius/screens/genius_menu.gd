@@ -6,7 +6,8 @@ const JoinScreen := preload("res://app/screens/join_screen.gd")
 
 func _ready() -> void:
 	var col := make_column()
-	make_header(col, "Genius")
+	var head := make_header(col, "Genius")
+	head.add_child(UI.icon_button("book", func(): App.push(load("res://games/genius/screens/genius_how_to.gd").new())))
 	var ic := UI.texture("genius", 170)
 	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(ic)
@@ -21,7 +22,6 @@ func _ready() -> void:
 		App.push(load("res://games/genius/screens/genius_create_room.gd").new())))
 	col.add_child(_option("Entrar numa sala", "Alguém já criou? Entre por aqui", "enter", AppButton.Variant.SECONDARY, func():
 		App.push(JoinScreen.new())))
-	col.add_child(UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(load("res://games/genius/screens/genius_how_to.gd").new()), "book"))
 
 
 func _option(title_text: String, desc: String, icon_name: String, variant: int, on_press: Callable) -> Control:

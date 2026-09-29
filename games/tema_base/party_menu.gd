@@ -15,7 +15,8 @@ var info := {}
 
 func _ready() -> void:
 	var col := make_column()
-	make_header(col, info.name)
+	var head := make_header(col, info.name)
+	head.add_child(UI.icon_button("book", func(): App.push(load(info.how_to).new())))
 	var cover: Texture2D = info.cover.call() if info.has("cover") else null
 	if cover:
 		col.add_child(AvalonArt.Banner.new(cover, 0.2))
@@ -32,7 +33,6 @@ func _ready() -> void:
 		App.push(PartyCreateRoom.new(info))))
 	col.add_child(_option("Entrar numa sala", "Alguém já criou? Entre por aqui", "enter", AppButton.Variant.ACCENT, func():
 		App.push(JoinScreen.new())))
-	col.add_child(UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(load(info.how_to).new()), "book"))
 
 
 func _option(title_text: String, desc: String, icon_name: String, variant: int, on_press: Callable) -> Control:

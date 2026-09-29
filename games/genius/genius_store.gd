@@ -4,6 +4,9 @@ extends RefCounted
 
 const PATH := "user://genius.cfg"
 
+## false no tour de capturas: nada é gravado.
+static var persist := true
+
 
 static func best() -> int:
 	var cfg := ConfigFile.new()
@@ -14,7 +17,7 @@ static func best() -> int:
 
 ## Guarda se for recorde. Retorna true quando é um recorde novo.
 static func submit(score: int) -> bool:
-	if score <= best():
+	if score <= best() or not persist:
 		return false
 	var cfg := ConfigFile.new()
 	cfg.load(PATH)

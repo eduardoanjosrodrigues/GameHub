@@ -9,7 +9,8 @@ const GameScreen := preload("res://games/chapeu/screens/chapeu_game.gd")
 
 func _ready() -> void:
 	var col := make_column()
-	make_header(col, "Chapéu")
+	var head := make_header(col, "Chapéu")
+	head.add_child(UI.icon_button("book", func(): App.push(HowTo.new())))
 	var hat := UI.texture("chapeu", 190)
 	hat.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(hat)
@@ -21,7 +22,6 @@ func _ready() -> void:
 		App.push(CreateRoom.new())))
 	col.add_child(_option("Entrar numa sala", "Alguém já criou? Entre por aqui", "enter", AppButton.Variant.ACCENT, func():
 		App.push(JoinScreen.new())))
-	col.add_child(UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(HowTo.new()), "book"))
 
 
 func _option(title_text: String, desc: String, icon_name: String, variant: int, on_press: Callable) -> Control:

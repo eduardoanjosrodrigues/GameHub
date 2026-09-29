@@ -24,7 +24,9 @@ func _build() -> void:
 	var sc: Array = find_children("*", "ScrollContainer", true, false).filter(func(s): return not s in old)
 	if not sc.is_empty():
 		(func(): sc[0].scroll_vertical = keep).call_deferred()
-	make_header(_col, "Senha")
+	var head := make_header(_col, "Senha")
+	head.add_child(UI.icon_button("trophy", func(): App.push(stats_screen())))
+	head.add_child(UI.icon_button("book", func(): App.push(SenhaHowTo.new())))
 	var ic := UI.texture("senha", 150)
 	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_col.add_child(ic)
@@ -33,14 +35,6 @@ func _build() -> void:
 	_col.add_child(_training_card())
 	_col.add_child(_look_card())
 	_col.add_child(_wifi_card())
-	var row := UI.hbox(12)
-	var st := UI.small_button("Estatísticas", AppButton.Variant.SECONDARY, func(): App.push(stats_screen()), "trophy")
-	st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(st)
-	var how := UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(SenhaHowTo.new()), "book")
-	how.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(how)
-	_col.add_child(row)
 
 
 static func stats_screen() -> Screen:

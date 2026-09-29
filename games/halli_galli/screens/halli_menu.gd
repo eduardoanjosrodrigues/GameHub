@@ -9,7 +9,8 @@ const JoinScreen := preload("res://app/screens/join_screen.gd")
 
 func _ready() -> void:
 	var col := make_column()
-	make_header(col, "Halli Galli")
+	var head := make_header(col, "Halli Galli")
+	head.add_child(UI.icon_button("book", func(): App.push(HowTo.new())))
 	var art := UI.texture("halli_galli", 190)
 	art.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(art)
@@ -21,7 +22,6 @@ func _ready() -> void:
 		App.push(JoinScreen.new())))
 	col.add_child(_option("Na mesa", "Um aparelho só no meio, até %d pessoas em volta" % TableGame.max_players(), "tablet", AppButton.Variant.PRIMARY, func():
 		App.push(TableGame.new())))
-	col.add_child(UI.small_button("Como jogar", AppButton.Variant.SECONDARY, func(): App.push(HowTo.new()), "book"))
 
 
 func _option(title_text: String, desc: String, icon_name: String, variant: int, on_press: Callable) -> Control:
